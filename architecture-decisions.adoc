@@ -1,0 +1,53 @@
+= Decisiones Arquitectónicas - ReflectAI
+:author: Eugenio Salvador González Sánchez - Arquitecto de Software
+:revdate: 6 de Abril de 2026
+:toc: left
+:toclevels: 3
+:icons: font
+:sectnums:
+
+== Visión General de la Arquitectura
+
+ReflectAI utiliza una arquitectura orientada a servicios administrados (Serverless/BaaS) diseñada para maximizar la velocidad de desarrollo, unificar el lenguaje del equipo y garantizar tiempos de respuesta óptimos para el flujo dinámico de reflexión.
+
+== Stack Tecnológico Aprobado
+
+La siguiente matriz detalla las tecnologías seleccionadas para la construcción del MVP durante el periodo de 8 semanas.
+
+[cols="1,2,3", options="header"]
+|===
+| Capa | Tecnología | Justificación Principal
+| **Core Framework** | Next.js (React + TypeScript) | Unificación de Front y Back en un monorepo. Rutas de API integradas sin necesidad de configurar un servidor Express/.NET.
+| **Estilos y UI** | Tailwind CSS | Desarrollo ágil y maquetación de componentes responsivos (Mobile-First) sin hojas de estilo monolíticas.
+| **Base de Datos y Auth** | Supabase (PostgreSQL) | Provee autenticación lista para usar y un motor SQL robusto que soporta tipos de datos `JSONB` para flujos dinámicos.
+| **Motor de IA** | Groq API | Latencia ultra-baja (LPU) vital para no interrumpir el flujo de pensamiento del usuario, además de capa gratuita.
+| **Infraestructura (DevOps)** | Vercel | Despliegue continuo e integración nativa y transparente con repositorios de GitHub y Next.js.
+|===
+
+== Registros de Decisiones Arquitectónicas (ADR)
+
+=== ADR-001: Adopción de Next.js y BaaS en lugar de Backend Tradicional
+
+* **Estado:** Aceptado
+* **Fecha:** 6 de Abril de 2026
+* **Contexto:** El proyecto cuenta con un equipo de 5 personas con una capacidad limitada a un promedio de 7 horas semanales a lo largo de 4 Sprints (8 semanas). Un enfoque tradicional (ej. C# .NET + React separados) requería una inversión significativa en configuración de infraestructura y "boilerplate".
+* **Decisión:** Se adopta Next.js como framework *Full-Stack* junto con Supabase como *Backend-as-a-Service*.
+* **Consecuencias:**
+** Positivas: Elimina el esfuerzo de configurar un sistema de autenticación (CU-01) y agiliza el despliegue. Permite a los desarrolladores de Front y Back compartir interfaces y tipos de TypeScript.
+** Negativas/Riesgos: Dependencia (Vendor Lock-in) de la plataforma Supabase.
+
+=== ADR-002: Almacenamiento Híbrido Relacional-Documental
+
+* **Estado:** Aceptado
+* **Contexto:** El "Motor de Reflexión" (CU-02) requiere guardar respuestas a flujos dinámicos de preguntas, cuyas estructuras, cantidad y ramificaciones pueden cambiar sin previo aviso.
+* **Decisión:** Se utilizará PostgreSQL estructurando las entidades de negocio (Usuarios, Perfiles) de manera relacional, pero almacenando el payload de las sesiones de reflexión en columnas nativas de tipo `JSONB`.
+* **Consecuencias:**
+** Positivas: Flexibilidad máxima para las sesiones sin necesidad de migraciones de base de datos constantes.
+** Negativas/Riesgos: Consultar dentro de objetos JSONB complejos (para el CU-04 Comparativa) requerirá queries más especializadas por parte del DBA.
+
+== Organización del Repositorio y CI/CD
+
+El proyecto se gestionará bajo un enfoque ágil iterativo (Scrum/Kanban). El repositorio central estará alojado en GitHub.
+
+* **Integración Continua:** GitHub Actions validará el código mediante pruebas unitarias en cada Pull Request.
+* **Despliegue Continuo:** La rama `main` estará conectada a Vercel para despliegues automáticos al entorno de Producción.

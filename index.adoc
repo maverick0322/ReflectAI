@@ -1,0 +1,22 @@
+= Proyecto ReflectAI: Documentación Técnica
+:author: Tobbireppo Team
+:revnumber: 1.0
+:revdate: 2026-05-29
+:doctype: book
+:toc: left
+:toclevels: 3
+:sectnums:
+:sectanchors:
+:pdf-theme: ./theme.yml
+:icons: font
+:imagesdir: ./images
+
+[preface]
+== Introducción
+Este documento describe formalmente los requisitos y el diseño técnico del sistema ReflectAI, un ecosistema integral de salud y nutrición.
+
+include::requirements.adoc[]
+
+include::design.adoc[]
+
+include::architecture-decisions.adoc[]

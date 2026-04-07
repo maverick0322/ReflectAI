@@ -1,0 +1,68 @@
+= Requerimientos
+:icons: font
+:imagesdir: ./images
+
+== Propósito
+Definir los requisitos funcionales, no funcionales y reglas de negocio para el desarrollo de ReflectAI, una aplicación web orientada al acompañamiento del proceso de reflexión personal mediante sesiones guiadas, estructuradas a partir de preguntas diseñadas para ayudar al usuario a identificar situaciones, pensamientos, emociones y posibles interpretaciones alternativas.
+
+Su propósito es brindar un espacio digital donde las personas puedan registrar experiencias significativas, analizar la relación entre lo que ocurrió, lo que pensaron y cómo se sintieron, y dar seguimiento a patrones recurrentes en su forma de interpretar determinadas situaciones.
+
+=== Alcance del sistema 
+El sistema permite almacenar sesiones de reflexión, consultar registros anteriores y comparar respuestas a lo largo del tiempo, con el fin de favorecer el autoconocimiento y la identificación de cambios en el pensamiento y en la intensidad emocional. Además, incorpora flujos organizados de preguntas y visualizaciones básicas que permiten al usuario reconocer tendencias, temas frecuentes o avances en su proceso personal de reflexión.
+
+Desde el punto de vista funcional, ReflectAI no está planteado como una herramienta clínica ni como un sustituto de atención psicológica profesional, sino como una plataforma de apoyo para la autorreflexión guiada y el registro estructurado de experiencias. Su valor principal radica en transformar un ejercicio que normalmente se realiza de manera informal en un proceso más ordenado, consultable y comparable, facilitando que el usuario observe su evolución y encuentre mayor claridad en sus pensamientos.
+
+== Descripción General 
+
+Como proyecto de software, ReflectAI integra módulos de gestión de usuarios, creación y almacenamiento de sesiones, flujos dinámicos de preguntas, historial de registros, comparación entre sesiones y un panel básico de seguimiento. Esto permite desarrollar una solución útil y con impacto, al mismo tiempo que aplica conocimientos de análisis de requisitos, diseño de interfaces, modelado de datos, lógica de negocio, pruebas de software y organización del desarrollo.
+
+*Funciones del Producto*
+
+* Registro y autenticación de usuarios.
+* Sesiones de reflexión guiada con preguntas estructuradas.
+* Historial de sesiones y registros consultables.
+* Comparación entre sesiones para identificar patrones.
+
+== Clases de usuario
+Definición de los diferentes perfiles de usuario que interactúan con el sistema ReflectAI.
+
+* *Paciente / Usuario Final*: Persona que registra su proceso de reflexión.
+
+
+== Casos de uso
+Descripción funcional de las interacciones principales.
+
+[cols="1,1,1,3"]
+|===
+| ID | Caso de Uso | Actor | Descripción Breve
+| CU-01 | Gestionar Cuenta | Paciente | El paciente puede registrarse, iniciar sesión y recuperar su contraseña por correo electrónico.
+| CU-02 | Iniciar Sesión de Reflexión | Paciente | El paciente puede iniciar una nueva sesión de reflexión, respondiendo a un flujo dinámico de preguntas que se adaptan según sus respuestas anteriores.
+| CU-03 | Consultar historial | Paciente | El paciente puede ver su historial de sesiones y registros.
+| CU-04 | Comparar sesiones | Paciente | El paciente puede comparar sus sesiones de reflexión para identificar patrones y avances.
+|===
+
+== Requisitos no funcionales
+[req-no-func]
+Restricciones y calidades técnicas del sistema.
+
+=== Limitaciones y restricciones
+
+Limitaciones de negocio, éticas o técnicas que enmarcan el desarrollo.
+
+RES-01 Disclaimer Ético/Legal: El sistema debe mostrar de forma clara y obligatoria (ej. en el registro y en el pie de página) un aviso legal indicando que ReflectAI no es una herramienta clínica, no diagnostica, y no sustituye la atención psicológica o psiquiátrica profesional.
+
+RES-02 Tiempo de Desarrollo: El alcance funcional debe poder ser desarrollado, probado y desplegado por un equipo de 5 personas trabajando a tiempo parcial (aprox. 7 hrs/semana) en un periodo estricto de 8 semanas.
+
+RES-03 Infraestructura Cloud: El despliegue debe realizarse en servicios en la nube de nivel gratuito o de muy bajo costo (ej. Vercel, Render, Railway, o AWS Free Tier) para la fase de producción inicial.
+
+=== Atributos de calidad
+
+RNF-01 Seguridad (Crítico): Las contraseñas deben estar hasheadas. Las comunicaciones deben estar cifradas obligatoriamente mediante HTTPS/SSL. Las sesiones deben manejarse mediante JWT (JSON Web Tokens) con tiempos de expiración cortos.
+
+RNF-02 Privacidad de Datos: Dado que los usuarios escribirán pensamientos personales, la base de datos debe restringir estrictamente el acceso a los registros mediante el ID del usuario. Ningún usuario debe poder acceder a través de la API a recursos que no le pertenecen (control de acceso a nivel de objeto).
+
+RNF-03 Rendimiento: Las transiciones entre preguntas en el flujo dinámico deben ocurrir en menos de 500 milisegundos para no interrumpir el hilo de pensamiento del usuario.
+
+RNF-04 Usabilidad (UI/UX): La interfaz debe ser de diseño Mobile-First y completamente responsiva. El diseño visual debe ser minimalista, evitando distracciones (sin animaciones intrusivas o colores agresivos) para fomentar un estado de concentración.
+
+RNF-05 Disponibilidad: El sistema debe apuntar a un uptime de al menos el 99.5%, asegurando que la herramienta esté disponible cuando el usuario sienta la necesidad de reflexionar.
