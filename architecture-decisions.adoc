@@ -24,6 +24,8 @@ La siguiente matriz detalla las tecnologías seleccionadas para la construcción
 | **Infraestructura (DevOps)** | Vercel | Despliegue continuo e integración nativa y transparente con repositorios de GitHub y Next.js.
 |===
 
+---
+
 == Registros de Decisiones Arquitectónicas (ADR)
 
 === ADR-001: Adopción de Next.js y BaaS en lugar de Backend Tradicional
@@ -44,6 +46,7 @@ La siguiente matriz detalla las tecnologías seleccionadas para la construcción
 * **Consecuencias:**
 ** Positivas: Flexibilidad máxima para las sesiones sin necesidad de migraciones de base de datos constantes.
 ** Negativas/Riesgos: Consultar dentro de objetos JSONB complejos (para el CU-04 Comparativa) requerirá queries más especializadas por parte del DBA.
+
 
 == Organización del Repositorio y CI/CD
 

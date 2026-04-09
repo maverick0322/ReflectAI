@@ -4,17 +4,79 @@
 == Diseño arquitectónico
 Descripción global de la infraestructura ReflectAI.
 
-// TODO: Add Diagram in png format
-
 == Vista de casos de uso (diagrama uml de casos de uso)
 Diagrama que muestra la interacción entre usuarios y el sistema.
 
-// TODO: Add Use Case Diagram
+[plantuml]
+....
+@startuml
+!theme plain
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Usuario\n(Buscador de Autoconocimiento)" as user
+
+package "ReflectAI : Sistema Core" {
+  
+  usecase "CU-01: Gestionar Cuenta" as UC1
+  usecase "Autenticarse (Email, Google, Apple)" as UC1_Auth
+  usecase "Recuperar Contraseña" as UC1_Recover
+  usecase "Eliminar Cuenta y Datos" as UC1_Delete
+  
+  usecase "CU-02: Iniciar Sesión de Reflexión" as UC2
+  usecase "Responder Flujo Guiado por IA" as UC2_Flow
+  
+  usecase "CU-03: Consultar Historial" as UC3
+  usecase "Visualizar Gráficas de Tendencia" as UC3_Dash
+  
+  usecase "CU-04: Comparar Sesiones" as UC4
+  
+}
+
+' Relaciones principales del Actor
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+
+@enduml
+....
 
 == Vista lógica (diagrama uml de clases)
 Estructura de clases lógica de las entidades principales.
 
-// TODO ADD Domain model
+[mermaid]
+....
+classDiagram
+    direction TB
+    class Usuario {
+        +UUID id
+        +String nombre
+        +String correo
+        +DateTime fechaRegistro
+        +iniciarSesion()
+    }
+    
+    class SesionReflexion {
+        +UUID id
+        +DateTime fechaInicio
+        +DateTime fechaFin
+        +EstadoSesion estado
+        +String tituloResumen
+        +completarSesion()
+    }
+    
+    class EntradaReflexion {
+        +String textoPregunta
+        +String respuestaUsuario
+        +String emocionIdentificada
+        +Int intensidadEmocional
+        +DateTime marcaDeTiempo
+    }
+    
+    Usuario "1" -- "*" SesionReflexion : realiza
+    SesionReflexion "1" *-- "1..*" EntradaReflexion : contiene
+....
 
 == Vista de despliegue (diagrama uml de despliegue)
 Estructura física de despliegue.
@@ -24,7 +86,76 @@ Estructura física de despliegue.
 == Modelo de datos (diagrama de entidad-relación)
 Diseño conceptual de la base de datos (NoSQL / Relacional).
 
-// TODO ADD ER diagram
+[mermaid]
+....
+erDiagram
+    auth_users ||--|| profiles : "crea perfil (trigger)"
+    profiles ||--o{ reflection_sessions : "registra"
+
+    auth_users {
+        uuid id PK "Gestionado por Supabase Auth"
+        varchar email
+        varchar encrypted_password
+    }
+
+    profiles {
+        uuid id PK "FK -> auth.users.id"
+        varchar full_name
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    reflection_sessions {
+        uuid id PK
+        uuid user_id FK "FK -> profiles.id"
+        timestamp started_at
+        timestamp completed_at
+        varchar status "enum: 'draft', 'completed'"
+        varchar title "Generado por IA al final"
+        jsonb payload "Estructura dinámica de preguntas/respuestas"
+        jsonb ai_analysis "Métricas pre-calculadas para el Dashboard"
+    }
+....
+
+=== Diccionario de datos
+Definición detallada de cada entidad, atributo y relación en la base de datos.
+
+Tabla reflection_sessions:
+
+Columna payload:
+
+[source,json]
+----
+[
+  {
+    "step_order": 1,
+    "question": "¿Qué situación detonó este momento de reflexión?",
+    "user_response": "Tuve una discusión en el trabajo...",
+    "timestamp": "2026-04-10T10:00:00Z"
+  },
+  {
+    "step_order": 2,
+    "question": "Al pensar en eso, ¿qué emoción predomina y qué tan intensa es del 1 al 10?",
+    "user_response": "Siento frustración.",
+    "detected_emotion": "frustración",
+    "intensity": 8,
+    "timestamp": "2026-04-10T10:02:30Z"
+  }
+]
+----
+
+Columna ai_analysis:
+
+[source,json]
+----
+{
+  "primary_emotions": ["frustración", "ansiedad"],
+  "average_intensity": 7.5,
+  "key_themes": ["trabajo", "comunicación"],
+  "cognitive_distortion_detected": "Lectura de pensamiento"
+}
+----
+
 
 == Descripciones de casos de uso
 Detalle paso a paso de los flujos principales (Flujo básico, alterno y excepciones).
