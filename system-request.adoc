@@ -1,0 +1,33 @@
+= System Request: ReflectAI
+:author: Erickmel, Eugenio, Arturo, Uriel, Miguel Eduardo
+:revdate: {docdate}
+:toc: left
+:icons: font
+:sectnums:
+
+== Patrocinador
+*Dra. María de Lourdes Hernández Rodríguez*. Titular de la Experiencia Educativa de Administración de Proyectos de Software.
+
+== Necesidad
+Actualmente, las personas que buscan mejorar su autoconocimiento carecen de una herramienta digital estructurada que dé trazabilidad a su proceso de introspección. El enfoque tradicional (diarios físicos informales o notas mentales desorganizadas) impide aislar e identificar objetivamente patrones recurrentes en emociones, detonantes y pensamientos alternativos, lo que limita la capacidad del usuario para observar su evolución cognitiva y emocional a lo largo del tiempo.
+
+== Funcionalidades Requeridas
+El sistema deberá permitir al usuario (Paciente):
+
+. Gestionar su cuenta mediante un inicio de sesión seguro (con opciones de Email, Google o Apple) y eliminación definitiva de datos.
+. Iniciar y responder sesiones de reflexión mediante flujos dinámicos de preguntas guiados por el motor de IA.
+. Guardar, pausar y reanudar sesiones de reflexión de forma asíncrona (estado de borrador).
+. Consultar el historial completo de sus sesiones pasadas ordenado de forma cronológica.
+. Visualizar gráficas de tendencias y temas frecuentes basados en el análisis automático de sus respuestas.
+. Comparar directamente los resultados y métricas de dos o más sesiones para identificar cambios a lo largo del tiempo.
+
+== Valor Generado para el Negocio
+* *Valor Académico/Operativo:* Garantizar el cumplimiento del 100% de los criterios de evaluación de la Experiencia Educativa, entregando un Producto Mínimo Viable (MVP) funcional en 8 semanas que demuestre empíricamente la correcta adopción del marco ágil Scrum y la arquitectura Serverless.
+* *Valor del Producto:* Aumentar en un 100% la trazabilidad de los procesos de introspección de los usuarios, reduciendo el tiempo de análisis de patrones emocionales de horas (revisión manual) a segundos (visualización en dashboard).
+
+== Restricciones
+* *Restricción de Tiempo:* Límite estricto e inamovible de 8 semanas (divididas en 4 Sprints) para el desarrollo, pruebas y despliegue del MVP.
+* *Restricción Legal/Ética:* Obligación de incluir un "Aviso Legal" (Disclaimer) visible y de aceptación obligatoria que declare explícitamente que ReflectAI no es una herramienta clínica, no emite diagnósticos y no sustituye el tratamiento psicológico profesional.
+* *Restricción de Privacidad y Seguridad (Políticas):* Los datos de las sesiones son altamente sensibles. Se debe implementar obligatoriamente el control de acceso RLS (Row Level Security) en la base de datos para impedir estrictamente que un usuario o proceso consulte información ajena a su ID de cuenta.
+* *Restricción Económica:* La infraestructura tecnológica debe mantenerse obligatoriamente dentro de las capas gratuitas (Free Tier) de los proveedores de nube (Vercel, Supabase, Groq) durante la fase de desarrollo y liberación inicial.
+* *Restricciones Técnicas:* Uso obligatorio de arquitectura Serverless / Backend-as-a-Service, limitando el stack tecnológico a React/Next.js, Tailwind CSS y PostgreSQL. Además, el tiempo de latencia del motor dinámico de preguntas (IA) está topado a un máximo de 500 milisegundos para no interrumpir el flujo del usuario.
