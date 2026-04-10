@@ -1,0 +1,63 @@
+== Evaluacion AHP de Stacks Tecnologicos
+
+=== Objetivo
+Seleccionar el stack tecnologico mas conveniente para ReflectAI entre:
+
+* A: Next.js + React + TypeScript + Tailwind CSS + Supabase PostgreSQL + Groq API + Vercel
+* B: .NET Core + C# + React + TypeScript + Tailwind CSS + SQL Server + OpenAI API + AWS
+
+=== Criterios y pesos
+Los pesos se definieron para priorizar costo total de propiedad y velocidad de adopcion, manteniendo consideraciones tecnicas de desempeno y mantenibilidad.
+
+[cols="2,1",options="header"]
+|===
+|Criterio |Peso
+
+|Costo |0.36
+|Curva de aprendizaje |0.20
+|Desempeno |0.10
+|Mantenibilidad |0.06
+|Facilidad de integracion |0.16
+|Escalabilidad |0.07
+|Compatibilidad |0.05
+|===
+
+=== Juicios de alternativas (A vs B)
+La matriz por criterio se ajusto para reflejar:
+
+* Ventaja de A en costo, curva de aprendizaje y facilidad de uso/integracion por disponibilidad de partes pre-hechas.
+* Ventaja de B en desempeno y mantenibilidad, pero con menor peso relativo en la decision global.
+
+[cols="2,1,1",options="header"]
+|===
+|Criterio |Preferencia A/B |Interpretacion
+
+|Costo |7 |A muy superior
+|Curva de aprendizaje |5 |A superior
+|Facilidad de integracion |6 |A muy superior
+|Compatibilidad |2 |A ligeramente superior
+|Desempeno |1/3 |B superior
+|Mantenibilidad |1/2 |B ligeramente superior
+|Escalabilidad |1/2 |B ligeramente superior
+|===
+
+=== Resultado global
+Puntaje final ponderado:
+
+[cols="1,1",options="header"]
+|===
+|Alternativa |Score
+
+|A |0.7205
+|B |0.2795
+|===
+
+Decision recomendada: *Seleccionar el Stack A*.
+
+=== Consistencia de juicios
+Se verifico la consistencia con matriz de 7 criterios:
+
+* Formula CI: (lambda_max - 7) / (7 - 1)
+* Formula CR: CI / 1.32
+* Estado esperado: Consistente (CR < 0.10)
+
