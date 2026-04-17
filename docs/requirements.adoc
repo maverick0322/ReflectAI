@@ -41,6 +41,29 @@ Descripción funcional de las interacciones principales.
 | CU-04 | Comparar sesiones | Paciente | El paciente puede comparar sus sesiones de reflexión para identificar patrones y avances.
 |===
 
+== Requisitos funcionales por caso de uso
+
+=== CU-01: Gestionar Cuenta
+
+* RF-1.1: El sistema permitirá el registro de nuevos usuarios mediante correo electrónico y contraseña.
+* RF-1.2: El sistema autenticará a los usuarios devolviendo un token seguro (JWT).
+* RF-1.3: El sistema permitirá la recuperación de contraseña mediante un enlace enviado por correo.
+
+=== CU-02: Iniciar Sesión de Reflexión
+
+* RF-2.1: El sistema permitirá crear y guardar una nueva sesión de reflexión.
+* RF-2.2: El sistema consumirá un servicio de IA para generar preguntas dinámicas basadas en la respuesta anterior del usuario.
+
+=== CU-03: Consultar Historial
+
+* RF-3.1: El sistema mostrará un listado cronológico de las sesiones completadas por el usuario.
+* RF-3.2: El sistema permitirá visualizar el detalle (preguntas, respuestas y emociones) de una sesión específica.
+
+=== CU-04: Comparar Sesiones
+
+* RF-4.1: El sistema permitirá seleccionar dos o más sesiones del historial.
+* RF-4.2: El sistema generará una visualización comparativa de patrones y tendencias emocionales entre las sesiones seleccionadas.
+
 == Requisitos no funcionales
 [req-no-func]
 Restricciones y calidades técnicas del sistema.

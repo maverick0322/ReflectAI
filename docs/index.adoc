@@ -7,7 +7,7 @@
 :toclevels: 3
 :sectnums:
 :sectanchors:
-:pdf-theme: ./theme.yml
+:pdf-theme: ./docs/theme.yml
 :icons: font
 :imagesdir: ./images
 
