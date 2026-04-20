@@ -18,7 +18,7 @@ export default function LoginPage() {
   });
 
   const onSubmit = (data: LoginFormValues) => {
-    console.log("Iniciando sesión con:", data);
+    void data;
   };
 
   return (

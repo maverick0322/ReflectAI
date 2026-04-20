@@ -17,8 +17,8 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = (data: RegisterFormValues) => {
-    console.log("Datos validados listos para Supabase:", data);
+  const onSubmit = (_data: RegisterFormValues) => {
+    // TODO: Enviar los datos al servicio de registro sin exponer información sensible en logs del cliente.
   };
 
   return (
