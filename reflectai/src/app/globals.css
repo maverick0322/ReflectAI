@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+@theme {
+  --color-reflect-dark: #1E1B4B;
+}
