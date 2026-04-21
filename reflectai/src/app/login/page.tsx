@@ -9,6 +9,7 @@ import Button from "@/components/ui/Button";
 import SocialButton from "@/components/ui/SocialButton";
 import CustomLink from "@/components/ui/CustomLink";
 import PasswordInput from "@/components/ui/PasswordInput";
+import GlassCard from "@/components/ui/GlassCard"; // Importamos GlassCard
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
 
@@ -17,13 +18,14 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    void data;
+  const onSubmit = async (_data: LoginFormValues) => {
+    // TODO: Integración con Supabase para iniciar sesión
+    // Nota de seguridad: Se omite intencionalmente el logging de 'data'
   };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-8 shadow-2xl shadow-purple-200/50 flex flex-col gap-6">
+      <GlassCard>
         <header className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight text-reflect-dark">ReflectAI</h1>
           <p className="text-reflect-dark/70 font-medium text-sm">Tu espacio seguro para la reflexión</p>
@@ -54,7 +56,7 @@ export default function LoginPage() {
         <footer className="text-center text-sm text-reflect-dark/70">
           ¿No tienes cuenta? <CustomLink href="/registro">Regístrate aquí</CustomLink>
         </footer>
-      </div>
+      </GlassCard>
     </main>
   );
 }

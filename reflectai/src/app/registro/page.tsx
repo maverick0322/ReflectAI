@@ -9,6 +9,7 @@ import Button from "@/components/ui/Button";
 import SocialButton from "@/components/ui/SocialButton";
 import CustomLink from "@/components/ui/CustomLink";
 import PasswordInput from "@/components/ui/PasswordInput";
+import GlassCard from "@/components/ui/GlassCard"; // Importamos GlassCard
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
 
@@ -17,13 +18,13 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = (_data: RegisterFormValues) => {
-    // TODO: Enviar los datos al servicio de registro sin exponer información sensible en logs del cliente.
+  const onSubmit = async (data: RegisterFormValues) => {
+    // TODO: Integración con Supabase para registrar usuario para el backend
   };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 py-12">
-      <div className="w-full max-w-lg bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] p-8 shadow-2xl shadow-purple-200/50 flex flex-col gap-6">
+      <GlassCard className="max-w-lg">
         <header className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight text-reflect-dark">Crear Cuenta</h1>
           <p className="text-reflect-dark/70 font-medium text-sm">Comienza tu viaje</p>
@@ -64,7 +65,7 @@ export default function RegisterPage() {
         <footer className="text-center text-sm text-reflect-dark/70">
           ¿Ya tienes cuenta? <CustomLink href="/login">Inicia sesión aquí</CustomLink>
         </footer>
-      </div>
+      </GlassCard>
     </main>
   );
 }
