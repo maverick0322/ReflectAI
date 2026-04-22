@@ -1,0 +1,167 @@
+= Especificación de Requisito Funcional: HT-13
+:sectnums:
+:toc:
+
+== 1. Descripción de la Historia de Usuario
+
+**ID:** HT-13
+**Título:** Motor de Flujo de Reflexión Guiada
+**Como:** Usuario (Paciente/Buscador de Autoconocimiento)
+**Quiero:** Contar con un flujo estructurado de preguntas lógicas al iniciar una sesión.
+**Para:** Poder identificar objetivamente mi situación, mi respuesta emocional y encontrar una interpretación alternativa útil.
+
+== 2. Flujo Base (El "Happy Path")
+
+El flujo estándar consta de 4 fases secuenciales. El usuario no debe poder avanzar a la siguiente fase sin haber completado la actual.
+
+=== Fase 1: Contexto
+* **[Q1_SIT] Situación:** "¿Qué situación específica detonó la necesidad de reflexionar hoy? Describe los hechos, sin juicios."
+** Tipo: Texto largo.
+
+=== Fase 2: Evaluación
+* **[Q2_THO] Pensamiento Automático:** "En ese instante, ¿cuál fue el primer pensamiento que cruzó tu mente?"
+** Tipo: Texto corto.
+* **[Q3_EMO] Emoción Primaria:** "¿Qué emoción principal experimentaste?"
+** Tipo: Selector de lista (Alegría, Confianza, Miedo, Sorpresa, Tristeza, Aversión, Enojo, Anticipación).
+* **[Q4_INT] Intensidad:** "En una escala del 1 al 10, ¿qué tan intensa es esa emoción en este momento?"
+** Tipo: Slider numérico (1-10).
+
+=== Fase 3: Propósito y Control
+* **[Q5_TEL] Propósito:** "A veces las emociones tienen un 'objetivo'. Si esta emoción intentara protegerte de algo o lograr algo, ¿qué sería?"
+** Tipo: Texto.
+* **[Q6_CON] Separación de Tareas:** "De esta situación, ¿qué cosas estaban estrictamente bajo tu control (tu tarea) y cuáles dependían de otros (tarea ajena)?"
+** Tipo: Texto (Idealmente dos campos separados en UI).
+
+=== Fase 4: Reestructuración
+* **[Q7_ALT] Alternativa:** "Sabiendo lo que controlas, ¿existe una forma más útil o compasiva de interpretar lo que ocurrió?"
+** Tipo: Texto.
+
+---
+
+== 3. Casos Alternativos y Desviaciones a Evitar (Reglas de Negocio)
+
+Para que el flujo sea verdaderamente terapéutico, el sistema debe manejar las siguientes desviaciones del usuario:
+
+=== Caso A: Desbordamiento Emocional (Intensidad Crítica)
+* **Condición:** Si en `[Q4_INT]` el usuario marca una intensidad de `9` o `10`.
+* **Problema:** Un usuario con la amígdala "secuestrada" no puede realizar la Fase 3 (Procesos Cognitivos Complejos).
+* **Desviación en el Flujo:** Antes de pasar a `[Q5_TEL]`, el sistema intercala una pantalla de "Aterrizaje" (Grounding).
+* **Acción del Sistema:** Mostrar un mensaje empático: *"Parece que esta emoción es muy abrumadora ahora mismo. Antes de continuar analizando, toma 3 respiraciones profundas..."*. Requerir que el usuario presione un botón de "Estoy listo para continuar" antes de mostrar la siguiente pregunta.
+
+=== Caso B: Evitación Cognitiva ("No sé")
+* **Condición:** El usuario intenta dejar `[Q2_THO]` o `[Q3_EMO]` vacíos, o escribe textos de menos de 3 caracteres (ej. "no", "x").
+* **Problema:** El usuario intenta evitar el trabajo de introspección.
+* **Desviación en el Flujo:** La interfaz bloquea el botón "Siguiente". 
+* **Acción del Sistema:** Mostrar un *Tooltip* o sugerencia: *"Identificar el pensamiento es el paso más difícil pero el más importante. Intenta completar esta frase: 'Me dije a mí mismo que...'"*.
+
+=== Caso C: Locus de Control Externo Absoluto
+* **Condición:** Si un modelo de NLP (futuro) o un flujo lógico detecta que en `[Q6_CON]` el usuario asume cero control sobre la situación.
+* **Problema:** Fomenta la victimización, impidiendo la Fase 4.
+* **Desviación en el Flujo:** Modificar dinámicamente el prompt de `[Q7_ALT]`.
+* **Acción del Sistema:** Cambiar la pregunta a: *"Es muy frustrante cuando dependemos de circunstancias externas. Dado que no puedes cambiar a los demás, ¿cómo decides cuidar de tu propia reacción la próxima vez?"*.
+
+---
+
+== 4. Sustento Bibliográfico y Justificación Clínica
+
+Para garantizar que el flujo sea de utilidad y no cause daños por inducciones incorrectas, la estructura se basa en los siguientes marcos validados:
+
+1. **Modelo ABC de la Terapia Cognitivo-Conductual (TCC):**
+** **Fuente:** Beck, A. T. (1979). _Cognitive Therapy of Depression_.
+** **Justificación:** Las Fases 1 y 2 separan el Evento Activador (A), de las Creencias/Pensamientos (B) y las Consecuencias emocionales (C). Beck demostró que intervenir en "B" es el método más efectivo para reducir el malestar.
+2. **Rueda de las Emociones de Plutchik:**
+** **Fuente:** Plutchik, R. (1980). _Emotion: A Psychoevolutionary Synthesis_.
+** **Justificación:** Los valores para el selector en `[Q3_EMO]` no son aleatorios; representan las 8 emociones primarias de Plutchik, lo que estandariza los datos para el análisis de tendencias en el futuro Dashboard.
+3. **Psicología Adleriana (Teleología y Separación de Tareas):**
+** **Fuente:** Adler, A. (1931). _What Life Could Mean to You_ / Kishimi, I. & Koga, F. (2013). _The Courage to Be Disliked_.
+** **Justificación:** La Fase 3 se fundamenta en la negación de la etiología (causa y efecto estricto) a favor de la teleología (el propósito de la emoción). Adicionalmente, el concepto de la "Separación de Tareas" expuesto por Kishimi es crucial para resolver conflictos interpersonales documentados en la aplicación, ayudando al usuario a soltar aquello que no puede controlar.
+
+---
+
+== 5. Estructura de Salida Esperada (Para Backend - JSONB)
+
+El equipo de Backend deberá almacenar este flujo en la tabla `reflection_sessions` con la siguiente estructura, permitiendo registrar las desviaciones (ej. si se activó el flujo de *Grounding*).
+
+[source,json]
+----
+{
+  "schema_version": "1.1",
+  "deviations_triggered": ["high_intensity_grounding"],
+  "interactions": [
+    {
+      "question_id": "Q4_INT",
+      "value": 9
+    },
+    {
+      "question_id": "Q6_CON",
+      "value_internal": "Mi preparación para la reunión.",
+      "value_external": "La actitud agresiva de mi jefe."
+    }
+  ]
+}
+----
+
+=== 5.1 Ejemplos de Estructura de Datos (Columna JSONB)
+
+Para asegurar la interoperabilidad entre el motor de IA (Groq) y la persistencia (Supabase), se definen los siguientes esquemas de ejemplo que se deben contemplar en el manejo de la API.
+
+==== Escenario A: Flujo Estándar (Exitoso)
+Este caso representa una sesión completada donde el usuario logra una reincorporación útil de los hechos.
+
+[source,json]
+----
+{
+  "metadata": {
+    "version": "1.0",
+    "started_at": "2026-04-20T10:00:00Z",
+    "completed_at": "2026-04-20T10:15:00Z",
+    "interruption_detected": false
+  },
+  "responses": [
+    { "id": "Q1_SIT", "text": "Mi jefe me corrigió frente al equipo por un error menor." },
+    { "id": "Q2_THO", "text": "Pienso que no valora mi esfuerzo y que quedé en ridículo." },
+    { "id": "Q3_EMO", "text": "Enojo", "category": "primary" },
+    { "id": "Q4_INT", "value": 6 },
+    { "id": "Q5_TEL", "text": "Proteger mi orgullo y evitar sentirme vulnerable ante el grupo." },
+    { "id": "Q6_CON_MINE", "text": "La calidad de mi trabajo y mi reacción profesional." },
+    { "id": "Q6_CON_OTHERS", "text": "La forma de comunicar de mi jefe (su tarea)." },
+    { "id": "Q7_ALT", "text": "Su corrección buscaba la excelencia del proyecto, no atacarme a mí personalmente." }
+  ]
+}
+----
+
+==== Escenario B: Desviación por Alta Intensidad (Bloqueo de Seguridad)
+Cuando la intensidad supera el umbral de 8, el sistema inserta metadatos de "Grounding" (Aterrizaje) para validar que el usuario está en condiciones de razonar.
+
+[source,json]
+----
+{
+  "metadata": {
+    "version": "1.0",
+    "flags": ["high_intensity_triggered", "grounding_completed"],
+    "grounding_duration_seconds": 45
+  },
+  "responses": [
+    { "id": "Q4_INT", "value": 10 },
+    { "id": "SYS_GROUNDING", "status": "acknowledged", "method": "box_breathing" },
+    { "id": "Q5_TEL", "text": "Siento que quiero explotar para que dejen de presionarme." }
+  ]
+}
+----
+
+==== Escenario C: Sesgo de Culpa Externa (Locus Externo)
+Ejemplo de cómo se captura una reflexión donde el usuario inicialmente no identifica su "Tarea" (Concepto Adleriano), lo que permite a la IA ajustar el siguiente prompt.
+
+[source,json]
+----
+{
+  "metadata": {
+    "ai_hints": ["external_locus_detected"]
+  },
+  "responses": [
+    { "id": "Q6_CON_MINE", "text": "Nada, yo no hice nada malo." },
+    { "id": "Q6_CON_OTHERS", "text": "Todo es culpa del mal clima y de la mala organización de Arturo." },
+    { "id": "SYS_AI_ADJUSTMENT", "intervention": "Reenfocar en responsabilidad radical" }
+  ]
+}
+----
