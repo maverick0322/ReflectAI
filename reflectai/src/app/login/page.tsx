@@ -16,6 +16,7 @@ import { FacebookIcon } from "@/components/icons/FacebookIcon";
 export default function LoginPage() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
+    mode: "onTouched",
   });
 
   const onSubmit = async (_data: LoginFormValues) => {
@@ -32,8 +33,8 @@ export default function LoginPage() {
         </header>
 
         <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <Input {...register("email")} type="email" placeholder="Correo electrónico" error={errors.email?.message} />
-          <PasswordInput {...register("password")} placeholder="Contraseña" error={errors.password?.message} />
+          <Input {...register("email")} type="email" placeholder="Correo electrónico" maxLength={254} error={errors.email?.message} />
+          <PasswordInput {...register("password")} placeholder="Contraseña" maxLength={64} error={errors.password?.message} />
           
           <div className="flex justify-end">
             <CustomLink href="/recuperar" className="text-sm font-semibold">¿Olvidaste tu contraseña?</CustomLink>

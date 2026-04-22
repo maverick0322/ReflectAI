@@ -12,6 +12,7 @@ import GlassCard from "@/components/ui/GlassCard";
 export default function RecoverPasswordPage() {
   const { register, handleSubmit, formState: { errors } } = useForm<RecoverPasswordFormValues>({
     resolver: zodResolver(recoverPasswordSchema),
+    mode: "onTouched",
   });
 
   const onSubmit = async (_data: RecoverPasswordFormValues) => {
@@ -33,7 +34,8 @@ export default function RecoverPasswordPage() {
           <Input 
             {...register("email")} 
             type="email" 
-            placeholder="Correo electrónico" 
+            placeholder="Correo electrónico"
+            maxLength={254} 
             error={errors.email?.message} 
           />
           <Button type="submit">Enviar enlace</Button>

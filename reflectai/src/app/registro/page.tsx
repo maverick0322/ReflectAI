@@ -16,6 +16,7 @@ import { FacebookIcon } from "@/components/icons/FacebookIcon";
 export default function RegisterPage() {
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+    mode: "onTouched",
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
@@ -32,16 +33,16 @@ export default function RegisterPage() {
 
         <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input {...register("firstName")} placeholder="Nombre(s)" error={errors.firstName?.message} />
-            <Input {...register("lastName")} placeholder="Apellido(s) (Opcional)" error={errors.lastName?.message} />
+            <Input {...register("firstName")} placeholder="Nombre(s)" maxLength={120} error={errors.firstName?.message} />
+            <Input {...register("lastName")} placeholder="Apellido(s) (Opcional)" maxLength={120} error={errors.lastName?.message} />
           </div>
 
-          <Input {...register("email")} type="email" placeholder="Correo electrónico" error={errors.email?.message} />
-          <Input {...register("confirmEmail")} type="email" placeholder="Confirmar correo electrónico" error={errors.confirmEmail?.message} />
+          <Input {...register("email")} type="email" placeholder="Correo electrónico" maxLength={254} error={errors.email?.message} />
+          <Input {...register("confirmEmail")} type="email" placeholder="Confirmar correo electrónico" maxLength={254} error={errors.confirmEmail?.message} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <PasswordInput {...register("password")} placeholder="Contraseña" error={errors.password?.message} />
-            <PasswordInput {...register("confirmPassword")} placeholder="Confirmar contraseña" error={errors.confirmPassword?.message} />
+            <PasswordInput {...register("password")} placeholder="Contraseña" maxLength={64} error={errors.password?.message} />
+            <PasswordInput {...register("confirmPassword")} placeholder="Confirmar contraseña" maxLength={64} error={errors.confirmPassword?.message} />
           </div>
 
           <Input {...register("birthDate")} type="date" placeholder="Fecha de nacimiento" className="text-reflect-dark/70" error={errors.birthDate?.message} />
