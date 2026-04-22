@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import SocialButton from "@/components/ui/SocialButton";
 import CustomLink from "@/components/ui/CustomLink";
 import PasswordInput from "@/components/ui/PasswordInput";
-import GlassCard from "@/components/ui/GlassCard"; // Importamos GlassCard
+import GlassCard from "@/components/ui/GlassCard";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
 
@@ -30,7 +30,7 @@ export default function RegisterPage() {
           <p className="text-reflect-dark/70 font-medium text-sm">Comienza tu viaje</p>
         </header>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input {...register("firstName")} placeholder="Nombre(s)" error={errors.firstName?.message} />
             <Input {...register("lastName")} placeholder="Apellido(s) (Opcional)" error={errors.lastName?.message} />

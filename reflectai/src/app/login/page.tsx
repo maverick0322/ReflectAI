@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import SocialButton from "@/components/ui/SocialButton";
 import CustomLink from "@/components/ui/CustomLink";
 import PasswordInput from "@/components/ui/PasswordInput";
-import GlassCard from "@/components/ui/GlassCard"; // Importamos GlassCard
+import GlassCard from "@/components/ui/GlassCard";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
 
@@ -31,7 +31,7 @@ export default function LoginPage() {
           <p className="text-reflect-dark/70 font-medium text-sm">Tu espacio seguro para la reflexión</p>
         </header>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <Input {...register("email")} type="email" placeholder="Correo electrónico" error={errors.email?.message} />
           <PasswordInput {...register("password")} placeholder="Contraseña" error={errors.password?.message} />
           
