@@ -18,12 +18,12 @@ export const firstNameField = z
   .string()
   .min(1, "El nombre es obligatorio")
   .max(120, "Se alcanzó el límite") 
-  .regex(/^[a-zA-Z\s]+$/, "El nombre solo puede contener letras");
+  .regex(/^[\p{L}\s]+$/u, "El nombre solo puede contener letras");
 
 export const lastNameField = z
   .string()
   .max(120, "Se alcanzó el límite")
-  .regex(/^[a-zA-Z\s]*$/, "El apellido solo puede contener letras")
+  .regex(/^[\p{L}\s]*$/u, "El apellido solo puede contener letras")
   .optional();
 
 export const birthDateField = z
