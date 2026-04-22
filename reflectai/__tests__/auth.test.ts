@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { registerSchema, loginSchema, recoverPasswordSchema } from '@/lib/validations/auth';
 
 const usuarioValido = {
-  firstName: 'Arturo',
-  lastName: 'Cuevas',
+  firstName: 'José Luis',
+  lastName: 'Cuevas Ñañez',
   email: 'test@reflectai.com',
   confirmEmail: 'test@reflectai.com',
   password: 'PasswordFuerte123',

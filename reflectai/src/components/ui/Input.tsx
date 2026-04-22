@@ -32,8 +32,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             aria-invalid={!!error}
             aria-describedby={error ? errorId : undefined}
             className={`w-full px-4 py-3.5 bg-white/50 border ${
-              error ? 'border-red-500 focus:ring-red-400' : 'border-white/80 focus:ring-reflect-primary'
-            } rounded-2xl text-reflect-dark placeholder:text-reflect-dark/50 focus:outline-none focus:ring-2 transition-all ${
+              error ? 'border-red-500 focus:ring-red-400' : 'border-white/80 focus:ring-reflect-dark/30'            } rounded-2xl text-reflect-dark placeholder:text-reflect-dark/50 focus:outline-none focus:ring-2 transition-all ${
               rightElement ? 'pr-12' : ''
             } ${className}`}
             {...props}
