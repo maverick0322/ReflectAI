@@ -3,7 +3,10 @@ import { emailField, passwordField, firstNameField, lastNameField, birthDateFiel
 
 export const loginSchema = z.object({
   email: emailField,
-  password: z.string().min(1, "La contraseña es obligatoria"),
+  password: z
+    .string()
+    .min(1, "La contraseña es obligatoria")
+    .max(64, "La contraseña no puede tener más de 64 caracteres"),
 });
 
 export const registerSchema = z.object({
