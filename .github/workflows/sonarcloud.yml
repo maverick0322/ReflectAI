@@ -19,7 +19,7 @@ jobs:
 
       - name: Instalar dependencias
         working-directory: ./reflectai
-        run: npm ci
+        run: npm install
 
       - name: Correr pruebas y generar Cobertura
         working-directory: ./reflectai
