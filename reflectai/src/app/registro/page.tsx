@@ -19,7 +19,7 @@ export default function RegisterPage() {
     mode: "onTouched",
   });
 
-  const onSubmit = async (data: RegisterFormValues) => {
+  const onSubmit = async (_data: RegisterFormValues) => {
     // TODO: Integración con Supabase para registrar usuario para el backend
   };
 
