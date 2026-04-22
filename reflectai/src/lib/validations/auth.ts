@@ -10,9 +10,9 @@ export const registerSchema = z.object({
   firstName: firstNameField,
   lastName: lastNameField,
   email: emailField,
-  confirmEmail: z.string(),
+  confirmEmail: emailField,
   password: passwordField,
-  confirmPassword: z.string(),
+  confirmPassword: passwordField,
   birthDate: birthDateField,
 }).refine((data) => data.email === data.confirmEmail, {
   message: "Los correos electrónicos no coinciden",
