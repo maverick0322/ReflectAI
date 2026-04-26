@@ -15,9 +15,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      {}
-      <body className={`${inter.className} bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF] min-h-screen text-[#1E1B4B] antialiased`}>
+    <html lang="es" suppressHydrationWarning>
+      {/* Y también agrégalo aquí en el body */}
+      <body 
+        className={`${inter.className} bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF] min-h-screen text-[#1E1B4B] antialiased`}
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>
