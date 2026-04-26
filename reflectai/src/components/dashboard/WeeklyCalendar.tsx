@@ -7,7 +7,7 @@ export function WeeklyCalendar({ currentDay }: { currentDay: number }) {
   return (
     <div className="flex justify-between items-center py-2" role="list">
       {days.map((day) => (
-        <div key={day.num} className="flex flex-col items-center gap-2">
+        <div key={day.num} className="flex flex-col items-center gap-2" role="listitem">
           <span className="text-xs font-medium text-slate-400">{day.label}</span>
           <div className={`
             w-10 h-10 flex items-center justify-center rounded-full transition-all
