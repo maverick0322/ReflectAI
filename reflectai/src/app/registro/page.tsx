@@ -30,7 +30,7 @@ export default function RegisterPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 py-12">
-      <GlassCard className="max-w-lg">
+      <GlassCard className="p-8 gap-6 w-full max-w-md mx-auto">
         <header className="space-y-2 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-reflect-dark">Crear cuenta</h1>
           <p className="text-sm font-medium text-reflect-dark/70">Comienza tu viaje</p>
@@ -55,14 +55,14 @@ export default function RegisterPage() {
           <Input
             {...register("email")}
             type="email"
-            placeholder="Correo electronico"
+            placeholder="Correo electrónico"
             maxLength={254}
             error={errors.email?.message}
           />
           <Input
             {...register("confirmEmail")}
             type="email"
-            placeholder="Confirmar correo electronico"
+            placeholder="Confirmar correo electrónico"
             maxLength={254}
             error={errors.confirmEmail?.message}
           />
@@ -70,13 +70,13 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <PasswordInput
               {...register("password")}
-              placeholder="Contrasena"
+              placeholder="Contraseña"
               maxLength={64}
               error={errors.password?.message}
             />
             <PasswordInput
               {...register("confirmPassword")}
-              placeholder="Confirmar contrasena"
+              placeholder="Confirmar contraseña"
               maxLength={64}
               error={errors.confirmPassword?.message}
             />
@@ -97,7 +97,7 @@ export default function RegisterPage() {
 
         <div className="relative flex items-center py-2 text-sm font-medium text-reflect-dark/50">
           <div className="flex-grow border-t border-reflect-dark/10"></div>
-          <span className="mx-4">o registrate con</span>
+          <span className="mx-4">o regístrate con</span>
           <div className="flex-grow border-t border-reflect-dark/10"></div>
         </div>
 
@@ -107,7 +107,7 @@ export default function RegisterPage() {
         </div>
 
         <footer className="text-center text-sm text-reflect-dark/70">
-          Ya tienes cuenta? <CustomLink href="/login">Inicia sesion aqui</CustomLink>
+          ¿Ya tienes cuenta? <CustomLink href="/login">Inicia sesión aquí</CustomLink>
         </footer>
       </GlassCard>
     </main>
