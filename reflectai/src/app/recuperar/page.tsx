@@ -49,7 +49,7 @@ export default function RecoverPasswordPage() {
         </form>
 
         <footer className="mt-4 text-center text-sm text-reflect-dark/70">
-          Recordaste tu contraseña?{" "}
+          ¿Recordaste tu contraseña?{" "}
           <CustomLink href="/login">Volver a iniciar sesión</CustomLink>
         </footer>
       </GlassCard>

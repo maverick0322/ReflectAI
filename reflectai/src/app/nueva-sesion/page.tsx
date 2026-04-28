@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -81,11 +81,21 @@ export default function NuevaSesionPage() {
     // TODO: [BACKEND] Mapear al payload de Supabase y enviar
     console.log("¡Sesión Finalizada y validada con éxito!", data);
     setIsSuccess(true);
-    
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 2500);
   };
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (isSuccess) {
+      timeoutId = setTimeout(() => {
+        router.push("/dashboard");
+      }, 2500);
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isSuccess, router]);
 
   if (isSuccess) {
     return (

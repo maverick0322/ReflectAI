@@ -34,7 +34,7 @@ export default function LoginPage() {
         <header className="space-y-2 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-reflect-dark">ReflectAI</h1>
           <p className="text-sm font-medium text-reflect-dark/70">
-            Tu espacio seguro para la reflexion
+            Tu espacio seguro para la reflexión
           </p>
         </header>
 
@@ -42,7 +42,7 @@ export default function LoginPage() {
           <Input
             {...register("email")}
             type="email"
-            placeholder="Correo electronico"
+            placeholder="Correo electrónico"
             maxLength={254}
             error={errors.email?.message}
           />
@@ -55,7 +55,7 @@ export default function LoginPage() {
 
           <div className="flex justify-end">
             <CustomLink href="/recuperar" className="text-sm font-semibold">
-              Olvidaste tu contraseña?
+              ¿Olvidaste tu contraseña?
             </CustomLink>
           </div>
 
@@ -64,7 +64,7 @@ export default function LoginPage() {
 
         <div className="relative flex items-center py-2 text-sm font-medium text-reflect-dark/50">
           <div className="flex-grow border-t border-reflect-dark/10"></div>
-          <span className="mx-4">o continua con</span>
+          <span className="mx-4">o continúa con</span>
           <div className="flex-grow border-t border-reflect-dark/10"></div>
         </div>
 
@@ -74,7 +74,7 @@ export default function LoginPage() {
         </div>
 
         <footer className="text-center text-sm text-reflect-dark/70">
-          No tienes cuenta? <CustomLink href="/registro">Registrate aqui</CustomLink>
+          ¿No tienes cuenta? <CustomLink href="/registro">Regístrate aquí</CustomLink>
         </footer>
       </GlassCard>
     </main>

@@ -1,6 +1,6 @@
 export interface UserProfile {
   name: string;
-  streak: number;
+  racha: number;
   avatarUrl: string | null;
 }
 

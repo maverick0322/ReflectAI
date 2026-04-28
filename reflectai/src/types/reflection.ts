@@ -78,15 +78,3 @@ export interface ReflectionSessionPayload {
   metadata: SessionMetadata;
   responses: SessionResponse[];
 }
-
-// Estado Local Interno del Formulario (Para React-Hook-Form)
-export interface WizardFormValues {
-  situacion: string;           
-  pensamiento: string;         
-  emocion: PrimaryEmotion | ""; 
-  intensidad: number;          
-  proposito: string;           
-  controlMio: string;          
-  controlOtros: string;        
-  alternativa: string;         
-}

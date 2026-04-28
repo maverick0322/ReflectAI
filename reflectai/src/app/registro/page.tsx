@@ -97,7 +97,7 @@ export default function RegisterPage() {
 
         <div className="relative flex items-center py-2 text-sm font-medium text-reflect-dark/50">
           <div className="flex-grow border-t border-reflect-dark/10"></div>
-          <span className="mx-4">o registrate con</span>
+          <span className="mx-4">o regístrate con</span>
           <div className="flex-grow border-t border-reflect-dark/10"></div>
         </div>
 
@@ -107,7 +107,7 @@ export default function RegisterPage() {
         </div>
 
         <footer className="text-center text-sm text-reflect-dark/70">
-          Ya tienes cuenta? <CustomLink href="/login">Inicia sesión aqui</CustomLink>
+          ¿Ya tienes cuenta? <CustomLink href="/login">Inicia sesión aquí</CustomLink>
         </footer>
       </GlassCard>
     </main>
