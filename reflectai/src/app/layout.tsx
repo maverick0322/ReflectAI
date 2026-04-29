@@ -13,8 +13,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      {}
-      <body className="bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF] min-h-screen text-[#1E1B4B] antialiased">
+      <body 
+        suppressHydrationWarning 
+        className="bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF] min-h-screen text-[#1E1B4B] antialiased"
+      >
         {children}
       </body>
     </html>

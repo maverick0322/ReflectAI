@@ -23,8 +23,9 @@ export const firstNameField = z
 export const lastNameField = z
   .string()
   .max(120, "Se alcanzó el límite")
-  .regex(/^[\p{L}\s]*$/u, "El apellido solo puede contener letras")
-  .optional();
+  .refine((value) => value === "" || /^[\p{L}\s]+$/u.test(value), {
+    message: "El apellido solo puede contener letras",
+  });
 
 export const birthDateField = z
   .string()
