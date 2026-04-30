@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { firstNameField, lastNameField, birthDateField, passwordField} from "./common";
+import { firstNameField, lastNameField, birthDateField, passwordField } from "./common";
 
 export const profileSchema = z.object({
   firstName: firstNameField,

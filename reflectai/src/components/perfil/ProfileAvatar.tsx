@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import type { ChangeEvent } from "react";
 import CameraIcon from "@/components/icons/CameraIcon";
 
 interface ProfileAvatarProps {
@@ -28,24 +29,31 @@ export default function ProfileAvatar({ firstName, lastName, avatarUrl, onPhotoS
     return (n.charAt(0) + (a ? a.charAt(0) : "")).toUpperCase();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Validación Local (Frontend)
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       setError("Solo se permiten formatos JPG, PNG o WEBP.");
+      input.value = ""; 
       return;
     }
-    if (file.size > 2 * 1024 * 1024) { // 2MB
+    if (file.size > 2 * 1024 * 1024) {
       setError("La imagen debe pesar menos de 2MB.");
+      input.value = ""; 
       return;
     }
 
-    setError(null);
-    const objectUrl = URL.createObjectURL(file);
-    setPreview(objectUrl);
-    onPhotoSelected(file); 
+    try {
+      setError(null);
+      const objectUrl = URL.createObjectURL(file);
+      setPreview(objectUrl);
+      onPhotoSelected(file); 
+    } finally {
+      input.value = "";
+    }
   };
 
   return (
@@ -74,6 +82,7 @@ export default function ProfileAvatar({ firstName, lastName, avatarUrl, onPhotoS
         
         <button 
           type="button"
+          aria-label="Abrir explorador de archivos"
           onClick={() => fileInputRef.current?.click()} 
           className="absolute bottom-0 right-0 p-2 bg-orange-400 text-white rounded-full shadow-lg hover:scale-110 transition-transform"
         >

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -82,7 +83,7 @@ const DataRow = ({ label, value }: { label: string; value: string }) => (
     <span className="text-slate-700 font-medium mt-1">{value}</span>
   </div>
 );
-const PreferenceRow = ({ icon, label, enabled, onChange }: { icon: React.ReactNode; label: string; enabled: boolean; onChange: () => void }) => (
+const PreferenceRow = ({ icon, label, enabled, onChange }: { icon: ReactNode; label: string; enabled: boolean; onChange: () => void }) => (
   <div className="flex items-center justify-between">
     <div className="flex items-center gap-3">
       {icon}
@@ -173,6 +174,7 @@ export default function PerfilPage() {
           <ProfileAvatar 
             firstName={profile.firstName} 
             lastName={profile.lastName} 
+            avatarUrl={profile.avatarUrl}
             onPhotoSelected={(file) => console.log("Foto lista para backend:", file)} // Para miguel: [BACKEND]
           />
           <div className="text-center">
