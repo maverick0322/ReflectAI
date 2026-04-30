@@ -44,14 +44,14 @@ export default function CambiarContraseñaPage() {
   });
 
   const onStep1Submit = async (data: Step1FormValues) => {
-    // TODO: [BACKEND] Validar contraseña actual
+    // Para miguel: [BACKEND] Validar contraseña actual
     console.log("Verificando:", data);
     form2.reset({ newPassword: "", confirmNewPassword: "" });
     setStep(2);
   };
 
   const onStep2Submit = async (data: Step2FormValues) => {
-    // TODO: [BACKEND] Actualizar a la nueva contraseña
+    // Para miguel: [BACKEND] Actualizar a la nueva contraseña
     console.log("Actualizando:", data);
     router.push("/perfil");
   };

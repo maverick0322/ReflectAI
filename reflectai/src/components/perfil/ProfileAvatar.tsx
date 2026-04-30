@@ -10,14 +10,14 @@ interface ProfileAvatarProps {
   onPhotoSelected: (file: File) => void;
 }
 
-export default function ProfileAvatar({ firstName, lastName, avatarUrl, onPhotoSelected }: ProfileAvatarProps) {
+export default function ProfileAvatar({ firstName, lastName, avatarUrl, onPhotoSelected }: Readonly<ProfileAvatarProps>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(avatarUrl || null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
-      if (preview && preview.startsWith("blob:")) {
+      if (preview?.startsWith("blob:")) {
         URL.revokeObjectURL(preview);
       }
     };

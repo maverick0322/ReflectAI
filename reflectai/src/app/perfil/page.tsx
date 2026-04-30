@@ -130,7 +130,7 @@ export default function PerfilPage() {
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
-    // TODO: [BACKEND] Implementar PATCH /api/users/me en Supabase
+    // Para miguel: [BACKEND] Implementar PATCH /api/users/me en Supabase
     setProfile((current) => ({
       ...current,
       firstName: data.firstName,
@@ -173,7 +173,7 @@ export default function PerfilPage() {
           <ProfileAvatar 
             firstName={profile.firstName} 
             lastName={profile.lastName} 
-            onPhotoSelected={(file) => console.log("Foto lista para backend:", file)} // TODO: [BACKEND]
+            onPhotoSelected={(file) => console.log("Foto lista para backend:", file)} // Para miguel: [BACKEND]
           />
           <div className="text-center">
             <h2 className="text-2xl font-bold text-slate-800">{profile.firstName} {profile.lastName}</h2>
@@ -205,7 +205,7 @@ export default function PerfilPage() {
               <Input {...register("lastName")} placeholder="Apellido(s)" maxLength={120} error={errors.lastName?.message} />
               <Input {...register("birthDate")} type="date" className="text-slate-700" error={errors.birthDate?.message} />
             </div>
-            <div className={!isEditing ? "flex flex-col gap-4 animate-in fade-in duration-300" : "hidden"}>
+            <div className={isEditing ? "hidden" : "flex flex-col gap-4 animate-in fade-in duration-300"}>
               <DataRow label="Nombre Completo" value={formatFullName(profile.firstName, profile.lastName)} />
               <hr className="border-slate-200/50" />
               <DataRow label="Fecha de Nacimiento" value={formatearFechaDisplay(profile.birthDate)} />

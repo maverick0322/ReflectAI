@@ -3,9 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from 'vitest';
 import PerfilPage from '@/app/perfil/page';
 
+const pushMock = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    push: vi.fn(),
+    push: pushMock,
   }),
 }));
 
@@ -96,5 +97,32 @@ describe('PerfilPage', () => {
     expect(screen.getByRole('link', { name: /cambiar contraseña/i })).toHaveAttribute('href', '/cambiar-contrasena');
     
     expect(screen.getByRole('link', { name: /eliminar cuenta permanentemente/i })).toHaveAttribute('href', '/eliminar-cuenta');
+  });
+
+  it('cierra sesión correctamente y redirige al login', async () => {
+    const user = userEvent.setup();
+    render(<PerfilPage />);
+    
+    const logoutBtn = screen.getByRole('button', { name: /cerrar sesión/i });
+    await user.click(logoutBtn);
+
+    expect(pushMock).toHaveBeenCalledWith("/login");
+  });
+
+  it('maneja la selección de foto de perfil simulando la subida al backend', async () => {
+    const user = userEvent.setup();
+    
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    
+    render(<PerfilPage />);
+    
+    const file = new File(['(⌐□_□)'], 'avatar.png', { type: 'image/png' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    
+    await user.upload(input, file);
+    
+    expect(consoleSpy).toHaveBeenCalledWith("Foto lista para backend:", file);
+    
+    consoleSpy.mockRestore();
   });
 });

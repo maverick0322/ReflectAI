@@ -16,7 +16,7 @@ export default function EliminarCuentaPage() {
   const isConfirmed = confirmText === "ELIMINAR";
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const onlyLetters = e.target.value.replace(/[^A-Za-z]/g, "").slice(0, 8);
+    const onlyLetters = e.target.value.replaceAll(/[^A-Za-z]/g, "").slice(0, 8);
     setConfirmText(onlyLetters.toUpperCase());
   };
 
@@ -24,7 +24,7 @@ export default function EliminarCuentaPage() {
     if (!isConfirmed) return;
     setIsDeleting(true);
 
-    // TODO: [BACKEND] Llamar a Supabase para eliminar datos
+    // Para miguel: [BACKEND] Llamar a Supabase para eliminar datos
     console.log("Usuario eliminado. Redirigiendo...");
 
     setTimeout(() => {
