@@ -65,10 +65,11 @@ export default function EliminarCuentaPage() {
 
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-3 p-4 rounded-xl bg-reflect-dark/5">
-                <label className="text-xs font-medium text-reflect-dark text-center">
+                <label htmlFor="delete-confirm-input" className="text-xs font-medium text-reflect-dark text-center">
                   Para confirmar, escribe <strong>ELIMINAR</strong> abajo:
                 </label>
                 <Input
+                  id="delete-confirm-input"
                   value={confirmText}
                   onChange={handleInputChange}
                   placeholder="ELIMINAR"
