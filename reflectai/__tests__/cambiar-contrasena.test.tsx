@@ -45,37 +45,30 @@ describe("CambiarContraseña - Paso 2 (Nueva contraseña)", () => {
     const user = userEvent.setup();
     render(<CambiarContraseñaPage />);
 
-    // Ir al paso 2
     const currentPassword = screen.getByPlaceholderText(/contraseña actual/i);
     await user.type(currentPassword, "Contraseña123");
 
     const continueButton = screen.getByRole("button", { name: /continuar/i });
     await user.click(continueButton);
 
-    // Esperar a que aparezca el paso 2
     await waitFor(() => {
       expect(screen.getByText(/paso 2 de 2/i)).toBeInTheDocument();
     });
 
-    // Buscar el input de nueva contraseña
     const passwordInputs = screen.getAllByPlaceholderText(/contraseña/i);
-    const newPasswordInput = passwordInputs[0]; // Primera es la nueva contraseña
+    const newPasswordInput = passwordInputs[0]; 
 
-    // Escribir contraseña inválida (sin mayúsculas)
     await user.type(newPasswordInput, "validpassword123");
 
-    // Debe mostrar error en tiempo real
     await waitFor(() => {
       expect(
         screen.getByText(/debe contener al menos una mayúscula, una minúscula y un número/i)
       ).toBeInTheDocument();
     });
 
-    // Completar con contraseña válida
     await user.clear(newPasswordInput);
     await user.type(newPasswordInput, "ValidPassword123");
 
-    // El error debe limpiarse automáticamente
     await waitFor(() => {
       expect(
         screen.queryByText(/debe contener al menos una mayúscula, una minúscula y un número/i)
@@ -87,23 +80,19 @@ describe("CambiarContraseña - Paso 2 (Nueva contraseña)", () => {
     const user = userEvent.setup();
     render(<CambiarContraseñaPage />);
 
-    // Ir al paso 2
     const currentPassword = screen.getByPlaceholderText(/contraseña actual/i);
     await user.type(currentPassword, "Contraseña123");
 
     let continueButton = screen.getByRole("button", { name: /continuar/i });
     await user.click(continueButton);
 
-    // Esperar a que aparezca el paso 2
     await waitFor(() => {
       expect(screen.getByText(/paso 2 de 2/i)).toBeInTheDocument();
     });
 
-    // Clickear botón atrás
     const backButton = screen.getByRole("button", { name: /atrás/i });
     await user.click(backButton);
 
-    // Volver al paso 1
     await waitFor(() => {
       expect(screen.getByText(/paso 1 de 2/i)).toBeInTheDocument();
     });
@@ -113,19 +102,16 @@ describe("CambiarContraseña - Paso 2 (Nueva contraseña)", () => {
     const user = userEvent.setup();
     render(<CambiarContraseñaPage />);
 
-    // Ir al paso 2
     const currentPassword = screen.getByPlaceholderText(/contraseña actual/i);
     await user.type(currentPassword, "Contraseña123");
 
     const continueButton = screen.getByRole("button", { name: /continuar/i });
     await user.click(continueButton);
 
-    // Esperar a que aparezca el paso 2
     await waitFor(() => {
       expect(screen.getByText(/paso 2 de 2/i)).toBeInTheDocument();
     });
 
-    // Llenar los campos de contraseña
     const passwordInputs = screen.getAllByPlaceholderText(/contraseña/i);
     const newPasswordInput = passwordInputs[0];
     const confirmPasswordInput = passwordInputs[1];
@@ -133,16 +119,13 @@ describe("CambiarContraseña - Paso 2 (Nueva contraseña)", () => {
     await user.type(newPasswordInput, "ValidPassword123");
     await user.type(confirmPasswordInput, "DifferentPassword123");
 
-    // Debe mostrar error de coincidencia
     await waitFor(() => {
       expect(screen.getByText(/las contraseñas no coinciden/i)).toBeInTheDocument();
     });
 
-    // Corregir la confirmación
     await user.clear(confirmPasswordInput);
     await user.type(confirmPasswordInput, "ValidPassword123");
 
-    // El error debe limpiarse
     await waitFor(() => {
       expect(screen.queryByText(/las contraseñas no coinciden/i)).not.toBeInTheDocument();
     });

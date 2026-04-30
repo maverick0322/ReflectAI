@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { z } from "zod";
-
 import Button from "@/components/ui/Button";
 import CustomLink from "@/components/ui/CustomLink";
 import GlassCard from "@/components/ui/GlassCard";
@@ -54,7 +53,6 @@ export default function CambiarContraseñaPage() {
   const onStep2Submit = async (data: Step2FormValues) => {
     // TODO: [BACKEND] Actualizar a la nueva contraseña
     console.log("Actualizando:", data);
-    // Redirect to /perfil on success
     router.push("/perfil");
   };
 

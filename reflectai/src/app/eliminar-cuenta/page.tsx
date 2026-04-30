@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import WarningIcon from "@/components/icons/WarningIcon";
-import Button from "@/components/ui/Button";
 import GlassCard from "@/components/ui/GlassCard";
 import Input from "@/components/ui/Input";
 
@@ -17,7 +16,6 @@ export default function EliminarCuentaPage() {
   const isConfirmed = confirmText === "ELIMINAR";
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Limitar a 8 caracteres y filtrar solo letras
     const onlyLetters = e.target.value.replace(/[^A-Za-z]/g, "").slice(0, 8);
     setConfirmText(onlyLetters.toUpperCase());
   };
@@ -37,16 +35,12 @@ export default function EliminarCuentaPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 py-12">
       <GlassCard className="max-w-lg w-full">
-        {/* Barra de navegación */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-reflect-dark">Eliminar Cuenta</h1>
         </div>
-        
 
         {isDeleting ? (
-          // PANTALLA DE ÉXITO CON PALOMITA VERDE
           <div className="flex flex-col items-center justify-center py-8 animate-in zoom-in-95 duration-500">
-            {/* Ícono de palomita verde */}
             <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-6 shadow-sm border-2 border-green-200">
               <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />

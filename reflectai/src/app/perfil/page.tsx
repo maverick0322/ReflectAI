@@ -180,7 +180,7 @@ export default function PerfilPage() {
             <p className="text-sm text-slate-500 font-medium">Miembro de ReflectAI</p>
           </div>
         </header>
-        {/* FORMULARIO DE INFORMACIÓN (noValidate bloquea las alertas por defecto del navegador) */}
+        {/* FORMULARIO DE INFORMACIÓN */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-1">
             <SectionTitle>Información Personal</SectionTitle>

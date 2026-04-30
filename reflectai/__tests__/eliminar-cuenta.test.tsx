@@ -25,18 +25,14 @@ describe("EliminarCuenta Page", () => {
     const input = screen.getByPlaceholderText("ELIMINAR");
     const deleteButton = screen.getByRole("button", { name: /eliminar/i });
 
-    // Botón debe estar deshabilitado al inicio
     expect(deleteButton).toBeDisabled();
 
-    // Escribir texto incorrecto
     await user.type(input, "DELETE");
     expect(deleteButton).toBeDisabled();
 
-    // Escribir el texto correcto
     await user.clear(input);
     await user.type(input, "ELIMINAR");
 
-    // Botón debe habilitarse
     await waitFor(() => {
       expect(deleteButton).toBeEnabled();
     });
@@ -48,13 +44,10 @@ describe("EliminarCuenta Page", () => {
 
     const input = screen.getByPlaceholderText("ELIMINAR") as HTMLInputElement;
 
-    // El handleInputChange debe estar en el input
     expect(input).toBeInTheDocument();
 
-    // Escribir con números y minúsculas, debería convertir a mayúsculas y remover números
     await user.type(input, "eliminar");
 
-    // Debe quedar solo ELIMINAR (todas mayúsculas)
     expect(input.value).toBe("ELIMINAR");
   });
 
@@ -64,10 +57,8 @@ describe("EliminarCuenta Page", () => {
 
     const input = screen.getByPlaceholderText("ELIMINAR") as HTMLInputElement;
 
-    // Intentar escribir más de 8 letras
     await user.type(input, "ELIMINARMUCHASTEXTO");
 
-    // Debe quedar solo los primeros 8
     expect(input.value).toBe("ELIMINAR");
   });
 
@@ -82,15 +73,12 @@ describe("EliminarCuenta Page", () => {
     const user = userEvent.setup();
     render(<EliminarCuentaPage />);
 
-    // Escribir confirmación
     const input = screen.getByPlaceholderText("ELIMINAR");
     await user.type(input, "ELIMINAR");
 
-    // Clickear delete
     const deleteButton = screen.getByRole("button", { name: /eliminar/i });
     await user.click(deleteButton);
 
-    // Debe mostrar pantalla de éxito
     await waitFor(() => {
       expect(screen.getByText(/cuenta.*eliminada/i)).toBeInTheDocument();
     });
@@ -101,14 +89,12 @@ describe("EliminarCuenta Page", () => {
 
     const deleteButton = screen.getByRole("button", { name: /eliminar/i });
 
-    // Debe tener clase de disabled
     expect(deleteButton).toHaveClass("cursor-not-allowed");
 
     const user = userEvent.setup();
     const input = screen.getByPlaceholderText("ELIMINAR");
     await user.type(input, "ELIMINAR");
 
-    // Debe cambiar a estilos activos
     await waitFor(() => {
       expect(deleteButton).not.toHaveClass("cursor-not-allowed");
     });
@@ -117,27 +103,20 @@ describe("EliminarCuenta Page", () => {
   it("redirige al login después de 2.5 segundos tras eliminar", () => {
     vi.useFakeTimers(); 
     
-    // 1. Renderizamos
     render(<EliminarCuentaPage />);
 
-    // 2. Llenamos el input síncronamente
     const input = screen.getByPlaceholderText("ELIMINAR");
     fireEvent.change(input, { target: { value: "ELIMINAR" } });
 
-    // 3. Clickeamos el botón síncronamente
     const deleteButton = screen.getByRole("button", { name: /eliminar/i });
     fireEvent.click(deleteButton);
 
-    // 4. Verificamos que en el milisegundo 0 NO ha redirigido
     expect(pushMock).not.toHaveBeenCalled();
 
-    // 5. Mágicamente adelantamos el reloj 2.5 segundos exactos
     vi.advanceTimersByTime(2500);
 
-    // 6. Verificamos directamente (sin waitFor, porque el tiempo ya pasó)
     expect(pushMock).toHaveBeenCalledWith("/login");
     
-    // 7. Limpiamos
     vi.useRealTimers(); 
   });
 });
