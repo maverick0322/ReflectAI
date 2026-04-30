@@ -10,8 +10,8 @@ import Button from "@/components/ui/Button";
 import CustomLink from "@/components/ui/CustomLink";
 import GlassCard from "@/components/ui/GlassCard";
 import PasswordInput from "@/components/ui/PasswordInput";
-import ArrowLeftIcon from "@/components/icons/ArrowLeftIcon";
 import { passwordField } from "@/lib/validations/common";
+import { useRouter } from "next/navigation";
 
 const step1Schema = z.object({
   currentPassword: z.string().min(1, "La contraseña actual es obligatoria"),
@@ -29,6 +29,7 @@ type Step1FormValues = z.infer<typeof step1Schema>;
 type Step2FormValues = z.infer<typeof step2Schema>;
 
 export default function CambiarContraseñaPage() {
+  const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
 
   const form1 = useForm<Step1FormValues>({
@@ -54,7 +55,7 @@ export default function CambiarContraseñaPage() {
     // TODO: [BACKEND] Actualizar a la nueva contraseña
     console.log("Actualizando:", data);
     // Redirect to /perfil on success
-    window.location.href = "/perfil";
+    router.push("/perfil");
   };
 
   return (
@@ -86,10 +87,10 @@ export default function CambiarContraseñaPage() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Link href="/perfil" className="flex-1">
-                  <Button type="button" variant="outline" className="w-full">
+                <Link
+                  href="/perfil"
+                  className="flex-1 w-full py-4 rounded-2xl font-bold text-lg transition-all duration-300 border-2 border-slate-300 text-slate-700 hover:bg-white/50 flex items-center justify-center">
                     Cancelar
-                  </Button>
                 </Link>
                 <Button type="submit" className="flex-1">
                   Continuar

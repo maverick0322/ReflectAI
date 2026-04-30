@@ -1,4 +1,6 @@
-export default function WarningIcon({ className = "w-6 h-6" }) {
+import { SVGProps } from "react";
+
+export default function WarningIcon({ className = "w-6 h-6", ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg 
       xmlns="http://www.w3.org/2000/svg" 
@@ -7,6 +9,7 @@ export default function WarningIcon({ className = "w-6 h-6" }) {
       strokeWidth={2} 
       stroke="currentColor" 
       className={className}
+      {...props}
     >
       <path 
         strokeLinecap="round" 

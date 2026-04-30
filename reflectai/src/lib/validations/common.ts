@@ -23,9 +23,10 @@ export const firstNameField = z
 export const lastNameField = z
   .string()
   .max(120, "Se alcanzó el límite")
-  .refine((value) => value === "" || /^[\p{L}\s]+$/u.test(value), {
+  .refine((value) => value === undefined || value === "" || /^[\p{L}\s]+$/u.test(value), {
     message: "El apellido solo puede contener letras",
-  });
+  })
+  .optional();
 
 export const birthDateField = z
   .string()

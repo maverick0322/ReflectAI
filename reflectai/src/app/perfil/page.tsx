@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -48,13 +48,6 @@ function formatFullName(firstName: string, lastName: string) {
   return [firstName, lastName].filter(Boolean).join(" ") || "Tu perfil";
 }
 
-function getInitials(firstName: string, lastName: string) {
-  const first = firstName.trim().charAt(0);
-  const second = lastName.trim().charAt(0);
-
-  return (first + second).toUpperCase();
-}
-
 function formatearFechaDisplay(fechaISO: string) {
   if (!fechaISO) return "No especificada";
 
@@ -67,15 +60,19 @@ function formatearFechaDisplay(fechaISO: string) {
 // =========================================================================
 // 🧱 COMPONENTES ATÓMICOS (Dumb Components para mantener el código limpio)
 // =========================================================================
-const Switch = ({ enabled, onChange }: { enabled: boolean; onChange: () => void }) => (
+const Switch = ({ enabled, onChange, ariaLabel }: { enabled: boolean; onChange: () => void; ariaLabel: string }) => (
   <button
     type="button"
+    role="switch"
+    aria-checked={enabled}
+    aria-label={ariaLabel}
     onClick={onChange}
     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${enabled ? "bg-indigo-500" : "bg-slate-300/50"}`}
   >
     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-300 ${enabled ? "translate-x-6" : "translate-x-1"}`} />
   </button>
 );
+
 const SectionTitle = ({ children }: { children: string }) => (
   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">{children}</h3>
 );
@@ -91,7 +88,8 @@ const PreferenceRow = ({ icon, label, enabled, onChange }: { icon: React.ReactNo
       {icon}
       <span className="text-sm font-bold text-slate-700">{label}</span>
     </div>
-    <Switch enabled={enabled} onChange={onChange} />
+    {/* Pasamos el label al switch para que el lector de pantalla diga: "Notificaciones, switch, encendido" */}
+    <Switch enabled={enabled} onChange={onChange} ariaLabel={label} />
   </div>
 );
 // =========================================================================
@@ -136,12 +134,12 @@ export default function PerfilPage() {
     setProfile((current) => ({
       ...current,
       firstName: data.firstName,
-      lastName: data.lastName,
+      lastName: data.lastName ?? "",
       birthDate: data.birthDate,
     }));
     reset({
       firstName: data.firstName,
-      lastName: data.lastName,
+      lastName: data.lastName ?? "",
       birthDate: data.birthDate,
     });
     clearErrors();

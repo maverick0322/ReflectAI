@@ -80,18 +80,18 @@ describe('PerfilPage', () => {
     render(<PerfilPage />);
 
     // Por defecto, notificaciones es true y darkMode es false (según initialProfileData)
-    const toggleButtons = screen.getAllByRole('button').filter(btn => btn.className.includes('rounded-full'));
+    const notifSwitch = screen.getByRole('switch', { name: /notificaciones diarias/i });
+    const darkSwitch = screen.getByRole('switch', { name: /modo oscuro/i });
     
-    // Switch 1: Notificaciones (Asumimos que es el primero)
-    const notifSwitch = toggleButtons[1]; // Índice 1 porque el índice 0 es el botón "Atrás" de la cabecera
+    // Switch 1: Notificaciones (Empieza encendido, lo apagamos)
     fireEvent.click(notifSwitch);
-    // Para probarlo visualmente podemos revisar si la clase cambia, aunque en un test unitario más profundo revisarías el estado
     expect(notifSwitch).toHaveClass('bg-slate-300/50'); // Apagado
+    expect(notifSwitch).toHaveAttribute('aria-checked', 'false');
     
-    // Switch 2: Dark Mode
-    const darkSwitch = toggleButtons[2];
+    // Switch 2: Dark Mode (Empieza apagado, lo encendemos)
     fireEvent.click(darkSwitch);
     expect(darkSwitch).toHaveClass('bg-indigo-500'); // Encendido
+    expect(darkSwitch).toHaveAttribute('aria-checked', 'true');
   });
 
   it('tiene enlaces correctos a cambiar contraseña, eliminar cuenta y cerrar sesión', () => {

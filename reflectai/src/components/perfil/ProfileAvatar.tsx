@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import CameraIcon from "@/components/icons/CameraIcon";
 
 interface ProfileAvatarProps {
@@ -14,6 +14,15 @@ export default function ProfileAvatar({ firstName, lastName, avatarUrl, onPhotoS
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(avatarUrl || null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
+
 
   const getInitials = (n: string, a: string) => {
     return (n.charAt(0) + (a ? a.charAt(0) : "")).toUpperCase();
@@ -49,16 +58,20 @@ export default function ProfileAvatar({ firstName, lastName, avatarUrl, onPhotoS
           accept="image/jpeg, image/png, image/webp" 
           onChange={handleFileChange}
         />
-        <div 
+        
+        <button 
+          type="button"
+          aria-label="Cambiar foto de perfil"
           onClick={() => fileInputRef.current?.click()}
-          className="w-24 h-24 rounded-full bg-gradient-to-tr from-orange-200 to-orange-300 flex items-center justify-center text-3xl font-bold text-orange-600 shadow-inner cursor-pointer hover:opacity-90 transition-opacity overflow-hidden"
+          className="w-24 h-24 rounded-full bg-gradient-to-tr from-orange-200 to-orange-300 flex items-center justify-center text-3xl font-bold text-orange-600 shadow-inner cursor-pointer hover:opacity-90 transition-opacity overflow-hidden focus:outline-none focus:ring-4 focus:ring-orange-300/50"
         >
           {preview ? (
             <img src={preview} alt="Perfil" className="w-full h-full object-cover" />
           ) : (
             getInitials(firstName, lastName)
           )}
-        </div>
+        </button>
+        
         <button 
           type="button"
           onClick={() => fileInputRef.current?.click()} 

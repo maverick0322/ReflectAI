@@ -83,10 +83,10 @@ export default function EliminarCuentaPage() {
               </div>
 
               <div className="flex gap-3">
-                <Link href="/perfil" className="flex-1">
-                  <Button type="button" variant="outline" className="w-full">
+                <Link
+                  href="/perfil"
+                  className="flex-1 w-full py-4 rounded-2xl font-bold text-lg transition-all duration-300 border-2 border-slate-300 text-slate-700 hover:bg-white/50 flex items-center justify-center">
                     Cancelar
-                  </Button>
                 </Link>
 
                 <button
