@@ -4,7 +4,7 @@ import { useState } from "react";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
 import { ClockIcon } from "@/components/icons/ClockIcon";
-import { CloseIcon } from "@/components/icons/CloseIcon";
+import CloseIcon from "@/components/icons/CloseIcon";
 
 export function PausedSessionAlert({ timeAgo }: { timeAgo: string }) {
   const [isVisible, setIsVisible] = useState(true);
