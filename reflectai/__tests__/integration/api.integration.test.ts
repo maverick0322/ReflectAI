@@ -26,15 +26,26 @@ type ChainResult = {
   orderResult?: QueryResult<any>;
 };
 
-function createChain(result: ChainResult = {}) {
-  const chain: Record<string, unknown> = {
+type MockFn = ReturnType<typeof vi.fn>;
+
+interface ChainMock {
+  select: MockFn;
+  insert: MockFn;
+  update: MockFn;
+  eq: MockFn;
+  order: MockFn;
+  single: MockFn;
+}
+
+function createChain(result: ChainResult = {}): ChainMock {
+  const chain = {
     select: vi.fn(() => chain),
     insert: vi.fn(() => chain),
     update: vi.fn(() => chain),
     eq: vi.fn(() => chain),
     order: vi.fn(async () => result.orderResult ?? { data: null, error: null }),
     single: vi.fn(async () => result.singleResult ?? { data: null, error: null }),
-  };
+  } as unknown as ChainMock;
 
   return chain;
 }
@@ -42,12 +53,12 @@ function createChain(result: ChainResult = {}) {
 function createSupabaseMock(options: {
   user: { id: string; email?: string } | null;
   error?: unknown;
-  builders?: Array<ReturnType<typeof createChain>>;
+  builders?: ChainMock[];
 }) {
   const from = vi.fn();
 
   for (const builder of options.builders ?? []) {
-    from.mockReturnValueOnce(builder);
+    from.mockReturnValueOnce(builder as never);
   }
 
   return {
