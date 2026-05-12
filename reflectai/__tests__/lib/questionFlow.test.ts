@@ -8,7 +8,8 @@ const makeResponse = (id: QuestionId): SessionResponse => ({ id });
 
 describe('question flow', () => {
   it('returns question text for a known id', () => {
-    expect(getQuestionText('Q1_SIT')).toContain('situacion');
+    expect(getQuestionText('Q1_SIT')).toContain('situación');
+    expect(getQuestionText('Q1_SIT')).toMatch(/^¿/);
   });
 
   it('returns Q1_SIT when no responses exist', () => {

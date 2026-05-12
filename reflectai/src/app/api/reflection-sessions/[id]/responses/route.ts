@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getAuthenticatedUser } from "@/lib/auth/getAuthenticatedUser";
-import { applyMetadataPatch, normalizePayload } from "@/lib/reflection/payload";
+import { appendResponse, applyMetadataPatch, normalizePayload } from "@/lib/reflection/payload";
 import { addReflectionResponseSchema } from "@/lib/validations/reflection";
 
 type RouteParams = {
@@ -64,22 +64,8 @@ export async function POST(request: Request, { params }: RouteParams) {
       session.started_at ?? new Date().toISOString(),
     );
 
-    const existingResponses = currentPayload.responses;
-    const existingIndex = existingResponses.findIndex(
-      (response) => response.id === validation.data.response.id,
-    );
-
-    const nextResponses = existingIndex >= 0
-      ? existingResponses.map((response, index) =>
-          index === existingIndex ? validation.data.response : response,
-        )
-      : [...existingResponses, validation.data.response];
-
     const updatedPayload = applyMetadataPatch(
-      {
-        ...currentPayload,
-        responses: nextResponses,
-      },
+      appendResponse(currentPayload, validation.data.response),
       validation.data.metadataPatch,
     );
 

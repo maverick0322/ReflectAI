@@ -64,6 +64,15 @@ describe('dashboard metrics', () => {
     expect(formatTimeAgo('2026-05-07T11:30:00.000Z')).toBe('hace 30 min');
   });
 
+  it('formatTimeAgo handles hours and singular/plural days', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-07T12:00:00.000Z'));
+
+    expect(formatTimeAgo('2026-05-07T10:00:00.000Z')).toBe('hace 2 h');
+    expect(formatTimeAgo('2026-05-06T11:00:00.000Z')).toBe('hace 1 día');
+    expect(formatTimeAgo('2026-05-04T11:00:00.000Z')).toBe('hace 3 días');
+  });
+
   it('formatDisplayDate formats readable date', () => {
     const formatted = formatDisplayDate(new Date('2026-05-07T12:00:00.000Z'));
     expect(formatted.length).toBeGreaterThan(3);

@@ -5,6 +5,10 @@ export interface DailyQuoteResult {
   author: string;
 }
 
+export interface GeneratedDailyQuoteResult extends DailyQuoteResult {
+  aiGenerated: boolean;
+}
+
 const FALLBACK_QUOTES: DailyQuoteResult[] = [
   {
     text: 'Respira, observa y responde con claridad.',
@@ -81,12 +85,23 @@ export function buildDailyQuoteMessages(userName?: string): GroqChatMessage[] {
   ];
 }
 
-export async function generateDailyQuote(userName?: string): Promise<DailyQuoteResult> {
+export async function generateDailyQuote(userName?: string): Promise<GeneratedDailyQuoteResult> {
   const content = await createGroqChatCompletion({
     messages: buildDailyQuoteMessages(userName),
     temperature: 0.9,
     maxTokens: 120,
   });
 
-  return parseQuoteContent(content) ?? getFallbackQuote();
+  const parsed = parseQuoteContent(content);
+  if (parsed) {
+    return {
+      ...parsed,
+      aiGenerated: true,
+    };
+  }
+
+  return {
+    ...getFallbackQuote(),
+    aiGenerated: false,
+  };
 }

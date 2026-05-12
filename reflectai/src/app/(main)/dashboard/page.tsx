@@ -27,19 +27,7 @@ function isRecoverableDraft(session: SessionSnapshot) {
   }
 
   const answeredIds = new Set(session.payload.responses.map((response) => response.id));
-  const hasStarted = answeredIds.size > 0;
-  const hasRequiredReflection = [
-    "Q1_SIT",
-    "Q2_THO",
-    "Q3_EMO",
-    "Q4_INT",
-    "Q5_TEL",
-    "Q6_CON_MINE",
-    "Q6_CON_OTHERS",
-    "Q7_ALT",
-  ].every((questionId) => answeredIds.has(questionId));
-
-  return hasStarted && !hasRequiredReflection;
+  return answeredIds.size > 0;
 }
 
 function getSessionTime(session: SessionSnapshot) {

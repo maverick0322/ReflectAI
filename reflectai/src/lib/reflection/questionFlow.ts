@@ -12,17 +12,17 @@ export const QUESTION_SEQUENCE: QuestionId[] = [
 ];
 
 const QUESTION_TEXT: Record<QuestionId, string> = {
-  Q1_SIT: 'Que situacion especifica detono la necesidad de reflexionar hoy?',
-  Q2_THO: 'En ese instante, cual fue el primer pensamiento que cruzo tu mente?',
-  Q3_EMO: 'Que emocion principal experimentaste?',
-  Q4_INT: 'En una escala del 1 al 10, que tan intensa es esa emocion?',
-  Q5_TEL: 'A veces las emociones tienen un objetivo. Cual era el proposito?',
-  Q6_CON_MINE: 'Que cosas estaban estrictamente bajo tu control?',
-  Q6_CON_OTHERS: 'Que cosas dependian de otras personas o circunstancias externas?',
-  Q7_ALT: 'Existe una forma mas util o compasiva de interpretar lo ocurrido?',
-  SYS_GROUNDING: 'Tomate un momento para respirar. Estas listo para continuar?',
+  Q1_SIT: '¿Qué situación específica detonó la necesidad de reflexionar hoy?',
+  Q2_THO: 'En ese instante, ¿cuál fue el primer pensamiento que cruzó tu mente?',
+  Q3_EMO: '¿Qué emoción principal experimentaste?',
+  Q4_INT: 'En una escala del 1 al 10, ¿qué tan intensa es esa emoción?',
+  Q5_TEL: 'A veces las emociones tienen un objetivo. ¿Cuál era el propósito?',
+  Q6_CON_MINE: '¿Qué cosas estaban estrictamente bajo tu control?',
+  Q6_CON_OTHERS: '¿Qué cosas dependían de otras personas o circunstancias externas?',
+  Q7_ALT: '¿Existe una forma más útil o compasiva de interpretar lo ocurrido?',
+  SYS_GROUNDING: 'Tómate un momento para respirar. ¿Estás listo para continuar?',
   SYS_AI_ADJUSTMENT:
-    'Gracias por compartir. Vamos a reenfocar en lo que si puedes controlar.',
+    'Gracias por compartir. Vamos a reenfocar en lo que sí puedes controlar.',
 };
 
 export function getQuestionText(questionId: QuestionId): string {

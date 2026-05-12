@@ -18,10 +18,7 @@ export async function GET() {
     try {
       const quote = await generateDailyQuote(userName);
       return NextResponse.json({
-        data: {
-          ...quote,
-          aiGenerated: true,
-        },
+        data: quote,
         message: 'Cita generada correctamente',
       });
     } catch {

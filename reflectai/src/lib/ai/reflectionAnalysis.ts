@@ -27,14 +27,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function parseJsonContent(content: string): unknown {
   const trimmed = content.trim();
-  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-    return JSON.parse(trimmed) as unknown;
-  }
+  try {
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      return JSON.parse(trimmed) as unknown;
+    }
 
-  const start = trimmed.indexOf('{');
-  const end = trimmed.lastIndexOf('}');
-  if (start !== -1 && end !== -1 && end > start) {
-    return JSON.parse(trimmed.slice(start, end + 1)) as unknown;
+    const start = trimmed.indexOf('{');
+    const end = trimmed.lastIndexOf('}');
+    if (start !== -1 && end !== -1 && end > start) {
+      return JSON.parse(trimmed.slice(start, end + 1)) as unknown;
+    }
+  } catch {
+    return null;
   }
 
   return null;

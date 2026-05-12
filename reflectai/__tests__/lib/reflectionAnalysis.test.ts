@@ -4,6 +4,7 @@ import type { ReflectionSessionPayload } from '@/types/reflection';
 import { buildInitialPayload } from '@/lib/reflection/payload';
 import {
   analyzeReflectionSession,
+  buildFallbackAnalysis,
   buildAnalysisMessages,
   parseAnalysisResult,
 } from '@/lib/ai/reflectionAnalysis';
@@ -54,6 +55,28 @@ describe('reflection analysis', () => {
     expect(result?.average_intensity).toBe(4);
     expect(result?.session_title).toBe('Resumen');
     expect(result?.recommendation).toBe('Recomendacion breve');
+  });
+
+  it('returns null instead of throwing for malformed JSON', () => {
+    expect(parseAnalysisResult('respuesta { "summary": } con llaves')).toBeNull();
+  });
+
+  it('builds fallback analysis from captured responses', () => {
+    const filledPayload: ReflectionSessionPayload = {
+      ...payload,
+      responses: [
+        { id: 'Q1_SIT', text: 'Una situacion importante que necesito resumir.' },
+        { id: 'Q3_EMO', text: 'ansiedad' },
+        { id: 'Q4_INT', value: 8 },
+        { id: 'Q7_ALT', text: 'Puedo responder con mas calma.' },
+      ],
+    };
+
+    const fallback = buildFallbackAnalysis(filledPayload);
+
+    expect(fallback.primary_emotions).toEqual(['ansiedad']);
+    expect(fallback.average_intensity).toBe(8);
+    expect(fallback.session_title).toBe('Puedo responder con mas calma.');
   });
 
   it('runs analysis using Groq client', async () => {

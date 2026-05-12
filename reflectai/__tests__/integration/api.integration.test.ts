@@ -433,6 +433,91 @@ describe("Integracion API critica", () => {
     });
   });
 
+  it("TC-02-03 fusiona una actualizacion parcial sin borrar campos previos", async () => {
+    const readBuilder = createChain({
+      singleResult: {
+        data: {
+          id: "session-1",
+          status: "draft",
+          started_at: "2026-04-30T10:00:00.000Z",
+          payload: {
+            metadata: {
+              version: "1.1",
+              started_at: "2026-04-30T10:00:00.000Z",
+            },
+            responses: [
+              {
+                id: "SYS_GROUNDING",
+                status: "started",
+                method: "box_breathing",
+              },
+            ],
+          },
+        },
+        error: null,
+      },
+    });
+
+    const updateBuilder = createChain({
+      singleResult: {
+        data: {
+          id: "session-1",
+          title: null,
+          status: "draft",
+          started_at: "2026-04-30T10:00:00.000Z",
+          completed_at: null,
+          payload: {
+            metadata: {
+              version: "1.1",
+              started_at: "2026-04-30T10:00:00.000Z",
+            },
+            responses: [
+              {
+                id: "SYS_GROUNDING",
+                status: "completed",
+                method: "box_breathing",
+              },
+            ],
+          },
+          ai_analysis: {},
+        },
+        error: null,
+      },
+    });
+
+    const supabaseMock = createSupabaseMock({
+      user: { id: "user-a" },
+      builders: [readBuilder, updateBuilder],
+    });
+
+    mockServerSupabaseClient(supabaseMock);
+
+    await addReflectionResponse(
+      new Request("http://localhost/api/reflection-sessions/session-1/responses", {
+        method: "POST",
+        body: JSON.stringify({
+          response: {
+            id: "SYS_GROUNDING",
+            status: "completed",
+          },
+        }),
+      }),
+      { params: Promise.resolve({ id: "session-1" }) },
+    );
+
+    expect(updateBuilder.update).toHaveBeenCalledWith({
+      payload: expect.objectContaining({
+        responses: [
+          {
+            id: "SYS_GROUNDING",
+            status: "completed",
+            method: "box_breathing",
+          },
+        ],
+      }),
+    });
+  });
+
   it("TC-02-04 impide completar una sesion sin respuestas previas", async () => {
     const readBuilder = createChain({
       singleResult: {

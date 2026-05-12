@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeAll } from "vitest";
 import ProfileAvatar from "@/components/perfil/ProfileAvatar";
@@ -50,5 +50,20 @@ describe("ProfileAvatar", () => {
     expect(screen.queryByText(/Solo se permiten/)).not.toBeInTheDocument();
     expect(screen.queryByText(/pesar menos/)).not.toBeInTheDocument();
     expect(handlePhotoSelected).toHaveBeenCalledWith(file);
+  });
+
+  it("maneja rechazos async al guardar la foto sin promesas sin capturar", async () => {
+    const user = userEvent.setup();
+    const handlePhotoSelected = vi.fn().mockRejectedValue(new Error("upload failed"));
+    render(<ProfileAvatar firstName="Arturo" lastName="Cuevas" onPhotoSelected={handlePhotoSelected} />);
+
+    const file = new File(["avatar"], "avatar.png", { type: "image/png" });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+    await user.upload(input, file);
+
+    expect(handlePhotoSelected).toHaveBeenCalledWith(file);
+    expect(await screen.findByText("No se pudo guardar la foto. Intentalo de nuevo.")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("AC")).toBeInTheDocument());
   });
 });

@@ -33,12 +33,49 @@ describe('payload helpers', () => {
     expect(normalized.responses).toHaveLength(0);
   });
 
+  it('normalizePayload falls back when metadata is null or responses have invalid ids', () => {
+    expect(
+      normalizePayload({ metadata: null, responses: [] }, STARTED_AT).metadata.started_at,
+    ).toBe(STARTED_AT);
+
+    expect(
+      normalizePayload(
+        {
+          metadata: { version: '1.1', started_at: STARTED_AT },
+          responses: [{ id: 'UNKNOWN' }],
+        },
+        STARTED_AT,
+      ).responses,
+    ).toHaveLength(0);
+  });
+
   it('appendResponse adds a response', () => {
     const payload = buildInitialPayload(STARTED_AT);
     const updated = appendResponse(payload, { id: 'Q1_SIT', text: 'Texto' });
 
     expect(updated.responses).toHaveLength(1);
     expect(updated.responses[0].id).toBe('Q1_SIT');
+  });
+
+  it('appendResponse merges partial updates for an existing response', () => {
+    const payload = appendResponse(buildInitialPayload(STARTED_AT), {
+      id: 'SYS_GROUNDING',
+      status: 'started',
+      method: 'breathing',
+    });
+
+    const updated = appendResponse(payload, {
+      id: 'SYS_GROUNDING',
+      status: 'completed',
+    });
+
+    expect(updated.responses).toEqual([
+      {
+        id: 'SYS_GROUNDING',
+        status: 'completed',
+        method: 'breathing',
+      },
+    ]);
   });
 
   it('applyMetadataPatch merges flags and hints', () => {

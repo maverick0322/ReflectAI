@@ -29,7 +29,7 @@ export default function ProfileAvatar({ firstName, lastName, avatarUrl, onPhotoS
     return (n.charAt(0) + (a ? a.charAt(0) : "")).toUpperCase();
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.currentTarget;
     const file = e.target.files?.[0];
     if (!file) return;
@@ -46,11 +46,15 @@ export default function ProfileAvatar({ firstName, lastName, avatarUrl, onPhotoS
       return;
     }
 
+    const objectUrl = URL.createObjectURL(file);
+
     try {
       setError(null);
-      const objectUrl = URL.createObjectURL(file);
+      await onPhotoSelected(file);
       setPreview(objectUrl);
-      onPhotoSelected(file); 
+    } catch {
+      URL.revokeObjectURL(objectUrl);
+      setError("No se pudo guardar la foto. Intentalo de nuevo.");
     } finally {
       input.value = "";
     }

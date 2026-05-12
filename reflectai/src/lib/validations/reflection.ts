@@ -54,7 +54,7 @@ export const addReflectionResponseSchema = z.object({
         Boolean(data.method) ||
         Boolean(data.intervention),
       {
-        message: "La respuesta debe incluir texto o valor",
+        message: "La respuesta debe incluir texto, valor, estado, metodo o intervencion",
       },
     ),
   metadataPatch: metadataPatchSchema,

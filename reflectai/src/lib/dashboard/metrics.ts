@@ -45,7 +45,7 @@ export function formatTimeAgo(dateIso: string) {
   }
 
   const diffDays = Math.floor(diffHours / 24);
-  return `hace ${diffDays} dias`;
+  return diffDays === 1 ? 'hace 1 día' : `hace ${diffDays} días`;
 }
 
 export function buildWeekRecords(

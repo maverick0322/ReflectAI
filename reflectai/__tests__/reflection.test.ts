@@ -48,6 +48,9 @@ describe("Validaciones de respuestas de reflexion", () => {
     });
 
     expect(result.success).toBe(false);
+    expect(result.error?.issues[0].message).toBe(
+      "La respuesta debe incluir texto, valor, estado, metodo o intervencion",
+    );
   });
 
   it("rechaza intensidad menor que 1", () => {

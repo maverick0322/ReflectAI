@@ -1,10 +1,23 @@
 import type {
+  QuestionId,
   ReflectionSessionPayload,
   SessionMetadata,
   SessionResponse,
 } from '@/types/reflection';
 
 const DEFAULT_SCHEMA_VERSION = '1.1';
+const QUESTION_IDS = new Set<QuestionId>([
+  'Q1_SIT',
+  'Q2_THO',
+  'Q3_EMO',
+  'Q4_INT',
+  'Q5_TEL',
+  'Q6_CON_MINE',
+  'Q6_CON_OTHERS',
+  'Q7_ALT',
+  'SYS_GROUNDING',
+  'SYS_AI_ADJUSTMENT',
+]);
 
 export interface MetadataPatch {
   version?: string;
@@ -21,6 +34,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+function isMetadata(value: unknown): value is SessionMetadata {
+  return (
+    isRecord(value) &&
+    typeof value.version === 'string' &&
+    value.version.trim().length > 0 &&
+    typeof value.started_at === 'string' &&
+    value.started_at.trim().length > 0
+  );
+}
+
+function isSessionResponse(value: unknown): value is SessionResponse {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    QUESTION_IDS.has(value.id as QuestionId)
+  );
+}
+
 function isPayload(value: unknown): value is ReflectionSessionPayload {
   if (!isRecord(value)) {
     return false;
@@ -30,8 +61,9 @@ function isPayload(value: unknown): value is ReflectionSessionPayload {
     return false;
   }
 
+  const metadata = (value as Record<string, unknown>).metadata;
   const responses = (value as Record<string, unknown>).responses;
-  return Array.isArray(responses);
+  return isMetadata(metadata) && Array.isArray(responses) && responses.every(isSessionResponse);
 }
 
 export function buildInitialPayload(startedAt: string): ReflectionSessionPayload {
