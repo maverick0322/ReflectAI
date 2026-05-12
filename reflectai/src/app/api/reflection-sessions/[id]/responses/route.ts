@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { getAuthenticatedUser } from "@/lib/auth/getAuthenticatedUser";
+import { applyMetadataPatch, normalizePayload } from "@/lib/reflection/payload";
 import { addReflectionResponseSchema } from "@/lib/validations/reflection";
-import type { ReflectionEntry } from "@/types/reflection";
 
 type RouteParams = {
   params: Promise<{
@@ -36,7 +36,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     const { data: session, error: sessionError } = await supabase
       .from("reflection_sessions")
-      .select("id, status, payload")
+      .select("id, status, payload, started_at")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();
@@ -59,20 +59,29 @@ export async function POST(request: Request, { params }: RouteParams) {
       );
     }
 
-    const currentPayload = Array.isArray(session.payload)
-      ? (session.payload as ReflectionEntry[])
-      : [];
+    const currentPayload = normalizePayload(
+      session.payload,
+      session.started_at ?? new Date().toISOString(),
+    );
 
-    const newEntry: ReflectionEntry = {
-      step_order: currentPayload.length + 1,
-      question: validation.data.question,
-      user_response: validation.data.userResponse,
-      detected_emotion: validation.data.detectedEmotion ?? null,
-      intensity: validation.data.intensity ?? null,
-      created_at: new Date().toISOString(),
-    };
+    const existingResponses = currentPayload.responses;
+    const existingIndex = existingResponses.findIndex(
+      (response) => response.id === validation.data.response.id,
+    );
 
-    const updatedPayload = [...currentPayload, newEntry];
+    const nextResponses = existingIndex >= 0
+      ? existingResponses.map((response, index) =>
+          index === existingIndex ? validation.data.response : response,
+        )
+      : [...existingResponses, validation.data.response];
+
+    const updatedPayload = applyMetadataPatch(
+      {
+        ...currentPayload,
+        responses: nextResponses,
+      },
+      validation.data.metadataPatch,
+    );
 
     const { data, error } = await supabase
       .from("reflection_sessions")

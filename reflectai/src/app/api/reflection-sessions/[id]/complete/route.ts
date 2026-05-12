@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { getAuthenticatedUser } from "@/lib/auth/getAuthenticatedUser";
+import {
+  analyzeReflectionSession,
+  buildFallbackAnalysis,
+} from "@/lib/ai/reflectionAnalysis";
+import { applyMetadataPatch, normalizePayload } from "@/lib/reflection/payload";
 import { completeReflectionSessionSchema } from "@/lib/validations/reflection";
 
 type RouteParams = {
@@ -35,7 +40,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const { data: session, error: sessionError } = await supabase
       .from("reflection_sessions")
-      .select("id, status, payload")
+      .select("id, status, payload, started_at")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();
@@ -54,26 +59,60 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       );
     }
 
-    const payload = Array.isArray(session.payload) ? session.payload : [];
+    const payload = normalizePayload(
+      session.payload,
+      session.started_at ?? new Date().toISOString(),
+    );
 
-    if (payload.length === 0) {
+    if (payload.responses.length === 0) {
       return NextResponse.json(
         { error: { message: "No se puede completar una sesion sin respuestas" } },
         { status: 409 },
       );
     }
 
+    const completedAt = new Date().toISOString();
+    const payloadWithCompletion = applyMetadataPatch(payload, {
+      ...validation.data.metadataPatch,
+      completed_at: completedAt,
+    });
+
+    let analysis: Record<string, unknown> = {};
+    let suggestedTitle: string | null = null;
+
+    try {
+      const result = await analyzeReflectionSession(payloadWithCompletion);
+      if (result) {
+        analysis = result as unknown as Record<string, unknown>;
+        suggestedTitle = result.session_title;
+      } else {
+        const fallback = buildFallbackAnalysis(payloadWithCompletion);
+        analysis = fallback as unknown as Record<string, unknown>;
+        suggestedTitle = fallback.session_title;
+      }
+    } catch {
+      const fallback = buildFallbackAnalysis(payloadWithCompletion);
+      analysis = fallback as unknown as Record<string, unknown>;
+      suggestedTitle = fallback.session_title;
+    }
+
     const updateData: {
       status: "completed";
       completed_at: string;
       title?: string;
+      payload: typeof payload;
+      ai_analysis: Record<string, unknown>;
     } = {
       status: "completed",
-      completed_at: new Date().toISOString(),
+      completed_at: completedAt,
+      payload: payloadWithCompletion,
+      ai_analysis: analysis,
     };
 
     if (validation.data.title) {
       updateData.title = validation.data.title;
+    } else if (suggestedTitle) {
+      updateData.title = suggestedTitle;
     }
 
     const { data, error } = await supabase

@@ -3,6 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import EliminarCuentaPage from "@/app/eliminar-cuenta/page";
 
+vi.mock("@/lib/api/auth", () => ({
+  deleteAccount: vi.fn(async () => ({ message: "ok" })),
+}));
+
 const pushMock = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -100,7 +104,7 @@ describe("EliminarCuenta Page", () => {
     });
   });
 
-  it("redirige al login después de 2.5 segundos tras eliminar", () => {
+  it("redirige al login después de 2.5 segundos tras eliminar", async () => {
     vi.useFakeTimers(); 
     
     render(<EliminarCuentaPage />);
@@ -110,6 +114,8 @@ describe("EliminarCuenta Page", () => {
 
     const deleteButton = screen.getByRole("button", { name: /eliminar/i });
     fireEvent.click(deleteButton);
+
+    await Promise.resolve();
 
     expect(pushMock).not.toHaveBeenCalled();
 

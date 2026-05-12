@@ -3,6 +3,14 @@ import { NextResponse } from "next/server";
 
 import { registerSchema } from "@/lib/validations/auth";
 
+function buildAuthCallbackUrl(requestUrl: string, nextPath: string) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const baseUrl = siteUrl ?? new URL(requestUrl).origin;
+  const callbackUrl = new URL('/auth/callback', baseUrl);
+  callbackUrl.searchParams.set('next', nextPath);
+  return callbackUrl.toString();
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
@@ -37,6 +45,7 @@ export async function POST(request: Request) {
       email,
       password,
       options: {
+        emailRedirectTo: buildAuthCallbackUrl(request.url, '/dashboard'),
         data: {
           first_name: firstName,
           last_name: lastName ?? "",

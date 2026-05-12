@@ -8,7 +8,7 @@ interface ProfileAvatarProps {
   firstName: string;
   lastName: string;
   avatarUrl?: string | null;
-  onPhotoSelected: (file: File) => void;
+  onPhotoSelected: (file: File) => void | Promise<void>;
 }
 
 export default function ProfileAvatar({ firstName, lastName, avatarUrl, onPhotoSelected }: Readonly<ProfileAvatarProps>) {

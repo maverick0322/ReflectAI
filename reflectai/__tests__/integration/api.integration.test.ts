@@ -8,6 +8,33 @@ import { POST as addReflectionResponse } from "@/app/api/reflection-sessions/[id
 import { PATCH as completeReflectionSession } from "@/app/api/reflection-sessions/[id]/complete/route";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+vi.mock("@/lib/ai/reflectionAnalysis", () => ({
+  analyzeReflectionSession: vi.fn(async () => ({
+    primary_emotions: ["ansiedad"],
+    average_intensity: 7,
+    key_themes: ["trabajo"],
+    cognitive_distortion_detected: null,
+    session_title: "Titulo sugerido",
+    summary: "Resumen generado",
+    recommendation: "Recomendacion generada",
+    encouraging_message: "Mensaje alentador",
+    professional_support_reminder:
+      "Lo mejor es consultar a un profesional si el malestar persiste.",
+  })),
+  buildFallbackAnalysis: vi.fn(() => ({
+    primary_emotions: [],
+    average_intensity: null,
+    key_themes: [],
+    cognitive_distortion_detected: null,
+    session_title: "Sesion de reflexion",
+    summary: "Resumen fallback",
+    recommendation: "Recomendacion fallback",
+    encouraging_message: "Mensaje fallback",
+    professional_support_reminder:
+      "Lo mejor es consultar a un profesional si el malestar persiste.",
+  })),
+}));
+
 vi.mock("@supabase/supabase-js", () => ({
   createClient: vi.fn(),
 }));
@@ -22,8 +49,8 @@ type QueryResult<T> = {
 };
 
 type ChainResult = {
-  singleResult?: QueryResult<any>;
-  orderResult?: QueryResult<any>;
+  singleResult?: QueryResult<unknown>;
+  orderResult?: QueryResult<unknown>;
 };
 
 type MockFn = ReturnType<typeof vi.fn>;
@@ -80,8 +107,20 @@ function mockRegisterClient(supabaseMock: { auth: { signUp: ReturnType<typeof vi
   vi.mocked(createClient).mockReturnValue(supabaseMock as never);
 }
 
-async function readJson(response: Response) {
-  return response.json() as Promise<any>;
+type ApiBody = {
+  message?: string;
+  data?: Record<string, unknown> & {
+    payload?: {
+      responses?: unknown[];
+    };
+  };
+  error?: {
+    message?: string;
+  };
+};
+
+async function readJson<T = ApiBody>(response: Response) {
+  return response.json() as Promise<T>;
 }
 
 beforeEach(() => {
@@ -123,6 +162,9 @@ describe("Integracion API critica", () => {
       email: "ana@reflectai.com",
       password: "PasswordFuerte123",
       options: {
+        emailRedirectTo: expect.stringContaining(
+          "/auth/callback?next=%2Fdashboard",
+        ),
         data: {
           first_name: "Ana",
           last_name: "Lopez",
@@ -162,7 +204,13 @@ describe("Integracion API critica", () => {
           status: "draft",
           started_at: "2026-04-30T10:00:00.000Z",
           completed_at: null,
-          payload: [],
+          payload: {
+            metadata: {
+              version: "1.1",
+              started_at: "2026-04-30T10:00:00.000Z",
+            },
+            responses: [],
+          },
           ai_analysis: {},
         },
         error: null,
@@ -190,7 +238,10 @@ describe("Integracion API critica", () => {
     expect(body.data).toMatchObject({
       id: "session-1",
       status: "draft",
-      payload: [],
+      payload: {
+        metadata: expect.any(Object),
+        responses: [],
+      },
       ai_analysis: {},
     });
     expect(supabaseMock.from).toHaveBeenCalledWith("reflection_sessions");
@@ -198,7 +249,11 @@ describe("Integracion API critica", () => {
       user_id: "user-a",
       title: null,
       status: "draft",
-      payload: [],
+      started_at: expect.any(String),
+      payload: {
+        metadata: expect.any(Object),
+        responses: [],
+      },
       ai_analysis: {},
     });
   });
@@ -297,16 +352,19 @@ describe("Integracion API critica", () => {
         data: {
           id: "session-1",
           status: "draft",
-          payload: [
-            {
-              step_order: 1,
-              question: "Que ocurrio?",
-              user_response: "Tuve una discusion.",
-              detected_emotion: "frustracion",
-              intensity: 8,
-              created_at: "2026-04-30T10:00:00.000Z",
+          started_at: "2026-04-30T10:00:00.000Z",
+          payload: {
+            metadata: {
+              version: "1.1",
+              started_at: "2026-04-30T10:00:00.000Z",
             },
-          ],
+            responses: [
+              {
+                id: "Q1_SIT",
+                text: "Tuve una discusion.",
+              },
+            ],
+          },
         },
         error: null,
       },
@@ -320,24 +378,22 @@ describe("Integracion API critica", () => {
           status: "draft",
           started_at: "2026-04-30T10:00:00.000Z",
           completed_at: null,
-          payload: [
-            {
-              step_order: 1,
-              question: "Que ocurrio?",
-              user_response: "Tuve una discusion.",
-              detected_emotion: "frustracion",
-              intensity: 8,
-              created_at: "2026-04-30T10:00:00.000Z",
+          payload: {
+            metadata: {
+              version: "1.1",
+              started_at: "2026-04-30T10:00:00.000Z",
             },
-            {
-              step_order: 2,
-              question: "Que pensaste?",
-              user_response: "No quise responder.",
-              detected_emotion: "frustracion",
-              intensity: 5,
-              created_at: "2026-04-30T10:05:00.000Z",
-            },
-          ],
+            responses: [
+              {
+                id: "Q1_SIT",
+                text: "Tuve una discusion.",
+              },
+              {
+                id: "Q2_THO",
+                text: "No quise responder.",
+              },
+            ],
+          },
           ai_analysis: {},
         },
         error: null,
@@ -355,10 +411,10 @@ describe("Integracion API critica", () => {
       new Request("http://localhost/api/reflection-sessions/session-1/responses", {
         method: "POST",
         body: JSON.stringify({
-          question: "Que pensaste?",
-          userResponse: "No quise responder.",
-          detectedEmotion: "frustracion",
-          intensity: 5,
+          response: {
+            id: "Q2_THO",
+            text: "No quise responder.",
+          },
         }),
       }),
       { params: Promise.resolve({ id: "session-1" }) },
@@ -367,16 +423,13 @@ describe("Integracion API critica", () => {
     const body = await readJson(response);
 
     expect(response.status).toBe(201);
-    expect(body.data.payload).toHaveLength(2);
-    expect(body.data.payload[1]).toMatchObject({
-      step_order: 2,
-      question: "Que pensaste?",
-      user_response: "No quise responder.",
-      detected_emotion: "frustracion",
-      intensity: 5,
+    expect(body.data.payload.responses).toHaveLength(2);
+    expect(body.data.payload.responses[1]).toMatchObject({
+      id: "Q2_THO",
+      text: "No quise responder.",
     });
     expect(updateBuilder.update).toHaveBeenCalledWith({
-      payload: expect.any(Array),
+      payload: expect.any(Object),
     });
   });
 
@@ -386,7 +439,14 @@ describe("Integracion API critica", () => {
         data: {
           id: "session-1",
           status: "draft",
-          payload: [],
+          started_at: "2026-04-30T10:00:00.000Z",
+          payload: {
+            metadata: {
+              version: "1.1",
+              started_at: "2026-04-30T10:00:00.000Z",
+            },
+            responses: [],
+          },
         },
         error: null,
       },
@@ -419,16 +479,19 @@ describe("Integracion API critica", () => {
         data: {
           id: "session-1",
           status: "draft",
-          payload: [
-            {
-              step_order: 1,
-              question: "Que ocurrio?",
-              user_response: "Tuve una discusion.",
-              detected_emotion: "frustracion",
-              intensity: 8,
-              created_at: "2026-04-30T10:00:00.000Z",
+          started_at: "2026-04-30T10:00:00.000Z",
+          payload: {
+            metadata: {
+              version: "1.1",
+              started_at: "2026-04-30T10:00:00.000Z",
             },
-          ],
+            responses: [
+              {
+                id: "Q1_SIT",
+                text: "Tuve una discusion.",
+              },
+            ],
+          },
         },
         error: null,
       },
@@ -442,17 +505,22 @@ describe("Integracion API critica", () => {
           status: "completed",
           started_at: "2026-04-30T10:00:00.000Z",
           completed_at: "2026-04-30T10:10:00.000Z",
-          payload: [
-            {
-              step_order: 1,
-              question: "Que ocurrio?",
-              user_response: "Tuve una discusion.",
-              detected_emotion: "frustracion",
-              intensity: 8,
-              created_at: "2026-04-30T10:00:00.000Z",
+          payload: {
+            metadata: {
+              version: "1.1",
+              started_at: "2026-04-30T10:00:00.000Z",
+              completed_at: "2026-04-30T10:10:00.000Z",
             },
-          ],
-          ai_analysis: {},
+            responses: [
+              {
+                id: "Q1_SIT",
+                text: "Tuve una discusion.",
+              },
+            ],
+          },
+          ai_analysis: {
+            primary_emotions: ["ansiedad"],
+          },
         },
         error: null,
       },
@@ -483,6 +551,8 @@ describe("Integracion API critica", () => {
       expect.objectContaining({
         status: "completed",
         title: "Sesion completada",
+        payload: expect.any(Object),
+        ai_analysis: expect.any(Object),
       }),
     );
   });

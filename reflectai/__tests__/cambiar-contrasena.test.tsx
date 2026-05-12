@@ -1,12 +1,18 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import CambiarContraseñaPage from "@/app/cambiar-contrasena/page";
+
+vi.mock("@/lib/api/auth", () => ({
+  changePassword: vi.fn(async () => ({ message: "ok" })),
+  confirmRecovery: vi.fn(async () => ({ message: "ok" })),
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 describe("CambiarContraseña - Paso 1 (Verificar identidad)", () => {
@@ -83,7 +89,7 @@ describe("CambiarContraseña - Paso 2 (Nueva contraseña)", () => {
     const currentPassword = screen.getByPlaceholderText(/contraseña actual/i);
     await user.type(currentPassword, "Contraseña123");
 
-    let continueButton = screen.getByRole("button", { name: /continuar/i });
+    const continueButton = screen.getByRole("button", { name: /continuar/i });
     await user.click(continueButton);
 
     await waitFor(() => {

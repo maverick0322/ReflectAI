@@ -1,20 +1,68 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import NuevaSesionPage from "@/app/nueva-sesion/page"; 
+import NuevaSesionPage from "@/app/nueva-sesion/page";
 
+const {
+  createReflectionSessionMock,
+  addReflectionResponseMock,
+  completeReflectionSessionMock,
+  routerMock,
+} = vi.hoisted(() => {
+  const baseResponse = {
+    data: {
+      id: "session-1",
+      title: "Sesion de prueba",
+      status: "draft",
+      started_at: "2026-05-07T10:00:00.000Z",
+      completed_at: null,
+      payload: {
+        metadata: {
+          version: "1.1",
+          started_at: "2026-05-07T10:00:00.000Z",
+        },
+        responses: [],
+      },
+      ai_analysis: {
+        summary: "Resumen generado",
+        recommendation: "Recomendacion generada",
+        encouraging_message: "Mensaje alentador",
+        professional_support_reminder:
+          "Lo mejor es consultar a un profesional si el malestar persiste.",
+      },
+    },
+    message: "ok",
+  };
 
-const mockPush = vi.fn();
-const mockBack = vi.fn();
+  return {
+    createReflectionSessionMock: vi.fn(async () => baseResponse),
+    addReflectionResponseMock: vi.fn(async () => baseResponse),
+    completeReflectionSessionMock: vi.fn(async () => baseResponse),
+    routerMock: {
+      push: vi.fn(),
+      back: vi.fn(),
+    },
+  };
+});
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    back: mockBack,
-  }),
+  useRouter: () => routerMock,
 }));
 
-global.alert = vi.fn();
+vi.mock("@/lib/api/reflection", () => ({
+  createReflectionSession: () => createReflectionSessionMock(),
+  getReflectionSession: vi.fn(),
+  requestNextQuestion: vi.fn(async () => ({
+    data: { done: true },
+  })),
+  addReflectionResponse: (...args: unknown[]) => addReflectionResponseMock(...args),
+  completeReflectionSession: (...args: unknown[]) => completeReflectionSessionMock(...args),
+}));
+
+const renderWizard = async () => {
+  render(<NuevaSesionPage />);
+  return screen.findByPlaceholderText(/Escribe aquí.../i);
+};
 
 describe("Wizard Nueva Sesión (Integración UI)", () => {
   beforeEach(() => {
@@ -23,7 +71,7 @@ describe("Wizard Nueva Sesión (Integración UI)", () => {
 
   it("Camino Malo: No debe dejar avanzar del Paso 1 si el campo está vacío", async () => {
     const user = userEvent.setup();
-    render(<NuevaSesionPage />);
+    await renderWizard();
 
     const btnSiguiente = screen.getByRole("button", { name: /siguiente/i });
     await user.click(btnSiguiente);
@@ -39,7 +87,7 @@ describe("Wizard Nueva Sesión (Integración UI)", () => {
 
   it("Camino Malo: Debe bloquear el Paso 2 si el texto es muy corto (Evitación)", async () => {
     const user = userEvent.setup();
-    render(<NuevaSesionPage />);
+    await renderWizard();
 
     await user.type(screen.getByPlaceholderText(/Escribe aquí.../i), "Discutí con mi jefe.");
     await user.click(screen.getByRole("button", { name: /siguiente/i }));
@@ -59,16 +107,14 @@ describe("Wizard Nueva Sesión (Integración UI)", () => {
 
   it("Edge Case: Debe poder guardar un borrador y regresar entre pasos sin perder datos", async () => {
     const user = userEvent.setup();
-    render(<NuevaSesionPage />);
-
-    const inputPaso1 = screen.getByPlaceholderText(/Escribe aquí.../i);
+    const inputPaso1 = await renderWizard();
     await user.type(inputPaso1, "Texto de prueba para borrador");
     await user.click(screen.getByRole("button", { name: /siguiente/i }));
 
     expect(await screen.findByText(/¿Qué emoción principal/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /Pausar \/ Guardar borrador/i }));
-    expect(global.alert).toHaveBeenCalledWith("Progreso guardado localmente.");
+    expect(await screen.findByText(/Borrador guardado correctamente/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /Atrás/i }));
 
@@ -77,7 +123,7 @@ describe("Wizard Nueva Sesión (Integración UI)", () => {
 
   it("Camino Feliz: Debe completar los 4 pasos y mostrar la pantalla de éxito", async () => {
     const user = userEvent.setup();
-    render(<NuevaSesionPage />);
+    await renderWizard();
 
     await user.type(screen.getByPlaceholderText(/Escribe aquí.../i), "Un problema en el trabajo");
     await user.click(screen.getByRole("button", { name: /siguiente/i }));
@@ -108,7 +154,7 @@ describe("Wizard Nueva Sesión (Integración UI)", () => {
 
   it("UI Reactiva: Debe quitar el mensaje de error tan pronto como el usuario escribe algo válido", async () => {
     const user = userEvent.setup();
-    render(<NuevaSesionPage />);
+    await renderWizard();
 
     const btnSiguiente = screen.getByRole("button", { name: /siguiente/i });
     await user.click(btnSiguiente);
@@ -126,7 +172,7 @@ describe("Wizard Nueva Sesión (Integración UI)", () => {
 
   it("Camino Malo: No debe dejar Finalizar Reflexión si la alternativa está vacía", async () => {
     const user = userEvent.setup();
-    render(<NuevaSesionPage />);
+    await renderWizard();
 
     await user.type(screen.getByPlaceholderText(/Escribe aquí.../i), "Situación válida");
     await user.click(screen.getByRole("button", { name: /siguiente/i }));

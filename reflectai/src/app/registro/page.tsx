@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
@@ -11,9 +13,14 @@ import GlassCard from "@/components/ui/GlassCard";
 import Input from "@/components/ui/Input";
 import PasswordInput from "@/components/ui/PasswordInput";
 import SocialButton from "@/components/ui/SocialButton";
+import { ApiError } from "@/lib/api/http";
+import { registerUser } from "@/lib/api/auth";
 import { registerSchema, type RegisterFormValues } from "@/lib/validations/auth";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -23,9 +30,28 @@ export default function RegisterPage() {
     mode: "onTouched",
   });
 
-  const onSubmit = async (_data: RegisterFormValues) => {
-    void _data;
-    // TODO: Integracion con Supabase para registrar usuario.
+  const onSubmit = async (data: RegisterFormValues) => {
+    setFormError(null);
+    setIsSubmitting(true);
+
+    try {
+      await registerUser({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+        birthDate: data.birthDate,
+      });
+      router.push("/login");
+    } catch (error) {
+      const message =
+        error instanceof ApiError && error.payload?.message
+          ? error.payload.message
+          : "No se pudo crear la cuenta";
+      setFormError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -90,9 +116,22 @@ export default function RegisterPage() {
             error={errors.birthDate?.message}
           />
 
+          {formError && (
+            <p className="text-sm text-red-500 font-semibold" role="alert">
+              {formError}
+            </p>
+          )}
+
           <div className="mt-2">
-            <Button type="submit">Registrarse</Button>
+            <Button type="submit" disabled={isSubmitting} className={isSubmitting ? "opacity-60" : ""}>
+              {isSubmitting ? "Creando cuenta..." : "Registrarse"}
+            </Button>
           </div>
+
+          <p className="text-[11px] text-reflect-dark/60 text-center">
+            ReflectAI no es una herramienta clinica, no diagnostica y no sustituye
+            atencion psicologica profesional.
+          </p>
         </form>
 
         <div className="relative flex items-center py-2 text-sm font-medium text-reflect-dark/50">
@@ -102,9 +141,13 @@ export default function RegisterPage() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <SocialButton provider="Google" icon={<GoogleIcon />} />
-          <SocialButton provider="Facebook" icon={<FacebookIcon />} />
+          <SocialButton provider="Google" icon={<GoogleIcon />} disabled />
+          <SocialButton provider="Facebook" icon={<FacebookIcon />} disabled />
         </div>
+
+        <p className="text-xs text-reflect-dark/50 text-center">
+          Registro con Google y Facebook estara disponible pronto.
+        </p>
 
         <footer className="text-center text-sm text-reflect-dark/70">
           ¿Ya tienes cuenta? <CustomLink href="/login">Inicia sesión aquí</CustomLink>

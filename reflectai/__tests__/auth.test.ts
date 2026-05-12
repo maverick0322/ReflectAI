@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { registerSchema, loginSchema, recoverPasswordSchema } from '@/lib/validations/auth';
+import {
+  registerSchema,
+  loginSchema,
+  recoverPasswordSchema,
+  confirmRecoverySchema,
+  changePasswordSchema,
+} from '@/lib/validations/auth';
 
 const usuarioValido = {
   firstName: 'José Luis',
@@ -159,6 +165,38 @@ describe('Validaciones de Recuperar Contraseña', () => {
 
   it('20. Debe fallar si el correo está vacío', () => {
     const resultado = recoverPasswordSchema.safeParse({ email: '' });
+    expect(resultado.success).toBe(false);
+  });
+});
+
+describe('Validaciones de Confirmar Recuperacion', () => {
+  it('21. Debe aceptar un codigo valido', () => {
+    const resultado = confirmRecoverySchema.safeParse({ code: 'code-123' });
+    expect(resultado.success).toBe(true);
+  });
+
+  it('22. Debe fallar si el codigo esta vacio', () => {
+    const resultado = confirmRecoverySchema.safeParse({ code: '' });
+    expect(resultado.success).toBe(false);
+  });
+});
+
+describe('Validaciones de Cambiar Contraseña', () => {
+  it('23. Debe aceptar datos validos', () => {
+    const resultado = changePasswordSchema.safeParse({
+      currentPassword: 'PasswordActual123',
+      newPassword: 'PasswordNueva123',
+      confirmNewPassword: 'PasswordNueva123',
+    });
+    expect(resultado.success).toBe(true);
+  });
+
+  it('24. Debe fallar si las contraseñas no coinciden', () => {
+    const resultado = changePasswordSchema.safeParse({
+      currentPassword: 'PasswordActual123',
+      newPassword: 'PasswordNueva123',
+      confirmNewPassword: 'PasswordDiferente123',
+    });
     expect(resultado.success).toBe(false);
   });
 });

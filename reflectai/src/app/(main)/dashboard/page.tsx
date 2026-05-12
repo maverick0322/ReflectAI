@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { WeeklyCalendar } from "@/components/dashboard/WeeklyCalendar";
 import { PausedSessionAlert } from "@/components/dashboard/PausedSessionAlert";
@@ -6,51 +9,141 @@ import { StreakWidget } from "@/components/dashboard/StreakWidget";
 import { RecentSessionCard } from "@/components/dashboard/RecentSessionCard";
 import { ProfileIcon } from "@/components/icons/ProfileIcon";
 import GlassCard from "@/components/ui/GlassCard";
-import { DayRecord } from "@/types/dashboard";
+import { fetchDailyQuote } from "@/lib/api/ai";
+import { ApiError } from "@/lib/api/http";
+import { listReflectionSessions } from "@/lib/api/reflection";
+import { fetchProfile } from "@/lib/api/profile";
+import {
+  buildWeekRecords,
+  calculateStreak,
+  formatDisplayDate,
+  formatTimeAgo,
+  type SessionSnapshot,
+} from "@/lib/dashboard/metrics";
+
+function isRecoverableDraft(session: SessionSnapshot) {
+  if (session.status !== "draft" || !session.payload) {
+    return false;
+  }
+
+  const answeredIds = new Set(session.payload.responses.map((response) => response.id));
+  const hasStarted = answeredIds.size > 0;
+  const hasRequiredReflection = [
+    "Q1_SIT",
+    "Q2_THO",
+    "Q3_EMO",
+    "Q4_INT",
+    "Q5_TEL",
+    "Q6_CON_MINE",
+    "Q6_CON_OTHERS",
+    "Q7_ALT",
+  ].every((questionId) => answeredIds.has(questionId));
+
+  return hasStarted && !hasRequiredReflection;
+}
+
+function getSessionTime(session: SessionSnapshot) {
+  return new Date(session.completed_at ?? session.started_at).getTime();
+}
 
 export default function DashboardPage() {
-// TODO: [BACKEND] - Obtener perfil del usuario desde Supabase
-  const user = { 
-    name: "Arturo", 
-    racha: 5,
-    avatarUrl: null // Reemplazar con URL real de imagen si existe
+  const [sessions, setSessions] = useState<SessionSnapshot[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<{ name: string; avatarUrl: string | null } | null>(null);
+  const [dailyQuote, setDailyQuote] = useState({
+    text: "La reflexión es el camino hacia la maestría de uno mismo.",
+    author: "Marco Aurelio",
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadSessions = async () => {
+      setIsLoading(true);
+      setFormError(null);
+
+      try {
+        const [sessionResponse, profileResponse, quoteResponse] = await Promise.all([
+          listReflectionSessions(),
+          fetchProfile(),
+          fetchDailyQuote().catch(() => null),
+        ]);
+        if (!isMounted) {
+          return;
+        }
+
+        setSessions(sessionResponse.data);
+        setUserProfile({
+          name: profileResponse.data.full_name,
+          avatarUrl: profileResponse.data.avatar_url,
+        });
+        if (quoteResponse) {
+          setDailyQuote({
+            text: quoteResponse.data.text,
+            author: quoteResponse.data.author,
+          });
+        }
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        const message =
+          error instanceof ApiError && error.payload?.message
+            ? error.payload.message
+            : "No se pudo cargar el dashboard";
+        setFormError(message);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadSessions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const today = useMemo(() => new Date(), []);
+  const weekDays = useMemo(() => buildWeekRecords(sessions, today), [sessions, today]);
+  const streak = useMemo(() => calculateStreak(sessions, today), [sessions, today]);
+  const streakMessage = streak === 0
+    ? "¡Hoy es el día perfecto para empezar tu hábito!"
+    : "¡Excelente! Estás construyendo un hábito sólido.";
+
+  const lastCompletedSession = sessions.find(
+    (session) => session.status === "completed",
+  );
+  const lastCompletedTime = lastCompletedSession ? getSessionTime(lastCompletedSession) : 0;
+  const pausedSession =
+    sessions.find(
+      (session) => isRecoverableDraft(session) && getSessionTime(session) > lastCompletedTime,
+    ) ?? null;
+
+  const intensityLabel = (value: unknown) => {
+    if (typeof value !== "number") {
+      return "Media";
+    }
+    if (value >= 8) return "Alta";
+    if (value <= 3) return "Baja";
+    return "Media";
   };
 
-// TODO: [BACKEND] - Verificar si hay una sesión incompleta en la tabla de borradores
-  const pausedSession = {
-    hasPaused: true,
-    timeAgo: "2 horas"
-  };
-  // TODO: [BACKEND] - Mensaje predefinido según los días de racha calculados
-  const streakMessage = user.racha === 0 
-      ? "¡Hoy es el día perfecto para empezar tu hábito!" 
-      : "¡Excelente! Estás construyendo un hábito sólido.";
-  // TODO: [BACKEND] - Obtener datos de la tabla de sesiones (limit 1)
-  const lastSession = {
-    title: "Gestión del estrés en mi proyecto actual",
-    date: "15 de Abril",
-    intensity: "Alta",
-    emotion: "Ansiedad"
+  const primaryEmotion = (analysis: Record<string, unknown>) => {
+    const emotions = analysis.primary_emotions;
+    if (Array.isArray(emotions) && typeof emotions[0] === "string") {
+      return emotions[0];
+    }
+    return "Sin datos";
   };
 
-   // TODO: [BACKEND] - LOGICA DEL CALENDARIO
-   /* 1. Calcular el rango de la semana actual (Lunes a Domingo) basado en la zona horaria del usuario.
-   * 2. Hacer un query a la tabla de 'sesiones' filtrando por este rango de fechas y por el user_id.
-   * 3. Mapear los 7 días construyendo el objeto DayRecord (ver src/types/dashboard.ts).
-   * 4. SUSTITUIR: Eliminar la constante 'currentWeekMock' por completo y reemplazarla 
-   * con el resultado real de la query a la base de datos.
-   */
-  // [DATO HARDCODEADO TEMPORAL PARA UI ]
-  const currentWeekMock: DayRecord[] = [
-    { date: "2026-04-13", label: "L", num: 13, isToday: false, isFuture: false, hasSessions: true },
-    { date: "2026-04-14", label: "M", num: 14, isToday: false, isFuture: false, hasSessions: false },
-    { date: "2026-04-15", label: "M", num: 15, isToday: false, isFuture: false, hasSessions: true },
-    { date: "2026-04-16", label: "J", num: 16, isToday: true,  isFuture: false, hasSessions: false },
-    { date: "2026-04-17", label: "V", num: 17, isToday: false, isFuture: true,  hasSessions: false },
-    { date: "2026-04-18", label: "S", num: 18, isToday: false, isFuture: true,  hasSessions: false },
-    { date: "2026-04-19", label: "D", num: 19, isToday: false, isFuture: true,  hasSessions: false },
-  ];
-
+  const averageIntensity = (analysis: Record<string, unknown>) => {
+    return intensityLabel(analysis.average_intensity);
+  };
 
   return (
     <main className="flex-1 w-full max-w-lg mx-auto px-4 py-6">
@@ -64,15 +157,15 @@ export default function DashboardPage() {
               Bienvenido de vuelta
             </span>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              {user.name}
+              {isLoading ? "..." : userProfile?.name ?? "Usuario"}
             </h1>
           </div>
           
           {/* Icono de Perfil Clicable hacia ruta de perfil */}
           <Link href="/perfil" className="focus:outline-none focus:ring-2 focus:ring-violet-500 rounded-full flex-shrink-0">
             <div className="w-12 h-12 rounded-full bg-white/50 dark:bg-black/40 backdrop-blur-md border border-white/40 flex items-center justify-center overflow-hidden hover:bg-white/80 transition-colors">
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt="Perfil" className="w-full h-full object-cover" />
+              {userProfile?.avatarUrl ? (
+                <img src={userProfile.avatarUrl} alt="Perfil" className="w-full h-full object-cover" />
               ) : (
                 <ProfileIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
               )}
@@ -84,26 +177,30 @@ export default function DashboardPage() {
         <section className="flex flex-col gap-4">
           <div>
             <h2 className="text-sm font-medium text-slate-500 uppercase tracking-widest">Hoy</h2>
-            {/* TODO: [BACKEND] SUSTITUIR: Generar esta fecha dinámicamente con Intl.DateTimeFormat */}
-            <p className="text-xl font-semibold text-slate-900 dark:text-white">Jueves 16 de Abril</p>
+            <p className="text-xl font-semibold text-slate-900 dark:text-white">
+              {formatDisplayDate(today)}
+            </p>
           </div>
-          <WeeklyCalendar weekDays={currentWeekMock}/>
+          <WeeklyCalendar weekDays={weekDays}/>
         </section>
 
         {/* 3. Sección de Sesión en Pausa (Condicional Backend) */}
-        {pausedSession.hasPaused && (
-          <PausedSessionAlert timeAgo={pausedSession.timeAgo} />
+        {pausedSession && (
+          <PausedSessionAlert
+            sessionId={pausedSession.id}
+            timeAgo={formatTimeAgo(pausedSession.started_at)}
+          />
         )}
 
         {/* 4. Cita del Día */}
         <DailyQuote 
-          text="La reflexión es el camino hacia la maestría de uno mismo." 
-          author="Marco Aurelio"
+          text={dailyQuote.text} 
+          author={dailyQuote.author}
         />
 
         {/* 5. Widget de Racha */}
         <StreakWidget 
-          days={user.racha} 
+          days={streak} 
           streakMessage={streakMessage} 
         />
 
@@ -113,12 +210,12 @@ export default function DashboardPage() {
             Tu última reflexión
           </h3>
           
-          {lastSession ? (
+          {lastCompletedSession ? (
             <RecentSessionCard 
-              title={lastSession.title} 
-              date={lastSession.date}
-              intensity={lastSession.intensity}
-              emotion={lastSession.emotion}
+              title={lastCompletedSession.title ?? "Sesion completada"} 
+              date={formatDisplayDate(new Date(lastCompletedSession.completed_at ?? lastCompletedSession.started_at))}
+              intensity={averageIntensity(lastCompletedSession.ai_analysis)}
+              emotion={primaryEmotion(lastCompletedSession.ai_analysis)}
             />
           ) : (
             <div className="flex flex-col items-center justify-center py-8 px-4 text-center border-2 border-dashed border-violet-200 dark:border-violet-900/50 rounded-2xl bg-white/20 dark:bg-black/10">
@@ -135,6 +232,11 @@ export default function DashboardPage() {
           )}
         </section>
 
+        {formError && (
+          <p className="text-sm text-red-500 font-semibold text-center mt-4" role="alert">
+            {formError}
+          </p>
+        )}
       </GlassCard>
     </main>
   );
