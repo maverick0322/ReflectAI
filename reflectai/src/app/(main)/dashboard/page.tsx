@@ -5,6 +5,7 @@ import { DailyQuote } from "@/components/dashboard/DailyQuote";
 import { StreakWidget } from "@/components/dashboard/StreakWidget";
 import { RecentSessionCard } from "@/components/dashboard/RecentSessionCard";
 import { ProfileIcon } from "@/components/icons/ProfileIcon";
+import { HelpIcon } from "@/components/icons/HelpIcon";
 import GlassCard from "@/components/ui/GlassCard";
 import { DayRecord } from "@/types/dashboard";
 
@@ -68,16 +69,25 @@ export default function DashboardPage() {
             </h1>
           </div>
           
-          {/* Icono de Perfil Clicable hacia ruta de perfil */}
-          <Link href="/perfil" className="focus:outline-none focus:ring-2 focus:ring-violet-500 rounded-full flex-shrink-0">
-            <div className="w-12 h-12 rounded-full bg-white/50 dark:bg-black/40 backdrop-blur-md border border-white/40 flex items-center justify-center overflow-hidden hover:bg-white/80 transition-colors">
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt="Perfil" className="w-full h-full object-cover" />
-              ) : (
-                <ProfileIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
-              )}
-            </div>
-          </Link>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {/* Botón de Ayuda */}
+            <Link href="/ayuda" aria-label="Ayuda" className="focus:outline-none focus:ring-2 focus:ring-violet-500 rounded-full">
+              <div className="w-12 h-12 rounded-full bg-white/50 dark:bg-black/40 backdrop-blur-md border border-white/40 flex items-center justify-center overflow-hidden hover:bg-white/80 transition-colors">
+                <HelpIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
+              </div>
+            </Link>
+
+            {/* Icono de Perfil Clicable hacia ruta de perfil */}
+            <Link href="/perfil" aria-label="Perfil" className="focus:outline-none focus:ring-2 focus:ring-violet-500 rounded-full">
+              <div className="w-12 h-12 rounded-full bg-white/50 dark:bg-black/40 backdrop-blur-md border border-white/40 flex items-center justify-center overflow-hidden hover:bg-white/80 transition-colors">
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="Perfil" className="w-full h-full object-cover" />
+                ) : (
+                  <ProfileIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
+                )}
+              </div>
+            </Link>
+          </div>
         </header>
 
         {/* 2. Sección de Fecha y Calendario */}
