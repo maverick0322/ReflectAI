@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { profileSchema } from '@/lib/validations/profile';
+import { changePasswordSchema, profileSchema } from '@/lib/validations/profile';
 
 const baseProfile = {
   firstName: 'Arturo',
@@ -49,6 +49,19 @@ describe('Validaciones de Perfil', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues[0].message).toBe('La fecha de nacimiento es obligatoria');
+    }
+  });
+
+  it('rechaza cambio de contrasena con confirmacion distinta', () => {
+    const result = changePasswordSchema.safeParse({
+      currentPassword: 'PasswordActual123',
+      newPassword: 'PasswordNueva123',
+      confirmNewPassword: 'OtraPassword123',
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Las contraseñas no coinciden');
     }
   });
 });

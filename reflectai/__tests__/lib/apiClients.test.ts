@@ -9,12 +9,15 @@ import {
   recoverPassword,
   registerUser,
 } from '@/lib/api/auth';
+import { fetchDailyQuote } from '@/lib/api/ai';
 import { fetchProfile, updateProfile, uploadProfileAvatar } from '@/lib/api/profile';
 import {
   addReflectionResponse,
   completeReflectionSession,
   createReflectionSession,
+  getReflectionSession,
   listReflectionSessions,
+  requestNextQuestion,
 } from '@/lib/api/reflection';
 
 const createFetchMock = () =>
@@ -139,7 +142,9 @@ describe('api clients', () => {
 
     await createReflectionSession('Sesion');
     await listReflectionSessions();
+    await getReflectionSession('session-1');
     await addReflectionResponse('session-1', { id: 'Q1_SIT', text: 'Texto' });
+    await requestNextQuestion('session-1', ['Q2_THO']);
     await completeReflectionSession('session-1', {});
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -147,13 +152,26 @@ describe('api clients', () => {
       expect.objectContaining({ method: 'POST' }),
     );
     expect(fetchMock).toHaveBeenCalledWith('/api/reflection-sessions', undefined);
+    expect(fetchMock).toHaveBeenCalledWith('/api/reflection-sessions/session-1', undefined);
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/reflection-sessions/session-1/responses',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/ai/next-question',
       expect.objectContaining({ method: 'POST' }),
     );
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/reflection-sessions/session-1/complete',
       expect.objectContaining({ method: 'PATCH' }),
     );
+  });
+
+  it('calls daily quote endpoint', async () => {
+    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
+
+    await fetchDailyQuote();
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/ai/daily-quote', undefined);
   });
 });

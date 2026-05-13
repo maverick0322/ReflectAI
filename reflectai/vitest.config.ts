@@ -13,14 +13,19 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
-      include: ['src/lib/**', 'src/components/**', 'src/contexts/**'],
+      include: [
+        'src/lib/**',
+        'src/components/**',
+        'src/contexts/**',
+        'src/app/api/**/route.ts',
+        'src/app/auth/callback/route.ts',
+      ],
       exclude: [
         'src/**/*.d.ts',
         'src/**/*.test.{ts,tsx}',
         'src/**/__tests__/**',
         'src/**/page.tsx',
         'src/**/layout.tsx',
-        'src/app/**',
         'src/components/icons/**',
         'src/types/**',
         'node_modules/**',
