@@ -1,6 +1,6 @@
 import type { StatisticsDashboardData } from '@/types/statistics';
 
-// Para Miguel(backend): Replace this mock payload with the real statistics response contract.
+// TODO(backend): Replace this mock payload with the real statistics response contract.
 export const statisticsDashboardMock: StatisticsDashboardData = {
   evolution: [
     { id: 'mon', label: 'Lun', intensity: 30 },

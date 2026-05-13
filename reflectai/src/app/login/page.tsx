@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 
-import { FacebookIcon } from "@/components/icons/FacebookIcon";
-import { GoogleIcon } from "@/components/icons/GoogleIcon";
-import Button from "@/components/ui/Button";
-import CustomLink from "@/components/ui/CustomLink";
-import GlassCard from "@/components/ui/GlassCard";
-import Input from "@/components/ui/Input";
-import PasswordInput from "@/components/ui/PasswordInput";
-import SocialButton from "@/components/ui/SocialButton";
-import { ApiError } from "@/lib/api/http";
-import { loginUser } from "@/lib/api/auth";
-import { loginSchema, type LoginFormValues } from "@/lib/validations/auth";
+import { FacebookIcon } from '@/components/icons/FacebookIcon';
+import { GoogleIcon } from '@/components/icons/GoogleIcon';
+import Button from '@/components/ui/Button';
+import CustomLink from '@/components/ui/CustomLink';
+import GlassCard from '@/components/ui/GlassCard';
+import Input from '@/components/ui/Input';
+import PasswordInput from '@/components/ui/PasswordInput';
+import SocialButton from '@/components/ui/SocialButton';
+import { ApiError } from '@/lib/api/http';
+import { loginUser } from '@/lib/api/auth';
+import { loginSchema, type LoginFormValues } from '@/lib/validations/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    mode: "onTouched",
+    mode: 'onTouched',
   });
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -36,12 +36,12 @@ export default function LoginPage() {
 
     try {
       await loginUser(data.email, data.password);
-      router.push("/dashboard");
+      router.push('/dashboard');
     } catch (error) {
       const message =
         error instanceof ApiError && error.payload?.message
           ? error.payload.message
-          : "No se pudo iniciar sesion";
+          : 'No se pudo iniciar sesion';
       setFormError(message);
     } finally {
       setIsSubmitting(false);
@@ -60,14 +60,14 @@ export default function LoginPage() {
 
         <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <Input
-            {...register("email")}
+            {...register('email')}
             type="email"
             placeholder="Correo electrónico"
             maxLength={254}
             error={errors.email?.message}
           />
           <PasswordInput
-            {...register("password")}
+            {...register('password')}
             placeholder="Contraseña"
             maxLength={64}
             error={errors.password?.message}
@@ -85,8 +85,8 @@ export default function LoginPage() {
             </p>
           )}
 
-          <Button type="submit" disabled={isSubmitting} className={isSubmitting ? "opacity-60" : ""}>
-            {isSubmitting ? "Ingresando..." : "Iniciar sesión"}
+          <Button type="submit" disabled={isSubmitting} className={isSubmitting ? 'opacity-60' : ''}>
+            {isSubmitting ? 'Ingresando...' : 'Iniciar sesión'}
           </Button>
         </form>
 

@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import { getAuthenticatedUser } from "@/lib/auth/getAuthenticatedUser";
-import { buildInitialPayload } from "@/lib/reflection/payload";
-import { createReflectionSessionSchema } from "@/lib/validations/reflection";
+import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import { buildInitialPayload } from '@/lib/reflection/payload';
+import { createReflectionSessionSchema } from '@/lib/validations/reflection';
 
 export async function POST(request: Request) {
   try {
     const { supabase, user, error: authError } = await getAuthenticatedUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: { message: "No autorizado" } }, { status: 401 });
+      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
     }
 
     const body = await request.json().catch(() => null);
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: {
-            message: "Datos invalidos",
+            message: 'Datos invalidos',
             details: validation.error.flatten(),
           },
         },
@@ -31,21 +31,21 @@ export async function POST(request: Request) {
     const payload = buildInitialPayload(startedAt);
 
     const { data, error } = await supabase
-      .from("reflection_sessions")
+      .from('reflection_sessions')
       .insert({
         user_id: user.id,
         title: validation.data.title ?? null,
-        status: "draft",
+        status: 'draft',
         started_at: startedAt,
         payload,
         ai_analysis: {},
       })
-      .select("id, title, status, started_at, completed_at, payload, ai_analysis")
+      .select('id, title, status, started_at, completed_at, payload, ai_analysis')
       .single();
 
     if (error) {
       return NextResponse.json(
-        { error: { message: "No se pudo crear la sesion" } },
+        { error: { message: 'No se pudo crear la sesion' } },
         { status: 500 },
       );
     }
@@ -53,13 +53,13 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         data,
-        message: "Sesion creada correctamente",
+        message: 'Sesion creada correctamente',
       },
       { status: 201 },
     );
   } catch {
     return NextResponse.json(
-      { error: { message: "Error inesperado al crear sesion" } },
+      { error: { message: 'Error inesperado al crear sesion' } },
       { status: 500 },
     );
   }
@@ -70,29 +70,29 @@ export async function GET() {
     const { supabase, user, error: authError } = await getAuthenticatedUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: { message: "No autorizado" } }, { status: 401 });
+      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
     }
 
     const { data, error } = await supabase
-      .from("reflection_sessions")
-      .select("id, title, status, started_at, completed_at, payload, ai_analysis")
-      .eq("user_id", user.id)
-      .order("started_at", { ascending: false });
+      .from('reflection_sessions')
+      .select('id, title, status, started_at, completed_at, payload, ai_analysis')
+      .eq('user_id', user.id)
+      .order('started_at', { ascending: false });
 
     if (error) {
       return NextResponse.json(
-        { error: { message: "No se pudo obtener el historial" } },
+        { error: { message: 'No se pudo obtener el historial' } },
         { status: 500 },
       );
     }
 
     return NextResponse.json({
       data,
-      message: "Sesiones obtenidas correctamente",
+      message: 'Sesiones obtenidas correctamente',
     });
   } catch {
     return NextResponse.json(
-      { error: { message: "Error inesperado al obtener sesiones" } },
+      { error: { message: 'Error inesperado al obtener sesiones' } },
       { status: 500 },
     );
   }

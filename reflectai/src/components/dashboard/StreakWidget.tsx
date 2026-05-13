@@ -1,5 +1,5 @@
-import GlassCard from "@/components/ui/GlassCard";
-import { LightningIcon } from "@/components/icons/LightningIcon";
+import GlassCard from '@/components/ui/GlassCard';
+import { LightningIcon } from '@/components/icons/LightningIcon';
 
 interface StreakWidgetProps {
   days: number;

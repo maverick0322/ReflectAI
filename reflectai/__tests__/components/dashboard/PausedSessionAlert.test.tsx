@@ -4,7 +4,7 @@ import { PausedSessionAlert } from '@/components/dashboard/PausedSessionAlert';
 
 describe('PausedSessionAlert', () => {
   it('debe mostrar el tiempo transcurrido pasado por props', () => {
-    const testTime = "3 horas y media";
+    const testTime = '3 horas y media';
     render(<PausedSessionAlert timeAgo={testTime} />);
     
     expect(screen.getByText('Tienes una reflexión pendiente')).toBeInTheDocument();

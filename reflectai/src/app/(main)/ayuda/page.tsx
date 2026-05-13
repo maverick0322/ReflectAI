@@ -1,6 +1,6 @@
-import ManualStep from "@/components/manual/ManualStep";
-import WarningIcon from "@/components/icons/WarningIcon";
-import GlassCard from "@/components/ui/GlassCard";
+import WarningIcon from '@/components/icons/WarningIcon';
+import ManualStep from '@/components/manual/ManualStep';
+import GlassCard from '@/components/ui/GlassCard';
 
 export default function AyudaPage() {
   return (
@@ -14,8 +14,8 @@ export default function AyudaPage() {
             Ayuda de ReflectAI
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            Aquí encuentras una guía rápida y visual para moverte con confianza. Ve paso a paso,
-            sin prisa: esto es para ti.
+            AquÃ­ encuentras una guÃ­a rÃ¡pida y visual para moverte con confianza.
+            Ve paso a paso, sin prisa: esto es para ti.
           </p>
         </header>
 
@@ -27,10 +27,13 @@ export default function AyudaPage() {
             <div className="space-y-1">
               <p className="text-sm font-bold">Aviso importante</p>
               <p className="text-sm leading-relaxed">
-                ReflectAI es una herramienta de apoyo para el autoconocimiento y la autorreflexión.
-                <span className="font-semibold"> No es una herramienta clínica</span> y no sustituye,
-                bajo ninguna circunstancia, la atención, diagnóstico o tratamiento psicológico o psiquiátrico profesional.
-                Si estás atravesando una crisis, por favor contacta a los servicios de salud mental de tu localidad.
+                ReflectAI es una herramienta de apoyo para el autoconocimiento y
+                la autorreflexiÃ³n.
+                <span className="font-semibold"> No es una herramienta clÃ­nica</span>{' '}
+                y no sustituye, bajo ninguna circunstancia, la atenciÃ³n,
+                diagnÃ³stico o tratamiento psicolÃ³gico o psiquiÃ¡trico
+                profesional. Si estÃ¡s atravesando una crisis, por favor
+                contacta a los servicios de salud mental de tu localidad.
               </p>
             </div>
           </div>
@@ -45,15 +48,17 @@ export default function AyudaPage() {
             title="Crear tu cuenta"
             description={
               <>
-                En la pantalla principal, selecciona <span className="font-semibold">“Registrarse”</span>.
-                Puedes usar tu correo y una contraseña, o entrar con Google/Apple para hacerlo más rápido.
+                En la pantalla principal, selecciona{' '}
+                <span className="font-semibold">â€œRegistrarseâ€</span>.
+                Puedes usar tu correo y una contraseÃ±a, o entrar con
+                Google/Apple para hacerlo mÃ¡s rÃ¡pido.
               </>
             }
             screenshot={{
-              src: "/manual/01-dashboard.png",
-              alt: "Captura del panel principal mostrando el acceso a registro e inicio.",
-              calloutText: "Haz clic aquí",
-              caption: "Referencia visual: acceso a registro/inicio.",
+              src: '/manual/01-dashboard.png',
+              alt: 'Captura del panel principal mostrando el acceso a registro e inicio.',
+              calloutText: 'Haz clic aquÃ­',
+              caption: 'Referencia visual: acceso a registro/inicio.',
             }}
           />
 
@@ -61,15 +66,16 @@ export default function AyudaPage() {
             title="Recuperar acceso"
             description={
               <>
-                Si olvidas tu contraseña, haz clic en <span className="font-semibold">“¿Olvidaste tu contraseña?”</span>.
+                Si olvidas tu contraseÃ±a, haz clic en{' '}
+                <span className="font-semibold">â€œÂ¿Olvidaste tu contraseÃ±a?â€</span>.
                 Te enviaremos un enlace seguro a tu correo.
               </>
             }
             screenshot={{
-              src: "/manual/01-dashboard.png",
-              alt: "Captura de la pantalla de inicio de sesión con la opción de recuperar contraseña.",
-              calloutText: "Haz clic aquí",
-              caption: "Referencia visual: opción “¿Olvidaste tu contraseña?”.",
+              src: '/manual/01-dashboard.png',
+              alt: 'Captura de la pantalla de inicio de sesiÃ³n con la opciÃ³n de recuperar contraseÃ±a.',
+              calloutText: 'Haz clic aquÃ­',
+              caption: 'Referencia visual: opciÃ³n â€œÂ¿Olvidaste tu contraseÃ±a?â€.',
             }}
           />
 
@@ -77,36 +83,38 @@ export default function AyudaPage() {
             title="Privacidad total"
             description={
               <>
-                Tus reflexiones son solo tuyas. Al iniciar sesión, tú eres la única persona que puede acceder a tu historial.
+                Tus reflexiones son solo tuyas. Al iniciar sesiÃ³n, tÃº eres la
+                Ãºnica persona que puede acceder a tu historial.
               </>
             }
             screenshot={{
-              src: "/manual/01-dashboard.png",
-              alt: "Captura representativa del panel principal.",
-              calloutText: "Tip",
-              caption: "Recuerda: escribe con libertad. Nadie más verá esto.",
+              src: '/manual/01-dashboard.png',
+              alt: 'Captura representativa del panel principal.',
+              calloutText: 'Tip',
+              caption: 'Recuerda: escribe con libertad. Nadie mÃ¡s verÃ¡ esto.',
             }}
           />
         </section>
 
         <section className="space-y-6">
           <h2 className="text-sm font-bold text-slate-900/40 dark:text-dark/40 uppercase tracking-tighter">
-            2) Iniciar una sesión de reflexión
+            2) Iniciar una sesiÃ³n de reflexiÃ³n
           </h2>
 
           <ManualStep
-            title="Comenzar una nueva reflexión"
+            title="Comenzar una nueva reflexiÃ³n"
             description={
               <>
-                Desde tu panel, haz clic en <span className="font-semibold">“Nueva Reflexión”</span>. A partir de ahí,
-                el sistema te guía con preguntas paso a paso.
+                Desde tu panel, haz clic en{' '}
+                <span className="font-semibold">â€œNueva ReflexiÃ³nâ€</span>.
+                A partir de ahÃ­, el sistema te guÃ­a con preguntas paso a paso.
               </>
             }
             screenshot={{
-              src: "/manual/02-nueva-reflexion.png",
-              alt: "Captura del panel mostrando el botón de Nueva Reflexión.",
-              calloutText: "Haz clic aquí",
-              caption: "Referencia visual: botón “Nueva Reflexión”.",
+              src: '/manual/02-nueva-reflexion.png',
+              alt: 'Captura del panel mostrando el botÃ³n de Nueva ReflexiÃ³n.',
+              calloutText: 'Haz clic aquÃ­',
+              caption: 'Referencia visual: botÃ³n â€œNueva ReflexiÃ³nâ€.',
             }}
           />
 
@@ -114,14 +122,15 @@ export default function AyudaPage() {
             title="Seguir el flujo"
             description={
               <>
-                Responde a tu ritmo. Si lo necesitas, toma una pausa. Lo importante es que seas honesto contigo.
+                Responde a tu ritmo. Si lo necesitas, toma una pausa. Lo
+                importante es que seas honesto contigo.
               </>
             }
             screenshot={{
-              src: "/manual/03-flujo-preguntas.png",
-              alt: "Captura del flujo de preguntas guiadas durante una sesión.",
-              calloutText: "Escribe aquí",
-              caption: "Referencia visual: campo de respuesta y navegación del flujo.",
+              src: '/manual/03-flujo-preguntas.png',
+              alt: 'Captura del flujo de preguntas guiadas durante una sesiÃ³n.',
+              calloutText: 'Escribe aquÃ­',
+              caption: 'Referencia visual: campo de respuesta y navegaciÃ³n del flujo.',
             }}
           />
 
@@ -129,31 +138,33 @@ export default function AyudaPage() {
             title="Medir tu intensidad"
             description={
               <>
-                En algunas preguntas, verás un control del <span className="font-semibold">1 al 10</span>.
-                Mueve el deslizador para indicar cómo te sientes en ese momento exacto.
+                En algunas preguntas, verÃ¡s un control del{' '}
+                <span className="font-semibold">1 al 10</span>. Mueve el
+                deslizador para indicar cÃ³mo te sientes en ese momento exacto.
               </>
             }
             screenshot={{
-              src: "/manual/04-slider-intensidad.png",
-              alt: "Captura del control deslizante de intensidad emocional.",
-              calloutText: "Arrastra aquí",
-              caption: "Referencia visual: slider de intensidad 1–10.",
+              src: '/manual/04-slider-intensidad.png',
+              alt: 'Captura del control deslizante de intensidad emocional.',
+              calloutText: 'Arrastra aquÃ­',
+              caption: 'Referencia visual: slider de intensidad 1â€“10.',
             }}
           />
 
           <ManualStep
-            title="Guardar tu sesión"
+            title="Guardar tu sesiÃ³n"
             description={
               <>
-                Cuando llegues al final, haz clic en <span className="font-semibold">“Guardar sesión”</span>. Tu progreso
-                se almacena de forma segura.
+                Cuando llegues al final, haz clic en{' '}
+                <span className="font-semibold">â€œGuardar sesiÃ³nâ€</span>. Tu
+                progreso se almacena de forma segura.
               </>
             }
             screenshot={{
-              src: "/manual/03-flujo-preguntas.png",
-              alt: "Captura final de una sesión mostrando el botón para guardar.",
-              calloutText: "Guardar sesión",
-              caption: "Referencia visual: botón de guardado al final del flujo.",
+              src: '/manual/03-flujo-preguntas.png',
+              alt: 'Captura final de una sesiÃ³n mostrando el botÃ³n para guardar.',
+              calloutText: 'Guardar sesiÃ³n',
+              caption: 'Referencia visual: botÃ³n de guardado al final del flujo.',
             }}
           />
         </section>
@@ -167,15 +178,16 @@ export default function AyudaPage() {
             title="Tu historial"
             description={
               <>
-                Ve a <span className="font-semibold">“Mis Sesiones”</span> para ver tu lista de reflexiones por fecha.
-                Toca una para volver a leerla.
+                Ve a <span className="font-semibold">â€œMis Sesionesâ€</span>{' '}
+                para ver tu lista de reflexiones por fecha. Toca una para volver
+                a leerla.
               </>
             }
             screenshot={{
-              src: "/manual/05-mis-sesiones.png",
-              alt: "Captura de la sección Mis Sesiones con una lista de reflexiones.",
-              calloutText: "Mis Sesiones",
-              caption: "Referencia visual: lista de sesiones ordenadas por fecha.",
+              src: '/manual/05-mis-sesiones.png',
+              alt: 'Captura de la secciÃ³n Mis Sesiones con una lista de reflexiones.',
+              calloutText: 'Mis Sesiones',
+              caption: 'Referencia visual: lista de sesiones ordenadas por fecha.',
             }}
           />
 
@@ -183,15 +195,16 @@ export default function AyudaPage() {
             title="Dashboard de tendencias"
             description={
               <>
-                En <span className="font-semibold">“Análisis”</span> verás gráficas que resumen tu actividad:
-                frecuencia emocional e intensidad a lo largo del tiempo.
+                En <span className="font-semibold">â€œAnÃ¡lisisâ€</span>{' '}
+                verÃ¡s grÃ¡ficas que resumen tu actividad: frecuencia emocional e
+                intensidad a lo largo del tiempo.
               </>
             }
             screenshot={{
-              src: "/manual/06-analisis.png",
-              alt: "Captura de la pestaña Análisis con gráficas de tendencias.",
-              calloutText: "Análisis",
-              caption: "Referencia visual: gráficas de frecuencia e intensidad.",
+              src: '/manual/06-analisis.png',
+              alt: 'Captura de la pestaÃ±a AnÃ¡lisis con grÃ¡ficas de tendencias.',
+              calloutText: 'AnÃ¡lisis',
+              caption: 'Referencia visual: grÃ¡ficas de frecuencia e intensidad.',
             }}
           />
 
@@ -199,15 +212,16 @@ export default function AyudaPage() {
             title="Comparar sesiones"
             description={
               <>
-                Si sientes que se repite un patrón, entra a <span className="font-semibold">“Comparativa”</span>,
-                elige dos sesiones y míralas lado a lado para ver tu evolución.
+                Si sientes que se repite un patrÃ³n, entra a{' '}
+                <span className="font-semibold">â€œComparativaâ€</span>, elige
+                dos sesiones y mÃ­ralas lado a lado para ver tu evoluciÃ³n.
               </>
             }
             screenshot={{
-              src: "/manual/07-comparativa.png",
-              alt: "Captura de la vista Comparativa mostrando dos sesiones lado a lado.",
-              calloutText: "Comparativa",
-              caption: "Referencia visual: comparación en paralelo.",
+              src: '/manual/07-comparativa.png',
+              alt: 'Captura de la vista Comparativa mostrando dos sesiones lado a lado.',
+              calloutText: 'Comparativa',
+              caption: 'Referencia visual: comparaciÃ³n en paralelo.',
             }}
           />
         </section>
@@ -220,33 +234,37 @@ export default function AyudaPage() {
           <div className="space-y-3">
             <details className="group rounded-2xl border border-white/50 bg-white/25 backdrop-blur-md p-4 shadow-sm">
               <summary className="cursor-pointer list-none font-semibold text-slate-900 dark:text-black flex items-center justify-between">
-                ¿Puedo borrar una sesión si me arrepiento de lo que escribí?
-                <span className="text-slate-400 group-open:rotate-180 transition-transform">⌄</span>
+                Â¿Puedo borrar una sesiÃ³n si me arrepiento de lo que escribÃ­?
+                <span className="text-slate-400 group-open:rotate-180 transition-transform">âŒ„</span>
               </summary>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Sí. Abre la sesión desde tu historial y usa el botón <span className="font-semibold">“Eliminar”</span> al final.
+                SÃ­. Abre la sesiÃ³n desde tu historial y usa el botÃ³n{' '}
+                <span className="font-semibold">â€œEliminarâ€</span> al final.
               </p>
             </details>
 
             <details className="group rounded-2xl border border-white/50 bg-white/25 backdrop-blur-md p-4 shadow-sm">
               <summary className="cursor-pointer list-none font-semibold text-slate-900 dark:text-black flex items-center justify-between">
-                ¿Qué pasa si mi internet falla a mitad de una reflexión?
-                <span className="text-slate-400 group-open:rotate-180 transition-transform">⌄</span>
+                Â¿QuÃ© pasa si mi internet falla a mitad de una reflexiÃ³n?
+                <span className="text-slate-400 group-open:rotate-180 transition-transform">âŒ„</span>
               </summary>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                ReflectAI guarda temporalmente tu progreso en tu navegador. Si se corta la conexión,
-                no cierres la pestaña: tus respuestas se sincronizarán en cuanto vuelva el internet.
+                ReflectAI guarda temporalmente tu progreso en tu navegador. Si se
+                corta la conexiÃ³n, no cierres la pestaÃ±a: tus respuestas se
+                sincronizarÃ¡n en cuanto vuelva el internet.
               </p>
             </details>
 
             <details className="group rounded-2xl border border-white/50 bg-white/25 backdrop-blur-md p-4 shadow-sm">
               <summary className="cursor-pointer list-none font-semibold text-slate-900 dark:text-black flex items-center justify-between">
-                ¿Puedo eliminar todos mis datos?
-                <span className="text-slate-400 group-open:rotate-180 transition-transform">⌄</span>
+                Â¿Puedo eliminar todos mis datos?
+                <span className="text-slate-400 group-open:rotate-180 transition-transform">âŒ„</span>
               </summary>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Sí. Ve a <span className="font-semibold">“Configuración de Cuenta”</span> y elige <span className="font-semibold">“Eliminar Cuenta”</span>.
-                Esto borrará tu perfil y tus reflexiones de forma irreversible.
+                SÃ­. Ve a{' '}
+                <span className="font-semibold">â€œConfiguraciÃ³n de Cuentaâ€</span>{' '}
+                y elige <span className="font-semibold">â€œEliminar Cuentaâ€</span>.
+                Esto borrarÃ¡ tu perfil y tus reflexiones de forma irreversible.
               </p>
             </details>
           </div>
@@ -255,4 +273,3 @@ export default function AyudaPage() {
     </main>
   );
 }
-

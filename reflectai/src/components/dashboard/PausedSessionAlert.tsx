@@ -1,53 +1,61 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState } from "react";
+import Link from 'next/link';
+import { useState } from 'react';
 
-import { ClockIcon } from "@/components/icons/ClockIcon";
-import CloseIcon from "@/components/icons/CloseIcon";
-import GlassCard from "@/components/ui/GlassCard";
+import { ClockIcon } from '@/components/icons/ClockIcon';
+import CloseIcon from '@/components/icons/CloseIcon';
+import GlassCard from '@/components/ui/GlassCard';
+
+interface PausedSessionAlertProps {
+  sessionId?: string;
+  timeAgo: string;
+}
+
+function getResumeHref(sessionId?: string) {
+  return sessionId ? `/nueva-sesion?sessionId=${sessionId}` : '/nueva-sesion';
+}
 
 export function PausedSessionAlert({
   sessionId,
   timeAgo,
-}: {
-  sessionId?: string;
-  timeAgo: string;
-}) {
+}: PausedSessionAlertProps) {
   const [isVisible, setIsVisible] = useState(true);
 
-  if (!isVisible) return null;
+  if (!isVisible) {
+    return null;
+  }
 
   return (
-    <GlassCard className="p-4 border-l-4 border-l-violet-500 relative animate-in fade-in slide-in-from-top-4 duration-500">
+    <GlassCard className="relative border-l-4 border-l-violet-500 p-4 animate-in fade-in slide-in-from-top-4 duration-500">
       <button
-        onClick={() => setIsVisible(false)}
-        className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-        aria-label="Cerrar alerta"
         type="button"
+        aria-label="Cerrar alerta"
+        onClick={() => setIsVisible(false)}
+        className="absolute right-2 top-2 rounded-full p-1 text-slate-400 transition-colors hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:hover:text-slate-200"
       >
-        <CloseIcon className="w-4 h-4" />
+        <CloseIcon className="h-4 w-4" />
       </button>
 
-      <div className="flex flex-row items-center justify-between gap-4 w-full pr-6">
-        <div className="flex-shrink-0 p-2 bg-violet-100 dark:bg-violet-900/30 rounded-full text-violet-600">
-          <ClockIcon className="w-5 h-5" />
+      <div className="flex w-full flex-row items-center justify-between gap-4 pr-6">
+        <div className="flex-shrink-0 rounded-full bg-violet-100 p-2 text-violet-600 dark:bg-violet-900/30">
+          <ClockIcon className="h-5 w-5" />
         </div>
 
-        <div className="flex-1 flex flex-col justify-center">
-          <p className="text-sm font-semibold text-slate-900 dark:text-white leading-tight">
+        <div className="flex flex-1 flex-col justify-center">
+          <p className="text-sm font-semibold leading-tight text-slate-900 dark:text-white">
             Tienes una reflexión pendiente
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
             Guardado hace {timeAgo}
           </p>
         </div>
 
         <div className="flex-shrink-0">
           <Link
-            href={sessionId ? `/nueva-sesion?sessionId=${sessionId}` : "/nueva-sesion"}
+            href={getResumeHref(sessionId)}
             role="button"
-            className="inline-flex items-center justify-center whitespace-nowrap text-xs py-2 px-4 h-auto bg-violet-600 hover:bg-violet-700 text-white border-none rounded-2xl font-semibold transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+            className="inline-flex h-auto items-center justify-center whitespace-nowrap rounded-2xl border-none bg-violet-600 px-4 py-2 text-xs font-semibold text-white transition-transform hover:bg-violet-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
           >
             Continuar sesión
           </Link>

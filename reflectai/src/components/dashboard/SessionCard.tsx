@@ -1,6 +1,6 @@
-import { useId } from "react";
-import GlassCard from "@/components/ui/GlassCard";
-import { CalendarIcon } from "@/components/icons/CalendarIcon";
+import { useId } from 'react';
+import GlassCard from '@/components/ui/GlassCard';
+import { CalendarIcon } from '@/components/icons/CalendarIcon';
 
 export interface SessionSummary {
   id: string;

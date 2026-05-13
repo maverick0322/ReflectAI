@@ -18,7 +18,11 @@ vi.mock('@supabase/ssr', () => ({
 
 const cookieStore = {
   getAll: vi.fn(() => [{ name: 'sb', value: 'token' }]),
-  set: vi.fn(),
+  set: vi.fn((name: string, value: string, options: { path: string }) => ({
+    name,
+    value,
+    options,
+  })),
 };
 
 vi.mock('next/headers', () => ({
@@ -71,9 +75,30 @@ describe('supabase clients', () => {
     expect(await createServerSupabaseClient()).toEqual({ server: true });
     expect(cookies).toHaveBeenCalled();
 
-    const options = vi.mocked(createServerClient).mock.calls[0][2];
-    expect(options.cookies.getAll()).toEqual([{ name: 'sb', value: 'token' }]);
-    options.cookies.setAll([
+    const options = vi.mocked(createServerClient).mock.calls[0]?.[2];
+    expect(options).toBeDefined();
+    if (!options) {
+      throw new Error('Expected Supabase server client options to be defined');
+    }
+
+    const cookieAdapter = options.cookies as {
+      getAll: () => Array<{ name: string; value: string }>;
+      setAll?: (
+        cookiesToSet: Array<{
+          name: string;
+          value: string;
+          options: { path: string };
+        }>
+      ) => void;
+    };
+
+    expect(cookieAdapter.getAll()).toEqual([{ name: 'sb', value: 'token' }]);
+    expect(cookieAdapter.setAll).toBeDefined();
+    if (!cookieAdapter.setAll) {
+      throw new Error('Expected cookie adapter setAll to be defined');
+    }
+
+    cookieAdapter.setAll([
       {
         name: 'sb',
         value: 'next-token',

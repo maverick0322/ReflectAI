@@ -1,5 +1,6 @@
-import { useId } from "react";
-import GlassCard from "@/components/ui/GlassCard";
+import { useId } from 'react';
+
+import GlassCard from '@/components/ui/GlassCard';
 
 interface RecentSessionCardProps {
   title: string;
@@ -8,27 +9,36 @@ interface RecentSessionCardProps {
   emotion: string;
 }
 
-export function RecentSessionCard({ title, date, intensity, emotion }: RecentSessionCardProps) {
+export function RecentSessionCard({
+  title,
+  date,
+  intensity,
+  emotion,
+}: RecentSessionCardProps) {
   const cardId = useId();
 
   return (
-    <GlassCard 
-      className="w-full p-5 flex flex-col gap-3 text-left hover:bg-white/20 transition-all cursor-pointer group"
+    <GlassCard
       aria-labelledby={cardId}
+      className="group flex w-full cursor-pointer flex-col gap-3 p-5 text-left transition-all hover:bg-white/20"
     >
-      <div className="flex justify-between items-start w-full gap-4">
-        <h4 id={cardId} className="font-semibold text-lg text-slate-800 dark:text-white line-clamp-2 group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">
+      <div className="flex w-full items-start justify-between gap-4">
+        <h4
+          id={cardId}
+          className="line-clamp-2 text-lg font-semibold text-slate-800 transition-colors group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300"
+        >
           {title}
         </h4>
-        {/* Píldora de emoción principal */}
-        <div className="px-3 py-1 bg-violet-100 dark:bg-violet-900/30 rounded-full flex-shrink-0 text-violet-700 dark:text-violet-300 text-xs font-bold border border-violet-200 dark:border-violet-800">
+        <div className="flex-shrink-0 rounded-full border border-violet-200 bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300">
           {emotion}
         </div>
       </div>
       <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
         <span>{date}</span>
-        <span aria-hidden="true">•</span>
-        <span>Intensidad: <span className="font-bold">{intensity}</span></span>
+        <span aria-hidden="true">&bull;</span>
+        <span>
+          Intensidad: <span className="font-bold">{intensity}</span>
+        </span>
       </div>
     </GlassCard>
   );

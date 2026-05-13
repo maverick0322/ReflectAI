@@ -1,4 +1,4 @@
-import ManualScreenshot from "@/components/manual/ManualScreenshot";
+import ManualScreenshot from '@/components/manual/ManualScreenshot';
 
 type ManualStepProps = Readonly<{
   title: string;

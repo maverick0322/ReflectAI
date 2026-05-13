@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { ReactNode } from "react";
-import GlassCard from "@/components/ui/GlassCard";
-import Button from "@/components/ui/Button";
-import { useRouter } from "next/navigation";
+import { ReactNode } from 'react';
+import GlassCard from '@/components/ui/GlassCard';
+import Button from '@/components/ui/Button';
+import { useRouter } from 'next/navigation';
 
 interface WizardLayoutProps {
   children: ReactNode;

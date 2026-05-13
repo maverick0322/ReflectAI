@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 interface CustomLinkProps {
   href: string;
@@ -6,7 +6,7 @@ interface CustomLinkProps {
   className?: string;
 }
 
-export default function CustomLink({ href, children, className = "" }: CustomLinkProps) {
+export default function CustomLink({ href, children, className = '' }: CustomLinkProps) {
   return (
     <Link 
       href={href} 

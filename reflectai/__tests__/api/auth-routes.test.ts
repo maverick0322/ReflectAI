@@ -183,8 +183,8 @@ describe('rutas API de autenticacion', () => {
     expect(exchangeCodeForSession).toHaveBeenCalledWith('code-1');
 
     exchangeCodeForSession.mockResolvedValueOnce({
-      data: { session: null },
-      error: { message: 'expired' },
+      data: { session: null as never },
+      error: { message: 'expired' } as never,
     });
 
     const failedResponse = await confirmRecoveryPost(
