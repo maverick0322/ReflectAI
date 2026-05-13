@@ -1,13 +1,11 @@
 "use client";
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
-import { CalendarIcon } from '@/components/icons/CalendarIcon';
-import { ChartIcon } from '@/components/icons/ChartIcon';
 import { HomeIcon } from '@/components/icons/HomeIcon';
 import { PlusIcon } from '@/components/icons/PlusIcon';
 import { ProfileIcon } from '@/components/icons/ProfileIcon';
+import { ChartIcon } from '@/components/icons/ChartIcon';
+import { CalendarIcon } from '@/components/icons/CalendarIcon';
 
 interface NavItem {
   href: string;
