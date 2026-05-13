@@ -145,10 +145,13 @@ function createSupabaseMock(options: {
     from.mockReturnValueOnce(builder as never);
   }
 
+  const defaultUser = { id: "user-a", email: "ana@reflectai.com" };
+  const resolvedUser = options.user === undefined ? defaultUser : options.user;
+
   return {
     auth: {
       getUser: vi.fn(async () => ({
-        data: { user: options.user ?? { id: "user-a", email: "ana@reflectai.com" } },
+        data: { user: resolvedUser },
         error: options.authError ?? null,
       })),
       signInWithPassword: vi.fn(),

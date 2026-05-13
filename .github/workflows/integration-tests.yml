@@ -40,6 +40,7 @@ jobs:
         run: npm run test:regression -- --reporter=verbose
 
       - name: Ejecutar suite completa con cobertura
+        if: github.event_name == 'push'
         working-directory: ./reflectai
         run: npm run test:coverage
 
