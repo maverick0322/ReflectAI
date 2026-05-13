@@ -1,4 +1,5 @@
 import Link from 'next/link';
+
 import { HomeIcon } from '@/components/icons/HomeIcon';
 import { PlusIcon } from '@/components/icons/PlusIcon';
 import { ChartIcon } from '@/components/icons/ChartIcon';

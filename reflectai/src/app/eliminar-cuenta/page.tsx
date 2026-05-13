@@ -6,12 +6,15 @@ import Link from "next/link";
 import WarningIcon from "@/components/icons/WarningIcon";
 import GlassCard from "@/components/ui/GlassCard";
 import Input from "@/components/ui/Input";
+import { ApiError } from "@/lib/api/http";
+import { deleteAccount } from "@/lib/api/auth";
 
 
 export default function EliminarCuentaPage() {
   const router = useRouter();
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const isConfirmed = confirmText === "ELIMINAR";
 
@@ -20,16 +23,24 @@ export default function EliminarCuentaPage() {
     setConfirmText(onlyLetters.toUpperCase());
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!isConfirmed) return;
     setIsDeleting(true);
+    setFormError(null);
 
-    // Para miguel: [BACKEND] Llamar a Supabase para eliminar datos
-    console.log("Usuario eliminado. Redirigiendo...");
-
-    setTimeout(() => {
-      router.push("/login");
-    }, 2500);
+    try {
+      await deleteAccount();
+      setTimeout(() => {
+        router.push("/login");
+      }, 2500);
+    } catch (error) {
+      const message =
+        error instanceof ApiError && error.payload?.message
+          ? error.payload.message
+          : "No se pudo eliminar la cuenta";
+      setFormError(message);
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -76,6 +87,12 @@ export default function EliminarCuentaPage() {
                   className="text-center font-bold tracking-widest text-reflect-dark uppercase"
                 />
               </div>
+
+              {formError && (
+                <p className="text-sm text-red-500 font-semibold" role="alert">
+                  {formError}
+                </p>
+              )}
 
               <div className="flex gap-3">
                 <Link

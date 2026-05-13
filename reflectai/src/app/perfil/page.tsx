@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,9 @@ import PencilIcon from "@/components/icons/PencilIcon";
 import SaveIcon from "@/components/icons/SaveIcon";
 import { profileSchema, type ProfileFormValues } from "@/lib/validations/profile";
 import ProfileAvatar from "@/components/perfil/ProfileAvatar";
+import { ApiError } from "@/lib/api/http";
+import { logoutUser } from "@/lib/api/auth";
+import { fetchProfile, updateProfile, uploadProfileAvatar } from "@/lib/api/profile";
 
 type ProfileData = {
   firstName: string;
@@ -33,16 +36,9 @@ type ProfileData = {
   };
 };
 
-const initialProfileData: ProfileData = {
-  firstName: "Arturo Agustín",
-  lastName: "Cuevas Pérez",
-  email: "arturo.cuevas@ejemplo.com",
-  birthDate: "2005-06-19",
-  avatarUrl: null,
-  preferences: {
-    notifications: true,
-    darkMode: false,
-  },
+const DEFAULT_PREFERENCES = {
+  notifications: true,
+  darkMode: false,
 };
 
 function formatFullName(firstName: string, lastName: string) {
@@ -99,7 +95,11 @@ const PreferenceRow = ({ icon, label, enabled, onChange }: { icon: ReactNode; la
 export default function PerfilPage() {
   const router = useRouter(); 
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState(initialProfileData);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [editSessionKey, setEditSessionKey] = useState(0);
 
   const {
@@ -111,15 +111,70 @@ export default function PerfilPage() {
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      birthDate: profile.birthDate,
+      firstName: "",
+      lastName: "",
+      birthDate: "",
     },
     mode: "onChange",
     reValidateMode: "onChange",
   });
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadProfile = async () => {
+      setIsLoading(true);
+      setFormError(null);
+
+      try {
+        const response = await fetchProfile();
+        if (!isMounted) {
+          return;
+        }
+
+        setProfile({
+          firstName: response.data.first_name,
+          lastName: response.data.last_name ?? "",
+          email: response.data.email ?? "",
+          birthDate: response.data.birth_date ?? "",
+          avatarUrl: response.data.avatar_url ?? null,
+          preferences: DEFAULT_PREFERENCES,
+        });
+
+        reset({
+          firstName: response.data.first_name,
+          lastName: response.data.last_name ?? "",
+          birthDate: response.data.birth_date ?? "",
+        });
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        const message =
+          error instanceof ApiError && error.payload?.message
+            ? error.payload.message
+            : "No se pudo cargar el perfil";
+        setFormError(message);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [reset]);
+
   const startEditing = () => {
+    if (!profile) {
+      return;
+    }
+
     reset({
       firstName: profile.firstName,
       lastName: profile.lastName,
@@ -131,24 +186,57 @@ export default function PerfilPage() {
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
-    // Para miguel: [BACKEND] Implementar PATCH /api/users/me en Supabase
-    setProfile((current) => ({
-      ...current,
-      firstName: data.firstName,
-      lastName: data.lastName ?? "",
-      birthDate: data.birthDate,
-    }));
-    reset({
-      firstName: data.firstName,
-      lastName: data.lastName ?? "",
-      birthDate: data.birthDate,
-    });
-    clearErrors();
-    setEditSessionKey((current) => current + 1);
-    setIsEditing(false);
+    if (!profile) {
+      return;
+    }
+
+    setFormError(null);
+    setIsSaving(true);
+
+    try {
+      const response = await updateProfile({
+        firstName: data.firstName,
+        lastName: data.lastName ?? "",
+        birthDate: data.birthDate,
+      });
+
+      setProfile((current) =>
+        current
+          ? {
+              ...current,
+              firstName: response.data.first_name,
+              lastName: response.data.last_name ?? "",
+              birthDate: response.data.birth_date ?? "",
+              avatarUrl: response.data.avatar_url ?? null,
+              email: response.data.email ?? current.email,
+            }
+          : current,
+      );
+
+      reset({
+        firstName: response.data.first_name,
+        lastName: response.data.last_name ?? "",
+        birthDate: response.data.birth_date ?? "",
+      });
+      clearErrors();
+      setEditSessionKey((current) => current + 1);
+      setIsEditing(false);
+    } catch (error) {
+      const message =
+        error instanceof ApiError && error.payload?.message
+          ? error.payload.message
+          : "No se pudo actualizar el perfil";
+      setFormError(message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
+    if (!profile) {
+      return;
+    }
+
     reset({
       firstName: profile.firstName,
       lastName: profile.lastName,
@@ -158,6 +246,61 @@ export default function PerfilPage() {
     setEditSessionKey((current) => current + 1);
     setIsEditing(false);
   };
+
+  const handleAvatarSelected = async (file: File) => {
+    setFormError(null);
+    setIsUploadingAvatar(true);
+
+    try {
+      const response = await uploadProfileAvatar(file);
+      setProfile((current) =>
+        current
+          ? {
+              ...current,
+              avatarUrl: response.data.avatar_url ?? null,
+            }
+          : current,
+      );
+    } catch (error) {
+      const message =
+        error instanceof ApiError && error.payload?.message
+          ? error.payload.message
+          : "No se pudo subir la foto de perfil";
+      setFormError(message);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // ignore logout errors and redirect to login
+    } finally {
+      router.push("/login");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center p-6 py-12">
+        <GlassCard className="max-w-md w-full p-6 text-center">
+          <p className="text-sm text-slate-500">Cargando perfil...</p>
+        </GlassCard>
+      </main>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center p-6 py-12">
+        <GlassCard className="max-w-md w-full p-6 text-center">
+          <p className="text-sm text-red-500">No se pudo cargar el perfil.</p>
+        </GlassCard>
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center p-4 md:p-6 py-8 bg-slate-50/50">
@@ -175,8 +318,11 @@ export default function PerfilPage() {
             firstName={profile.firstName} 
             lastName={profile.lastName} 
             avatarUrl={profile.avatarUrl}
-            onPhotoSelected={(file) => console.log("Foto lista para backend:", file)} // Para miguel: [BACKEND]
+            onPhotoSelected={handleAvatarSelected}
           />
+          {isUploadingAvatar && (
+            <p className="text-xs font-semibold text-slate-500">Subiendo foto...</p>
+          )}
           <div className="text-center">
             <h2 className="text-2xl font-bold text-slate-800">{profile.firstName} {profile.lastName}</h2>
             <p className="text-sm text-slate-500 font-medium">Miembro de ReflectAI</p>
@@ -191,8 +337,13 @@ export default function PerfilPage() {
                 <button type="button" onClick={handleCancel} className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors">
                   Cancelar
                 </button>
-                <button form="profile-form" type="submit" className="flex items-center gap-1.5 text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors">
-                  <SaveIcon className="w-4 h-4" /> Guardar
+                <button
+                  form="profile-form"
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex items-center gap-1.5 text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors"
+                >
+                  <SaveIcon className="w-4 h-4" /> {isSaving ? "Guardando..." : "Guardar"}
                 </button>
               </div>
             ) : (
@@ -224,6 +375,12 @@ export default function PerfilPage() {
             <CustomLink href="/cambiar-contrasena" className="flex items-center gap-2 text-orange-500 hover:text-orange-600 font-bold text-sm px-1 pt-1 transition-colors w-fit">
               <LockIcon className="w-4 h-4" /> Cambiar contraseña
             </CustomLink>
+
+            {formError && (
+              <p className="text-sm text-red-500 font-semibold" role="alert">
+                {formError}
+              </p>
+            )}
           </form>
         </section>
         {/* PREFERENCIAS */}
@@ -234,20 +391,44 @@ export default function PerfilPage() {
               icon={<BellIcon className="w-5 h-5 text-slate-600" />}
               label="Notificaciones diarias"
               enabled={profile.preferences.notifications}
-              onChange={() => setProfile((current) => ({ ...current, preferences: { ...current.preferences, notifications: !current.preferences.notifications } }))}
+              onChange={() =>
+                setProfile((current) =>
+                  current
+                    ? {
+                        ...current,
+                        preferences: {
+                          ...current.preferences,
+                          notifications: !current.preferences.notifications,
+                        },
+                      }
+                    : current,
+                )
+              }
             />
             <hr className="border-slate-200/50" />
             <PreferenceRow
               icon={<MoonIcon className="w-5 h-5 text-slate-600" />}
               label="Modo Oscuro"
               enabled={profile.preferences.darkMode}
-              onChange={() => setProfile((current) => ({ ...current, preferences: { ...current.preferences, darkMode: !current.preferences.darkMode } }))}
+              onChange={() =>
+                setProfile((current) =>
+                  current
+                    ? {
+                        ...current,
+                        preferences: {
+                          ...current.preferences,
+                          darkMode: !current.preferences.darkMode,
+                        },
+                      }
+                    : current,
+                )
+              }
             />
           </div>
         </section>
         {/* ACCIONES DE CUENTA */}
         <footer className="flex flex-col gap-4 pt-4 mt-auto">
-          <Button type="button" variant="outline" onClick={() => router.push('/login')} className="gap-2 border-slate-300 text-slate-600 hover:bg-white/60">
+          <Button type="button" variant="outline" onClick={handleLogout} className="gap-2 border-slate-300 text-slate-600 hover:bg-white/60">
             <LogOutIcon className="w-5 h-5" /> Cerrar Sesión
           </Button>
           <Link href="/eliminar-cuenta" className="text-xs font-bold text-red-400 hover:text-red-500 flex items-center justify-center gap-2 py-2 transition-colors">

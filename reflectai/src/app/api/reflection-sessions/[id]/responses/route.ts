@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { getAuthenticatedUser } from "@/lib/auth/getAuthenticatedUser";
+import { appendResponse, applyMetadataPatch, normalizePayload } from "@/lib/reflection/payload";
 import { addReflectionResponseSchema } from "@/lib/validations/reflection";
-import type { ReflectionEntry } from "@/types/reflection";
 
 type RouteParams = {
   params: Promise<{
@@ -36,7 +36,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     const { data: session, error: sessionError } = await supabase
       .from("reflection_sessions")
-      .select("id, status, payload")
+      .select("id, status, payload, started_at")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();
@@ -59,20 +59,15 @@ export async function POST(request: Request, { params }: RouteParams) {
       );
     }
 
-    const currentPayload = Array.isArray(session.payload)
-      ? (session.payload as ReflectionEntry[])
-      : [];
+    const currentPayload = normalizePayload(
+      session.payload,
+      session.started_at ?? new Date().toISOString(),
+    );
 
-    const newEntry: ReflectionEntry = {
-      step_order: currentPayload.length + 1,
-      question: validation.data.question,
-      user_response: validation.data.userResponse,
-      detected_emotion: validation.data.detectedEmotion ?? null,
-      intensity: validation.data.intensity ?? null,
-      created_at: new Date().toISOString(),
-    };
-
-    const updatedPayload = [...currentPayload, newEntry];
+    const updatedPayload = applyMetadataPatch(
+      appendResponse(currentPayload, validation.data.response),
+      validation.data.metadataPatch,
+    );
 
     const { data, error } = await supabase
       .from("reflection_sessions")
