@@ -17,8 +17,14 @@ vi.mock('@/components/icons/HomeIcon', () => ({
 vi.mock('@/components/icons/PlusIcon', () => ({
   PlusIcon: () => <svg data-testid="plus-icon" />,
 }));
-vi.mock('@/components/icons/ProfileIcon', () => ({
-  ProfileIcon: () => <svg data-testid="profile-icon" />,
+vi.mock('@/components/icons/ClockIcon', () => ({
+  ClockIcon: () => <svg data-testid="clock-icon" />,
+}));
+vi.mock('@/components/icons/ChartIcon', () => ({
+  ChartIcon: () => <svg data-testid="chart-icon" />,
+}));
+vi.mock('@/components/icons/HelpIcon', () => ({
+  HelpIcon: () => <svg data-testid="help-icon" />,
 }));
 vi.mock('@/components/icons/CalendarIcon', () => ({
   CalendarIcon: () => <svg data-testid="calendar-icon" />,
