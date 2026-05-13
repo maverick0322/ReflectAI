@@ -11,8 +11,14 @@ vi.mock('@/components/icons/HomeIcon', () => ({
 vi.mock('@/components/icons/PlusIcon', () => ({
   PlusIcon: () => <svg data-testid="plus-icon" />,
 }));
-vi.mock('@/components/icons/ProfileIcon', () => ({
-  ProfileIcon: () => <svg data-testid="profile-icon" />,
+vi.mock('@/components/icons/ClockIcon', () => ({
+  ClockIcon: () => <svg data-testid="clock-icon" />,
+}));
+vi.mock('@/components/icons/ChartIcon', () => ({
+  ChartIcon: () => <svg data-testid="chart-icon" />,
+}));
+vi.mock('@/components/icons/HelpIcon', () => ({
+  HelpIcon: () => <svg data-testid="help-icon" />,
 }));
 vi.mock('@/components/icons/CalendarIcon', () => ({
   CalendarIcon: () => <svg data-testid="calendar-icon" />,
@@ -23,8 +29,10 @@ describe('componentes UI basicos', () => {
     render(<BottomNav />);
 
     expect(screen.getByLabelText('Inicio')).toHaveAttribute('href', '/dashboard');
-    expect(screen.getByLabelText('Nueva sesion')).toHaveAttribute('href', '/nueva-sesion');
-    expect(screen.getByLabelText('Perfil')).toHaveAttribute('href', '/perfil');
+    expect(screen.getByLabelText('Historial')).toHaveAttribute('href', '/historial');
+    expect(screen.getByLabelText('Nueva sesión')).toHaveAttribute('href', '/nueva-sesion');
+    expect(screen.getByLabelText('Estadísticas')).toHaveAttribute('href', '/estadisticas');
+    expect(screen.getByLabelText('Ayuda')).toHaveAttribute('href', '/ayuda');
   });
 
   it('SocialButton renderiza provider, icono y estado deshabilitado', () => {

@@ -81,7 +81,62 @@ classDiagram
 == Vista de despliegue (diagrama uml de despliegue)
 Estructura física de despliegue.
 
-// TODO ADD Deployment diagram
+@startuml
+!theme plain
+left to right direction
+skinparam node {
+  BackgroundColor white
+  BorderColor black
+}
+
+node "Dispositivo del Usuario" <<Mobile / Desktop>> as Device {
+  node "Navegador Web" as Browser {
+    component "ReflectAI Client\n" as SPA
+  }
+}
+
+cloud "Vercel Platform" <<Frontend & Serverless Hosting>> as Vercel {
+  node "Next.js Node.js Runtime" as Next {
+    component "Server-Side Rendering\n(UI Components)" as SSR
+    component "API Route Handlers\n(Backend Logic)" as API
+  }
+}
+
+cloud "Supabase Cloud" <<Backend-as-a-Service>> as Supabase {
+  node "Infraestructura Gestionada" {
+    component "GoTrue Server\n(Identity & Auth)" as Auth
+    database "PostgreSQL DB\n" as DB
+  }
+}
+
+cloud "Groq Cloud" <<AI Provider>> as Groq {
+  node "LPU Inference Cluster" {
+    component "LLM Engine\n(Llama 3 / Mixtral)" as LPU
+  }
+}
+
+' Relaciones de red y protocolos
+Device =down=> Vercel : HTTPS (TLS 1.3)
+SPA ..> Auth : HTTPS / JWT (Autenticación OAuth)
+SPA --> SSR : Navegación / Hydration
+SPA --> API : Fetch / REST
+
+API =right=> DB : TCP/IP (Postgres Protocol / Supabase SDK)
+API =down=> LPU : HTTPS / REST (API Keys)
+
+note bottom of Device
+  La sesión temporal (JWT) 
+  se almacena en cookies seguras (HttpOnly).
+end note
+
+note top of Vercel
+  Variables de entorno (API Keys de Groq 
+  y Supabase) inyectadas en tiempo de build.
+end note
+
+@enduml
+
+image::diagrama_despliegue.png[]
 
 == Modelo de datos (diagrama de entidad-relación)
 Diseño conceptual de la base de datos (NoSQL / Relacional).
