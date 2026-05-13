@@ -7,7 +7,9 @@ import { CalendarIcon } from '@/components/icons/CalendarIcon';
 import { ChartIcon } from '@/components/icons/ChartIcon';
 import { HomeIcon } from '@/components/icons/HomeIcon';
 import { PlusIcon } from '@/components/icons/PlusIcon';
-import { ProfileIcon } from '@/components/icons/ProfileIcon';
+import { ChartIcon } from '@/components/icons/ChartIcon';
+import { ClockIcon } from '@/components/icons/ClockIcon';
+import { HelpIcon } from '@/components/icons/HelpIcon';
 
 interface NavItem {
   href: string;
