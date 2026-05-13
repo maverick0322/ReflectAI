@@ -161,8 +161,8 @@ export default function DashboardPage() {
             {/* Icono de Perfil Clicable hacia ruta de perfil */}
             <Link href="/perfil" aria-label="Perfil" className="focus:outline-none focus:ring-2 focus:ring-violet-500 rounded-full">
               <div className="w-12 h-12 rounded-full bg-white/50 dark:bg-black/40 backdrop-blur-md border border-white/40 flex items-center justify-center overflow-hidden hover:bg-white/80 transition-colors">
-                {user.avatarUrl ? (
-                  <img src={user.avatarUrl} alt="Perfil" className="w-full h-full object-cover" />
+                {userProfile?.avatarUrl ? (
+                  <img src={userProfile.avatarUrl} alt="Perfil" className="w-full h-full object-cover" />
                 ) : (
                   <ProfileIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
                 )}
