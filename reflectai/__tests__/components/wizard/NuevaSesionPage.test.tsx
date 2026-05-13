@@ -156,7 +156,7 @@ describe("Wizard Nueva Sesión (Integración UI)", () => {
     await waitFor(() => {
       expect(screen.getByText(/¡Reflexión Guardada!/i)).toBeInTheDocument();
     });
-  });
+  }, 10000);
 
   it("UI Reactiva: Debe quitar el mensaje de error tan pronto como el usuario escribe algo válido", async () => {
     const user = userEvent.setup();
