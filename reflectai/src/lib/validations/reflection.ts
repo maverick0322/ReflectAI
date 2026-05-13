@@ -9,28 +9,55 @@ export const createReflectionSessionSchema = z.object({
     .optional(),
 });
 
+const questionIdSchema = z.enum([
+  "Q1_SIT",
+  "Q2_THO",
+  "Q3_EMO",
+  "Q4_INT",
+  "Q5_TEL",
+  "Q6_CON_MINE",
+  "Q6_CON_OTHERS",
+  "Q7_ALT",
+  "SYS_GROUNDING",
+  "SYS_AI_ADJUSTMENT",
+]);
+
+const metadataPatchSchema = z
+  .object({
+    version: z.string().trim().min(1).optional(),
+    started_at: z.string().trim().min(1).optional(),
+    completed_at: z.string().trim().min(1).optional(),
+    interruption_detected: z.boolean().optional(),
+    resume_step: z.number().int().min(1).max(5).optional(),
+    flags: z.array(z.string().trim().min(1)).optional(),
+    grounding_duration_seconds: z.number().int().min(1).optional(),
+    ai_hints: z.array(z.string().trim().min(1)).optional(),
+  })
+  .optional();
+
 export const addReflectionResponseSchema = z.object({
-  question: z
-    .string()
-    .trim()
-    .min(1, "La pregunta es obligatoria")
-    .max(500, "La pregunta no puede tener mas de 500 caracteres"),
-  userResponse: z
-    .string()
-    .trim()
-    .min(1, "La respuesta es obligatoria")
-    .max(3000, "La respuesta no puede tener mas de 3000 caracteres"),
-  detectedEmotion: z
-    .string()
-    .trim()
-    .max(80, "La emocion no puede tener mas de 80 caracteres")
-    .optional(),
-  intensity: z
-    .number()
-    .int("La intensidad debe ser un numero entero")
-    .min(1, "La intensidad minima es 1")
-    .max(10, "La intensidad maxima es 10")
-    .optional(),
+  response: z
+    .object({
+      id: questionIdSchema,
+      text: z.string().trim().max(3000).optional(),
+      value: z.number().int().min(1).max(10).optional(),
+      category: z.string().trim().max(120).optional(),
+      status: z.string().trim().max(120).optional(),
+      method: z.string().trim().max(120).optional(),
+      intervention: z.string().trim().max(200).optional(),
+    })
+    .refine(
+      (data) =>
+        Boolean(data.text) ||
+        typeof data.value === "number" ||
+        Boolean(data.status) ||
+        Boolean(data.method) ||
+        Boolean(data.intervention),
+      {
+        message: "La respuesta debe incluir texto, valor, estado, metodo o intervencion",
+      },
+    ),
+  metadataPatch: metadataPatchSchema,
 });
 
 export const completeReflectionSessionSchema = z.object({
@@ -39,6 +66,7 @@ export const completeReflectionSessionSchema = z.object({
     .trim()
     .max(120, "El titulo no puede tener mas de 120 caracteres")
     .optional(),
+  metadataPatch: metadataPatchSchema,
 });
 
 export type CreateReflectionSessionInput = z.infer<typeof createReflectionSessionSchema>;

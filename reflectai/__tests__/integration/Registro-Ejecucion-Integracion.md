@@ -1,130 +1,94 @@
-# Registro de Ejecución de Pruebas de Integración
+# Registro de Ejecucion de Pruebas de Integracion
 
 **Proyecto:** ReflectAI
-**Fecha de ejecución:** 30 de abril de 2026
-**Encargado de ejecución:** Uriel Cendón Díaz
-**Alcance ejecutado:** API crítica del MVP sobre el código actual
+**Version de suite:** Integracion API critica v2026.05.12
+**Fecha de ejecucion:** 12 de mayo de 2026
+**Encargado de ejecucion:** Uriel Cendón Díaz
+**Alcance ejecutado:** Contratos criticos de API del sistema actual
 
 ## Resumen ejecutivo
 
-Se ejecutó la suite de integración `__tests__/integration/api.integration.test.ts` sobre la implementación actual del proyecto. El resultado fue **APROBADO**: 9 pruebas ejecutadas, 9 aprobadas, 0 fallidas.
+Se actualizo la suite de integracion desde el corte del 30 de abril de 2026 al nuevo versionado del 12 de mayo de 2026.
 
-Este reporte documenta el alcance vigente al 30 de abril de 2026. También servirá como base para futuras pruebas por versionado de la aplicación, de modo que cada versión pueda compararse contra este corte funcional sin mezclar cobertura histórica con el estado actual.
+El resultado fue **APROBADO**: 15 pruebas ejecutadas, 15 aprobadas, 0 fallidas.
 
-La cobertura reportada por Vitest/V8 para las áreas tocadas por la suite quedó en **95% de statements y 95% de lines**, con **100% de branches** en el subconjunto analizado.
+La suite cubre flujos reales de autenticacion, perfil, avatar, sesiones de reflexion, guardado incremental, grounding, cierre con analisis IA, cita diaria, siguiente pregunta y fallback de analisis. Cada caso protege un contrato usado por rutas o pantallas productivas.
+
+## Resultados de ejecucion
+
+| Comando | Resultado |
+|---|---|
+| `npm run test:integration` | 1 archivo aprobado, 15 pruebas aprobadas, 0 fallidas, duracion 1.85s |
+| `npm run test:unit` | 32 archivos aprobados, 192 pruebas aprobadas, 0 fallidas, duracion 18.02s |
+| `npm run test:regression` | 1 archivo aprobado, 4 pruebas aprobadas, 0 fallidas, duracion 6.07s |
+| `npm run test:coverage` | 34 archivos aprobados, 211 pruebas aprobadas, 0 fallidas, duracion 15.72s |
+
+## Cobertura del pase completo
+
+| Metrica | Cobertura |
+|---|---:|
+| Statements | 91.92% |
+| Branches | 82.90% |
+| Functions | 90.56% |
+| Lines | 93.46% |
 
 ## Casos ejecutados
 
 | ID | Caso | Resultado |
 |---|---|---|
-| TC-01-01 | Registro exitoso de usuario con Email/Password | Aprobado |
-| TC-01-03 | Rechazo de registro con datos inválidos | Aprobado |
-| TC-02-01 | Creación de sesión draft con payload mínimo válido | Aprobado |
-| TC-02-05 | Bloqueo de creación sin usuario autenticado | Aprobado |
-| TC-03-01 | Historial cronológico propio | Aprobado |
-| TC-03-04 | Bloqueo de lectura de sesión ajena | Aprobado |
-| TC-02-03 | Guardado de respuesta y extensión de payload | Aprobado |
-| TC-02-04 | Impedimento de completar sesión sin respuestas previas | Aprobado |
-| TC-02-04 | Completar sesión y marcar `completed_at` | Aprobado |
+| TC-01-01 | Registro exitoso y propagacion de metadatos de perfil a Supabase Auth | Aprobado |
+| TC-01-02 | Inicio y cierre de sesion con contratos seguros | Aprobado |
+| TC-01-03 | Recuperacion, confirmacion de codigo y cambio de password autenticado | Aprobado |
+| TC-01-04 | Eliminacion de cuenta con limpieza de historial, perfil, Auth y sesion local | Aprobado |
+| TC-02-01 | Creacion de perfil faltante desde metadatos y actualizacion de datos personales | Aprobado |
+| TC-02-02 | Subida de avatar valido y persistencia de URL publica | Aprobado |
+| TC-03-01 | Creacion de sesion draft con payload versionado 1.1 | Aprobado |
+| TC-03-02 | Historial propio en orden cronologico descendente | Aprobado |
+| TC-03-03 | Bloqueo de lectura de sesion ajena con 404 | Aprobado |
+| TC-03-04 | Guardado de respuestas y fusion de metadata de grounding sin perdida de datos | Aprobado |
+| TC-03-05 | Bloqueo de nuevas respuestas sobre sesiones completadas | Aprobado |
+| TC-03-06 | Completado de reflexion con analisis IA y metadata de cierre | Aprobado |
+| TC-04-01 | Cita diaria personalizada con fallback local si falla IA | Aprobado |
+| TC-04-02 | Generacion de siguientes preguntas con fallback por pregunta | Aprobado |
+| TC-04-03 | Persistencia de analisis fallback cuando el proveedor IA no responde | Aprobado |
 
 ## Evidencia observada
 
-- Respuesta HTTP correcta en los caminos felices y negativos cubiertos.
-- Validación de contratos de entrada en registro, respuesta y completado de sesión.
-- Persistencia simulada de `draft` y `completed` con verificación de payload mínimo.
-- Control de acceso por usuario autenticado en lectura y escritura de sesiones.
-- Verificación de orden cronológico descendente en historial propio.
+- Los endpoints criticos devuelven codigos HTTP esperados en caminos felices y bloqueos relevantes.
+- Las rutas autenticadas siguen filtrando por `user_id` y ocultan recursos ajenos.
+- El payload de reflexion mantiene `metadata.version = "1.1"` y conserva respuestas/metadata al fusionar actualizaciones parciales.
+- El grounding guarda `SYS_GROUNDING`, `flags` y `grounding_duration_seconds` sin borrar campos previos.
+- El cierre de sesion agrega `completed_at`, marca `status = "completed"` y persiste `ai_analysis`.
+- Las rutas IA conservan fallback local cuando el proveedor externo no responde.
 
-## Cobertura reportada
-
-| Archivo | Statements | Branches | Functions | Lines |
-|---|---:|---:|---:|---:|
-| `src/lib/auth/getAuthenticatedUser.ts` | 100% | 100% | 100% | 100% |
-| `src/lib/validations/auth.ts` | 100% | 100% | 100% | 100% |
-| `src/lib/validations/common.ts` | 100% | 100% | 100% | 100% |
-| `src/lib/validations/reflection.ts` | 80% | 100% | 0% | 80% |
-| **Total reportado** | **95%** | **100%** | **75%** | **95%** |
-
-## Observación operativa
-
-La ejecución mostrada por Vitest quedó en modo de espera de cambios después del reporte (`Waiting for file changes`). El resultado funcional sigue siendo válido, pero para un flujo totalmente no interactivo conviene usar `vitest run --coverage` o `npm run test -- --run --coverage`.
-
-## Ejecución de pruebas de integración
-
-### Ejecución manual
-
-Para ejecutar solo la suite de integración de forma aislada:
+## Ejecucion manual
 
 ```bash
 cd reflectai
-npm run test -- --run __tests__/integration/api.integration.test.ts
+npm run test:integration
 ```
 
-Para ejecutar con cobertura:
+Para validar todo el pipeline local:
 
 ```bash
-npm run test -- --run __tests__/integration/api.integration.test.ts --coverage
+npm run test:unit
+npm run test:integration
+npm run test:regression
+npm run test:coverage
 ```
 
-Para ejecutar toda la suite de pruebas (unitarias + integración):
+## Integracion en CI/CD
 
-```bash
-npm run test -- --run
-```
+El workflow actualizado es `.github/workflows/integration-tests.yml`.
 
-### Integración en CI/CD
+El pipeline ejecuta:
 
-Las pruebas de integración se encuentran automatizadas en cada Pull Request mediante GitHub Actions. El workflow responsable es:
+1. `npm run test:unit`
+2. `npm run test:integration`
+3. `npm run test:regression`
+4. `npm run test:coverage`
+5. Verificacion de rutas API criticas existentes
 
-**Ubicación:** `.github/workflows/integration-tests.yml`
+## Conclusion
 
-#### Flujo de validación automática
-
-Cuando se abre o actualiza un PR hacia `main`, GitHub Actions ejecuta automáticamente los siguientes validadores:
-
-1. **Job: Validar Pruebas de Integración**
-   - Instala dependencias del proyecto
-   - Ejecuta `npm run test -- --run --coverage` para correr todas las pruebas (unitarias + integración)
-   - Valida que la cobertura sea >= 70% en statements, branches, functions y lines
-   - Ejecuta específicamente la suite de integración (`__tests__/integration/api.integration.test.ts`) con reporter verbose
-   - Si alguna prueba falla, el workflow se detiene y rechaza el PR automáticamente
-   - Reporta el estado en el summary del PR
-
-2. **Job: Validar Rutas Críticas**
-   - Verifica que todas las rutas API críticas existan en el código:
-     - `src/app/api/auth/register/route.ts`
-     - `src/app/api/reflection-sessions/route.ts`
-     - `src/app/api/reflection-sessions/[id]/route.ts`
-     - `src/app/api/reflection-sessions/[id]/responses/route.ts`
-     - `src/app/api/reflection-sessions/[id]/complete/route.ts`
-   - Solo ejecuta si el Job anterior pasó exitosamente
-
-#### Criterios de rechazo automático
-
-Un PR **será rechazado automáticamente** si:
-- Cualquier prueba unitaria o de integración falla
-- La cobertura cae por debajo de 70% en cualquier métrica (statements, branches, functions, lines)
-- Se detecta un cambio en una ruta crítica sin pruebas asociadas
-- Se detectan errores no controlados o excepciones no capturadas
-
-#### Criterios de aprobación
-
-Un PR **puede ser fusionado a main** solo si:
-- Todos los casos de integración pasan sin errores
-- La cobertura se mantiene en o por encima del 70%
-- Las rutas críticas del API siguen existentes y funcionales
-- No hay cambios en los contratos de entrada/salida esperados
-
-#### Cómo se verifica en la práctica
-
-Después de hacer push a un PR:
-
-1. GitHub Actions automáticamente ejecuta el workflow `integration-tests.yml`
-2. Si alguna validación falla, el PR muestra un "❌" rojo en las checks
-3. En la pestaña "Checks" del PR se puede ver el reporte detallado de qué falló
-4. El merge button estará deshabilitado hasta que todas las validaciones pasen
-5. Una vez que pasen todas, aparecerá "✅" verde y el PR podrá ser fusionado
-
-## Conclusión
-
-Con el código actual, los casos críticos de integración cubiertos por esta suite quedaron **cumplidos** y sin fallas detectadas en la ejecución realizada.
+Con el codigo actual y el versionado del 12 de mayo de 2026, la suite de integracion queda **aprobada** y ampliada para cubrir los flujos criticos activos del sistema.

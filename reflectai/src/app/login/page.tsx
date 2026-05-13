@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
@@ -11,9 +13,14 @@ import GlassCard from "@/components/ui/GlassCard";
 import Input from "@/components/ui/Input";
 import PasswordInput from "@/components/ui/PasswordInput";
 import SocialButton from "@/components/ui/SocialButton";
+import { ApiError } from "@/lib/api/http";
+import { loginUser } from "@/lib/api/auth";
 import { loginSchema, type LoginFormValues } from "@/lib/validations/auth";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -23,9 +30,22 @@ export default function LoginPage() {
     mode: "onTouched",
   });
 
-  const onSubmit = async (_data: LoginFormValues) => {
-    void _data;
-    // TODO: Integracion con Supabase para iniciar sesion.
+  const onSubmit = async (data: LoginFormValues) => {
+    setFormError(null);
+    setIsSubmitting(true);
+
+    try {
+      await loginUser(data.email, data.password);
+      router.push("/dashboard");
+    } catch (error) {
+      const message =
+        error instanceof ApiError && error.payload?.message
+          ? error.payload.message
+          : "No se pudo iniciar sesion";
+      setFormError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -59,7 +79,15 @@ export default function LoginPage() {
             </CustomLink>
           </div>
 
-          <Button type="submit">Iniciar sesión</Button>
+          {formError && (
+            <p className="text-sm text-red-500 font-semibold" role="alert">
+              {formError}
+            </p>
+          )}
+
+          <Button type="submit" disabled={isSubmitting} className={isSubmitting ? "opacity-60" : ""}>
+            {isSubmitting ? "Ingresando..." : "Iniciar sesión"}
+          </Button>
         </form>
 
         <div className="relative flex items-center py-2 text-sm font-medium text-reflect-dark/50">
@@ -69,9 +97,13 @@ export default function LoginPage() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <SocialButton provider="Google" icon={<GoogleIcon />} />
-          <SocialButton provider="Facebook" icon={<FacebookIcon />} />
+          <SocialButton provider="Google" icon={<GoogleIcon />} disabled />
+          <SocialButton provider="Facebook" icon={<FacebookIcon />} disabled />
         </div>
+
+        <p className="text-xs text-reflect-dark/50 text-center">
+          Inicio con Google y Facebook estara disponible pronto.
+        </p>
 
         <footer className="text-center text-sm text-reflect-dark/70">
           ¿No tienes cuenta? <CustomLink href="/registro">Regístrate aquí</CustomLink>
