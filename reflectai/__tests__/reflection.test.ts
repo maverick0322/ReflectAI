@@ -30,10 +30,10 @@ describe("Validaciones de sesiones de reflexion", () => {
 describe("Validaciones de respuestas de reflexion", () => {
   it("permite una respuesta valida", () => {
     const result = addReflectionResponseSchema.safeParse({
-      question: "Que ocurrio?",
-      userResponse: "Tuve una discusion con un companero.",
-      detectedEmotion: "frustracion",
-      intensity: 8,
+      response: {
+        id: "Q1_SIT",
+        text: "Tuve una discusion con un companero.",
+      },
     });
 
     expect(result.success).toBe(true);
@@ -41,19 +41,24 @@ describe("Validaciones de respuestas de reflexion", () => {
 
   it("rechaza respuesta vacia", () => {
     const result = addReflectionResponseSchema.safeParse({
-      question: "Que ocurrio?",
-      userResponse: "",
-      intensity: 5,
+      response: {
+        id: "Q1_SIT",
+        text: "",
+      },
     });
 
     expect(result.success).toBe(false);
+    expect(result.error?.issues[0].message).toBe(
+      "La respuesta debe incluir texto, valor, estado, metodo o intervencion",
+    );
   });
 
   it("rechaza intensidad menor que 1", () => {
     const result = addReflectionResponseSchema.safeParse({
-      question: "Que ocurrio?",
-      userResponse: "Me senti mal.",
-      intensity: 0,
+      response: {
+        id: "Q4_INT",
+        value: 0,
+      },
     });
 
     expect(result.success).toBe(false);
@@ -61,12 +66,28 @@ describe("Validaciones de respuestas de reflexion", () => {
 
   it("rechaza intensidad mayor que 10", () => {
     const result = addReflectionResponseSchema.safeParse({
-      question: "Que ocurrio?",
-      userResponse: "Me senti mal.",
-      intensity: 11,
+      response: {
+        id: "Q4_INT",
+        value: 11,
+      },
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it("acepta metadata patch con flags", () => {
+    const result = addReflectionResponseSchema.safeParse({
+      response: {
+        id: "SYS_GROUNDING",
+        status: "acknowledged",
+        method: "box_breathing",
+      },
+      metadataPatch: {
+        flags: ["high_intensity_triggered"],
+      },
+    });
+
+    expect(result.success).toBe(true);
   });
 });
 

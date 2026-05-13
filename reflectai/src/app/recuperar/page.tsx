@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -7,9 +8,14 @@ import Button from "@/components/ui/Button";
 import CustomLink from "@/components/ui/CustomLink";
 import GlassCard from "@/components/ui/GlassCard";
 import Input from "@/components/ui/Input";
+import { ApiError } from "@/lib/api/http";
+import { recoverPassword } from "@/lib/api/auth";
 import { recoverPasswordSchema, type RecoverPasswordFormValues } from "@/lib/validations/auth";
 
 export default function RecoverPasswordPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -19,9 +25,22 @@ export default function RecoverPasswordPage() {
     mode: "onTouched",
   });
 
-  const onSubmit = async (_data: RecoverPasswordFormValues) => {
-    void _data;
-    // TODO: Integracion con Supabase para recuperar contraseña.
+  const onSubmit = async (data: RecoverPasswordFormValues) => {
+    setFormError(null);
+    setIsSubmitting(true);
+
+    try {
+      await recoverPassword(data.email);
+      setIsSuccess(true);
+    } catch (error) {
+      const message =
+        error instanceof ApiError && error.payload?.message
+          ? error.payload.message
+          : "No se pudo enviar el enlace";
+      setFormError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -45,7 +64,19 @@ export default function RecoverPasswordPage() {
             maxLength={254}
             error={errors.email?.message}
           />
-          <Button type="submit">Enviar enlace</Button>
+          {formError && (
+            <p className="text-sm text-red-500 font-semibold" role="alert">
+              {formError}
+            </p>
+          )}
+          {isSuccess && (
+            <p className="text-sm text-green-600 font-semibold" role="status">
+              Revisa tu correo para continuar con el restablecimiento.
+            </p>
+          )}
+          <Button type="submit" disabled={isSubmitting} className={isSubmitting ? "opacity-60" : ""}>
+            {isSubmitting ? "Enviando..." : "Enviar enlace"}
+          </Button>
         </form>
 
         <footer className="mt-4 text-center text-sm text-reflect-dark/70">

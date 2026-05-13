@@ -29,6 +29,21 @@ export const recoverPasswordSchema = z.object({
   email: emailField,
 });
 
+export const confirmRecoverySchema = z.object({
+  code: z.string().min(1, "El codigo es obligatorio"),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "La contraseña actual es obligatoria").optional(),
+  newPassword: passwordField,
+  confirmNewPassword: z.string().min(1, "Confirma tu nueva contraseña"),
+}).refine((data) => data.newPassword === data.confirmNewPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmNewPassword"],
+});
+
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 export type RecoverPasswordFormValues = z.infer<typeof recoverPasswordSchema>;
+export type ConfirmRecoveryValues = z.infer<typeof confirmRecoverySchema>;
+export type ChangePasswordValues = z.infer<typeof changePasswordSchema>;

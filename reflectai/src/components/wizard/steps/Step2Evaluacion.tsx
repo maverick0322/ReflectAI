@@ -1,19 +1,33 @@
 "use client";
 
 import { Controller, useFormContext, useWatch } from "react-hook-form";
+
 import Button from "@/components/ui/Button";
-import { PrimaryEmotion } from "@/types/reflection";
-import { WizardFormValues } from "@/lib/validations/reflection";
 import { useValidationContext } from "@/contexts/ValidationContext";
+import { WizardFormValues } from "@/lib/validations/reflection";
+import { PrimaryEmotion } from "@/types/reflection";
 
 interface StepProps {
   onNext: () => void;
   onPrev: () => void;
+  thoughtQuestion?: string;
+  emotionQuestion?: string;
+  intensityQuestion?: string;
 }
 
-export const Step2Evaluacion = ({ onNext, onPrev }: StepProps) => {
+const DEFAULT_THOUGHT_QUESTION =
+  "En ese instante, ¿cuál fue el primer pensamiento que cruzó tu mente?";
+const DEFAULT_EMOTION_QUESTION = "¿Qué emoción principal experimentaste?";
+const DEFAULT_INTENSITY_QUESTION = "Intensidad emocional";
+
+export const Step2Evaluacion = ({
+  onNext,
+  onPrev,
+  thoughtQuestion = DEFAULT_THOUGHT_QUESTION,
+  emotionQuestion = DEFAULT_EMOTION_QUESTION,
+  intensityQuestion = DEFAULT_INTENSITY_QUESTION,
+}: StepProps) => {
   const {
-    register,
     control,
     setValue,
     formState: { errors },
@@ -24,27 +38,37 @@ export const Step2Evaluacion = ({ onNext, onPrev }: StepProps) => {
   const currentIntensity = useWatch({ control, name: "intensidad" }) ?? 5;
   const pensamientoText = useWatch({ control, name: "pensamiento" }) ?? "";
 
-  const handleNext = () => onNext();
-  
   const shouldShowPensamientoError = !!errors.pensamiento && shouldShowErrors;
   const shouldShowEmocionError = !!errors.emocion && shouldShowErrors;
 
   return (
     <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-right-4 duration-500">
-      
-      <input type="hidden" {...register("emocion")} />
+      <Controller
+        name="emocion"
+        control={control}
+        render={({ field }) => <input type="hidden" {...field} value={field.value ?? ""} />}
+      />
 
       <section className="flex flex-col gap-2">
         <h2 className="text-xl md:text-2xl font-sans font-bold text-slate-800 leading-tight">
-          En ese instante, ¿cuál fue el primer pensamiento que cruzó tu mente?
+          {thoughtQuestion}
         </h2>
-        <textarea
-          {...register("pensamiento")}
-          maxLength={3000}
-          placeholder="Me dije a mí mismo que..."
-          className={`w-full min-h-[100px] p-4 mt-2 bg-white/30 backdrop-blur-sm rounded-2xl outline-none transition-all resize-none text-slate-700 placeholder:text-slate-400 ${
-            shouldShowPensamientoError ? "border-2 border-red-400" : "border border-white/60 focus:ring-2 focus:ring-indigo-300/50"
-          }`}
+        <Controller
+          name="pensamiento"
+          control={control}
+          render={({ field }) => (
+            <textarea
+              {...field}
+              value={field.value ?? ""}
+              maxLength={3000}
+              placeholder="Me dije a mí mismo que..."
+              className={`w-full min-h-[100px] p-4 mt-2 bg-white/30 backdrop-blur-sm rounded-2xl outline-none transition-all resize-none text-slate-700 placeholder:text-slate-400 ${
+                shouldShowPensamientoError
+                  ? "border-2 border-red-400"
+                  : "border border-white/60 focus:ring-2 focus:ring-indigo-300/50"
+              }`}
+            />
+          )}
         />
         <div className="flex justify-between items-start px-2">
           <span className="text-xs font-bold text-red-500 max-w-[80%]">
@@ -60,7 +84,7 @@ export const Step2Evaluacion = ({ onNext, onPrev }: StepProps) => {
 
       <section className="flex flex-col gap-4">
         <h3 className="text-lg font-sans font-bold text-slate-800">
-          ¿Qué emoción principal experimentaste?
+          {emotionQuestion}
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {Object.values(PrimaryEmotion).map((emocion) => (
@@ -96,13 +120,13 @@ export const Step2Evaluacion = ({ onNext, onPrev }: StepProps) => {
       <section className="flex flex-col gap-6">
         <div className="flex justify-between items-end">
           <h3 className="text-lg font-sans font-bold text-slate-800">
-            Intensidad emocional
+            {intensityQuestion}
           </h3>
           <span className="text-5xl font-black text-indigo-600 tracking-tighter drop-shadow-sm">
             {currentIntensity} <span className="text-xl text-slate-400 font-bold">/ 10</span>
           </span>
         </div>
-        
+
         <div className="flex flex-col gap-2 relative">
           <Controller
             name="intensidad"
@@ -130,7 +154,7 @@ export const Step2Evaluacion = ({ onNext, onPrev }: StepProps) => {
         <Button type="button" variant="ghost" onClick={onPrev} className="w-1/3">
           Atrás
         </Button>
-        <Button type="button" onClick={handleNext} className="w-2/3">
+        <Button type="button" onClick={onNext} className="w-2/3">
           Siguiente
         </Button>
       </div>

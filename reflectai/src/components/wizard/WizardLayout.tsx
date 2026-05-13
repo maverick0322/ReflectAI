@@ -26,6 +26,7 @@ export const WizardLayout = ({
       <div className="w-full max-w-lg mb-8 flex flex-col gap-4">
         <div className="flex justify-between items-center px-2">
           <button 
+            type="button"
             onClick={() => router.back()}
             className="text-gray-500 hover:text-gray-800 transition-colors text-sm font-medium"
             aria-label="Salir de la sesión"
@@ -34,6 +35,7 @@ export const WizardLayout = ({
           </button>
           
           <Button 
+            type="button"
             variant="ghost" 
             size="sm" 
             onClick={onSaveDraft}
