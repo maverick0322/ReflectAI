@@ -5,6 +5,12 @@ import { SessionCard } from '@/components/dashboard/SessionCard';
 import BottomNav from '@/components/ui/BottomNav';
 import SocialButton from '@/components/ui/SocialButton';
 
+const usePathnameMock = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => usePathnameMock(),
+}));
+
 vi.mock('@/components/icons/HomeIcon', () => ({
   HomeIcon: () => <svg data-testid="home-icon" />,
 }));
@@ -23,16 +29,30 @@ vi.mock('@/components/icons/HelpIcon', () => ({
 vi.mock('@/components/icons/CalendarIcon', () => ({
   CalendarIcon: () => <svg data-testid="calendar-icon" />,
 }));
+vi.mock('@/components/icons/ChartIcon', () => ({
+  ChartIcon: () => <svg data-testid="chart-icon" />,
+}));
 
 describe('componentes UI basicos', () => {
   it('BottomNav expone enlaces principales', () => {
+    usePathnameMock.mockReturnValue('/dashboard');
+
     render(<BottomNav />);
 
     expect(screen.getByLabelText('Inicio')).toHaveAttribute('href', '/dashboard');
     expect(screen.getByLabelText('Historial')).toHaveAttribute('href', '/historial');
-    expect(screen.getByLabelText('Nueva sesión')).toHaveAttribute('href', '/nueva-sesion');
-    expect(screen.getByLabelText('Estadísticas')).toHaveAttribute('href', '/estadisticas');
-    expect(screen.getByLabelText('Ayuda')).toHaveAttribute('href', '/ayuda');
+    expect(screen.getByLabelText('Estadisticas')).toHaveAttribute('href', '/estadisticas');
+    expect(screen.getByLabelText('Nueva sesion')).toHaveAttribute('href', '/nueva-sesion');
+    expect(screen.getByLabelText('Perfil')).toHaveAttribute('href', '/perfil');
+  });
+
+  it('BottomNav resalta la ruta activa de historial', () => {
+    usePathnameMock.mockReturnValue('/historial');
+
+    render(<BottomNav />);
+
+    expect(screen.getByLabelText('Historial')).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByLabelText('Perfil')).not.toHaveAttribute('aria-current');
   });
 
   it('SocialButton renderiza provider, icono y estado deshabilitado', () => {
