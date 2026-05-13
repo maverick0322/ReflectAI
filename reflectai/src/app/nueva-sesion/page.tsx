@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 
 import GlassCard from "@/components/ui/GlassCard";
@@ -154,14 +154,11 @@ function buildCompletionSummary(
 
 function NuevaSesionContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionIdFromUrl = searchParams.get("sessionId");
   const sessionCreationPromiseRef = useRef<
     Promise<Awaited<ReturnType<typeof createReflectionSession>>> | null
   >(null);
-  const [sessionIdFromUrl] = useState(() =>
-    typeof window === "undefined"
-      ? null
-      : new URLSearchParams(window.location.search).get("sessionId"),
-  );
 
   const [step, setStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -229,6 +226,7 @@ function NuevaSesionContent() {
     const initSession = async () => {
       setFormError(null);
       setQuestionPrompts({});
+      sessionCreationPromiseRef.current = null;
 
       if (!sessionIdFromUrl) {
         reset(DEFAULT_FORM_VALUES);
@@ -482,6 +480,10 @@ function NuevaSesionContent() {
       setStep(2);
       return;
     }
+    if (step === 4 && !groundingRequired) {
+      setStep(2);
+      return;
+    }
     setStep((current) => Math.max(current - 1, 1));
   };
 
@@ -698,6 +700,20 @@ function NuevaSesionContent() {
   );
 }
 
+function NuevaSesionLoading() {
+  return (
+    <main className="min-h-screen flex items-center justify-center p-4">
+      <GlassCard className="p-8 flex flex-col items-center text-center gap-4">
+        <p className="text-slate-500 font-medium">Preparando tu sesion...</p>
+      </GlassCard>
+    </main>
+  );
+}
+
 export default function NuevaSesionPage() {
-  return <NuevaSesionContent />;
+  return (
+    <Suspense fallback={<NuevaSesionLoading />}>
+      <NuevaSesionContent />
+    </Suspense>
+  );
 }

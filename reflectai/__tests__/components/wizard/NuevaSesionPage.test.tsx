@@ -5,8 +5,10 @@ import NuevaSesionPage from "@/app/nueva-sesion/page";
 
 const {
   createReflectionSessionMock,
+  getReflectionSessionMock,
   addReflectionResponseMock,
   completeReflectionSessionMock,
+  useSearchParamsMock,
   routerMock,
 } = vi.hoisted(() => {
   const baseResponse = {
@@ -36,8 +38,10 @@ const {
 
   return {
     createReflectionSessionMock: vi.fn(async () => baseResponse),
+    getReflectionSessionMock: vi.fn(async () => baseResponse),
     addReflectionResponseMock: vi.fn(async () => baseResponse),
     completeReflectionSessionMock: vi.fn(async () => baseResponse),
+    useSearchParamsMock: vi.fn(() => new URLSearchParams()),
     routerMock: {
       push: vi.fn(),
       back: vi.fn(),
@@ -47,11 +51,12 @@ const {
 
 vi.mock("next/navigation", () => ({
   useRouter: () => routerMock,
+  useSearchParams: () => useSearchParamsMock(),
 }));
 
 vi.mock("@/lib/api/reflection", () => ({
   createReflectionSession: () => createReflectionSessionMock(),
-  getReflectionSession: vi.fn(),
+  getReflectionSession: (...args: unknown[]) => getReflectionSessionMock(...args),
   requestNextQuestion: vi.fn(async () => ({
     data: { done: true },
   })),
@@ -67,6 +72,7 @@ const renderWizard = async () => {
 describe("Wizard Nueva Sesión (Integración UI)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useSearchParamsMock.mockReturnValue(new URLSearchParams());
   });
 
   it("Camino Malo: No debe dejar avanzar del Paso 1 si el campo está vacío", async () => {
@@ -197,5 +203,93 @@ describe("Wizard Nueva Sesión (Integración UI)", () => {
     ).toBeInTheDocument();
 
     expect(screen.queryByText(/¡Reflexión Guardada!/i)).not.toBeInTheDocument();
+  });
+
+  it("debe reanudar una sesion existente sin crear una nueva", async () => {
+    const user = userEvent.setup();
+    useSearchParamsMock.mockReturnValue(new URLSearchParams("sessionId=session-1"));
+    getReflectionSessionMock.mockResolvedValueOnce({
+      data: {
+        id: "session-1",
+        title: "Sesion pausada",
+        status: "draft",
+        started_at: "2026-05-07T10:00:00.000Z",
+        completed_at: null,
+        payload: {
+          metadata: {
+            version: "1.1",
+            started_at: "2026-05-07T10:00:00.000Z",
+          },
+          responses: [
+            {
+              id: "Q1_SIT",
+              text: "Una situacion guardada previamente",
+            },
+          ],
+        },
+        ai_analysis: {},
+      },
+      message: "ok",
+    });
+
+    render(<NuevaSesionPage />);
+
+    expect(await screen.findByText(/primer pensamiento/i)).toBeInTheDocument();
+    await user.type(
+      screen.getByPlaceholderText(/Me dije/i),
+      "Un pensamiento suficientemente claro",
+    );
+    await user.click(screen.getByRole("button", { name: "Enojo" }));
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    await waitFor(() => {
+      expect(addReflectionResponseMock).toHaveBeenCalledWith(
+        "session-1",
+        expect.objectContaining({ id: "Q2_THO" }),
+        undefined,
+      );
+    });
+    expect(createReflectionSessionMock).not.toHaveBeenCalled();
+  });
+
+  it("debe volver al paso anterior con respuestas rehidratadas al reanudar", async () => {
+    const user = userEvent.setup();
+    useSearchParamsMock.mockReturnValue(new URLSearchParams("sessionId=session-1"));
+    getReflectionSessionMock.mockResolvedValueOnce({
+      data: {
+        id: "session-1",
+        title: "Sesion pausada",
+        status: "draft",
+        started_at: "2026-05-07T10:00:00.000Z",
+        completed_at: null,
+        payload: {
+          metadata: {
+            version: "1.1",
+            started_at: "2026-05-07T10:00:00.000Z",
+            resume_step: 4,
+          },
+          responses: [
+            { id: "Q1_SIT", text: "Una situacion guardada previamente" },
+            { id: "Q2_THO", text: "Un pensamiento ya guardado" },
+            { id: "Q3_EMO", text: "Enojo", category: "primary" },
+            { id: "Q4_INT", value: 7 },
+          ],
+        },
+        ai_analysis: {},
+      },
+      message: "ok",
+    });
+
+    render(<NuevaSesionPage />);
+
+    expect(await screen.findByText(/oculto/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /atr/i }));
+
+    expect(await screen.findByText(/primer pensamiento/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Me dije/i)).toHaveValue(
+      "Un pensamiento ya guardado",
+    );
+    expect(screen.getByRole("button", { name: "Enojo" })).toHaveClass("bg-indigo-500");
+    expect(screen.getByRole("slider")).toHaveValue("7");
   });
 });
