@@ -5,7 +5,7 @@ interface EmotionalEvolutionCardProps {
   evolution: StatisticsEvolutionPoint[];
 }
 
-export function EmotionalEvolutionCard({ evolution }: EmotionalEvolutionCardProps) {
+export function EmotionalEvolutionCard({ evolution }: Readonly<EmotionalEvolutionCardProps>) {
   return (
     <GlassCard className="p-5 gap-4 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex flex-col gap-1">

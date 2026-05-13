@@ -5,7 +5,7 @@ interface HistorySearchBarProps {
   defaultValue: string;
 }
 
-export function HistorySearchBar({ placeholder, defaultValue }: HistorySearchBarProps) {
+export function HistorySearchBar({ placeholder, defaultValue }: Readonly<HistorySearchBarProps>) {
   return (
     <div className="flex items-center gap-3 rounded-full bg-slate-100 px-4 py-3">
       <SearchIcon className="h-5 w-5 text-slate-400" />

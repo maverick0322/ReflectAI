@@ -5,7 +5,7 @@ interface TopicHighlightsCardProps {
   topics: StatisticsTopicItem[];
 }
 
-export function TopicHighlightsCard({ topics }: TopicHighlightsCardProps) {
+export function TopicHighlightsCard({ topics }: Readonly<TopicHighlightsCardProps>) {
   return (
     <GlassCard className="p-5 gap-4 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex flex-col gap-1">

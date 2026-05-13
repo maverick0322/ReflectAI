@@ -4,7 +4,7 @@ interface HistorySessionCardProps {
   entry: HistoryEntry;
 }
 
-export function HistorySessionCard({ entry }: HistorySessionCardProps) {
+export function HistorySessionCard({ entry }: Readonly<HistorySessionCardProps>) {
   return (
     <article className="rounded-[1.75rem] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
       <div className="flex items-start justify-between gap-4">

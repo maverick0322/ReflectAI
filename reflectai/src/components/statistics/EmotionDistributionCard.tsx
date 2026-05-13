@@ -17,7 +17,7 @@ function buildDistributionGradient(emotions: StatisticsEmotionItem[]) {
     .join(', ');
 }
 
-export function EmotionDistributionCard({ emotions }: EmotionDistributionCardProps) {
+export function EmotionDistributionCard({ emotions }: Readonly<EmotionDistributionCardProps>) {
   return (
     <GlassCard className="p-5 gap-4 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex flex-col gap-1">

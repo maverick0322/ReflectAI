@@ -6,7 +6,7 @@ interface ThoughtPatternCardProps {
   pattern: StatisticsPattern;
 }
 
-export function ThoughtPatternCard({ pattern }: ThoughtPatternCardProps) {
+export function ThoughtPatternCard({ pattern }: Readonly<ThoughtPatternCardProps>) {
   return (
     <GlassCard className="p-5 gap-4 border-l-4 border-l-violet-500 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex items-start gap-4">

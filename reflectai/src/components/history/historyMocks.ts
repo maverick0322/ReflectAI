@@ -1,6 +1,6 @@
 import type { HistorySummary } from '@/types/history';
 
-// TODO(backend): Replace this placeholder payload with the real reflection history response.
+// Para Miguel(backend): Replace this placeholder payload with the real reflection history response.
 export const historySummaryMock: HistorySummary = {
   completedSessions: 42,
   searchPlaceholder: 'Buscar palabras clave o detonantes',

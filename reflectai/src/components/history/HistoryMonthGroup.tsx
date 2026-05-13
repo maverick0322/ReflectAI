@@ -5,7 +5,7 @@ interface HistoryMonthGroupProps {
   group: HistoryMonthGroupType;
 }
 
-export function HistoryMonthGroup({ group }: HistoryMonthGroupProps) {
+export function HistoryMonthGroup({ group }: Readonly<HistoryMonthGroupProps>) {
   return (
     <section className="flex flex-col gap-4" aria-labelledby={`month-${group.id}`}>
       <h2

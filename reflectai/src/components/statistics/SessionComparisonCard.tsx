@@ -19,7 +19,7 @@ export function SessionComparisonCard({
   sessionOptions,
   defaultSelection,
   comparisonResult,
-}: SessionComparisonCardProps) {
+}: Readonly<SessionComparisonCardProps>) {
   const [selection, setSelection] = useState(defaultSelection);
   const [isComparing, setIsComparing] = useState(false);
 
@@ -49,7 +49,7 @@ export function SessionComparisonCard({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-600">
-          Sesion A
+          <span>Sesion A</span> 
           <select
             aria-label="Sesion A"
             className="rounded-2xl border border-white/60 bg-white/60 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:ring-2 focus:ring-violet-300"
@@ -65,7 +65,7 @@ export function SessionComparisonCard({
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-600">
-          Sesion B
+          <span>Sesion B</span>
           <select
             aria-label="Sesion B"
             className="rounded-2xl border border-white/60 bg-white/60 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:ring-2 focus:ring-violet-300"
