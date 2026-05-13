@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-import ManualStep from "@/components/manual/ManualStep";
+import ManualStep from '@/components/manual/ManualStep';
 
 const manualScreenshotMock = vi.fn(
   ({
@@ -24,7 +24,7 @@ const manualScreenshotMock = vi.fn(
   ),
 );
 
-vi.mock("@/components/manual/ManualScreenshot", () => ({
+vi.mock('@/components/manual/ManualScreenshot', () => ({
   default: (props: {
     src: string;
     alt: string;
@@ -33,69 +33,69 @@ vi.mock("@/components/manual/ManualScreenshot", () => ({
   }) => manualScreenshotMock(props),
 }));
 
-describe("ManualStep", () => {
-  it("renderiza el titulo y la descripcion del paso", () => {
+describe('ManualStep', () => {
+  it('renderiza el titulo y la descripcion del paso', () => {
     render(
       <ManualStep
         title="Crear tu cuenta"
         description={<p>Usa tu correo para comenzar.</p>}
         screenshot={{
-          src: "/manual/paso1.png",
-          alt: "Pantalla de registro",
+          src: '/manual/paso1.png',
+          alt: 'Pantalla de registro',
         }}
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Crear tu cuenta" })).toBeInTheDocument();
-    expect(screen.getByText("Usa tu correo para comenzar.")).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Crear tu cuenta' })).toBeInTheDocument();
+    expect(screen.getByText('Usa tu correo para comenzar.')).toBeInTheDocument();
   });
 
-  it("renderiza el componente ManualScreenshot y le pasa correctamente src, alt, calloutText y caption", () => {
+  it('renderiza el componente ManualScreenshot y le pasa correctamente src, alt, calloutText y caption', () => {
     render(
       <ManualStep
         title="Guardar sesión"
         description="Confirma los cambios antes de salir."
         screenshot={{
-          src: "/manual/paso2.png",
-          alt: "Botón de guardado",
-          calloutText: "Presiona guardar",
-          caption: "Referencia visual del botón principal.",
+          src: '/manual/paso2.png',
+          alt: 'Botón de guardado',
+          calloutText: 'Presiona guardar',
+          caption: 'Referencia visual del botón principal.',
         }}
       />,
     );
 
-    expect(screen.getByTestId("manual-screenshot")).toBeInTheDocument();
+    expect(screen.getByTestId('manual-screenshot')).toBeInTheDocument();
     expect(manualScreenshotMock).toHaveBeenCalledWith(
       {
-        src: "/manual/paso2.png",
-        alt: "Botón de guardado",
-        calloutText: "Presiona guardar",
-        caption: "Referencia visual del botón principal.",
+        src: '/manual/paso2.png',
+        alt: 'Botón de guardado',
+        calloutText: 'Presiona guardar',
+        caption: 'Referencia visual del botón principal.',
       },
     );
-    expect(screen.getByText("/manual/paso2.png")).toBeInTheDocument();
-    expect(screen.getByText("Botón de guardado")).toBeInTheDocument();
-    expect(screen.getByText("Presiona guardar")).toBeInTheDocument();
-    expect(screen.getByText("Referencia visual del botón principal.")).toBeInTheDocument();
+    expect(screen.getByText('/manual/paso2.png')).toBeInTheDocument();
+    expect(screen.getByText('Botón de guardado')).toBeInTheDocument();
+    expect(screen.getByText('Presiona guardar')).toBeInTheDocument();
+    expect(screen.getByText('Referencia visual del botón principal.')).toBeInTheDocument();
   });
 
-  it("funciona aunque calloutText y caption no se manden", () => {
+  it('funciona aunque calloutText y caption no se manden', () => {
     render(
       <ManualStep
         title="Paso sin extras"
         description="Este paso no requiere textos opcionales."
         screenshot={{
-          src: "/manual/paso3.png",
-          alt: "Captura simple",
+          src: '/manual/paso3.png',
+          alt: 'Captura simple',
         }}
       />,
     );
 
-    expect(screen.getByTestId("manual-screenshot")).toBeInTheDocument();
+    expect(screen.getByTestId('manual-screenshot')).toBeInTheDocument();
     expect(manualScreenshotMock).toHaveBeenLastCalledWith(
       {
-        src: "/manual/paso3.png",
-        alt: "Captura simple",
+        src: '/manual/paso3.png',
+        alt: 'Captura simple',
         calloutText: undefined,
         caption: undefined,
       },

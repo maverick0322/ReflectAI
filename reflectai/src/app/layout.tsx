@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "ReflectAI",
-  description: "Tu espacio seguro para la reflexión personal",
+  title: 'ReflectAI',
+  description: 'Tu espacio seguro para la reflexión personal',
 };
 
 export default function RootLayout({

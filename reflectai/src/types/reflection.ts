@@ -1,4 +1,4 @@
-export type ReflectionSessionStatus = "draft" | "completed";
+export type ReflectionSessionStatus = 'draft' | 'completed';
 
 export type ReflectionSession = {
   id: string;
@@ -13,36 +13,32 @@ export type ReflectionSession = {
   updated_at: string;
 };
 
-
-// 2. TIPOS DEL FRONTEND (WIZARD HT-13 Y MANEJO DE ESTADO LOCAL) 
-
-
-// Las 8 emociones primarias de Plutchik (Requisito Clínico)
+// Frontend types used by the reflection wizard and local session state.
 export enum PrimaryEmotion {
-  ALEGRIA = "Alegría",
-  CONFIANZA = "Confianza",
-  MIEDO = "Miedo",
-  SORPRESA = "Sorpresa",
-  TRISTEZA = "Tristeza",
-  AVERSION = "Aversión",
-  ENOJO = "Enojo",
-  ANTICIPACION = "Anticipación",
+  ALEGRIA = 'Alegría',
+  CONFIANZA = 'Confianza',
+  MIEDO = 'Miedo',
+  SORPRESA = 'Sorpresa',
+  TRISTEZA = 'Tristeza',
+  AVERSION = 'Aversión',
+  ENOJO = 'Enojo',
+  ANTICIPACION = 'Anticipación',
 }
 
-// IDs Estrictos de las Preguntas del Flujo (Para mapear al JSONB)
-export type QuestionId = 
-  | 'Q1_SIT'         // Situación
-  | 'Q2_THO'         // Pensamiento
-  | 'Q3_EMO'         // Emoción
-  | 'Q4_INT'         // Intensidad (1-10)
-  | 'Q5_TEL'         // Propósito
-  | 'Q6_CON_MINE'    // Control Interno (Mi Tarea)
-  | 'Q6_CON_OTHERS'  // Control Externo (Tarea de Otros)
-  | 'Q7_ALT'         // Reestructuración (Alternativa)
-  | 'SYS_GROUNDING'  // Metadato de intervención del sistema
+// Strict question identifiers used by the JSONB reflection payload.
+export type QuestionId =
+  | 'Q1_SIT' // Situation
+  | 'Q2_THO' // Thought
+  | 'Q3_EMO' // Emotion
+  | 'Q4_INT' // Intensity (1-10)
+  | 'Q5_TEL' // Purpose
+  | 'Q6_CON_MINE' // Internal control
+  | 'Q6_CON_OTHERS' // External control
+  | 'Q7_ALT' // Alternative reframing
+  | 'SYS_GROUNDING' // System grounding intervention metadata
   | 'SYS_AI_ADJUSTMENT';
 
-// Estructura interna de respuesta requerida por el flujo (HT-13 JSONB)
+// Internal response shape required by the wizard flow.
 export interface SessionResponse {
   id: QuestionId;
   text?: string;
@@ -53,19 +49,19 @@ export interface SessionResponse {
   intervention?: string;
 }
 
-// Metadatos de la sesión
+// Session metadata persisted in the reflection payload.
 export interface SessionMetadata {
   version: string;
-  started_at: string; 
-  completed_at?: string; 
+  started_at: string;
+  completed_at?: string;
   interruption_detected?: boolean;
   resume_step?: number;
-  flags?: string[]; 
+  flags?: string[];
   grounding_duration_seconds?: number;
   ai_hints?: string[];
 }
 
-// Lo que formaremos al final antes de acoplarlo al "payload" del Backend
+// Final payload shape sent to backend once the session is composed.
 export interface ReflectionSessionPayload {
   metadata: SessionMetadata;
   responses: SessionResponse[];

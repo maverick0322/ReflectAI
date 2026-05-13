@@ -1,7 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
 
-import { registerSchema } from "@/lib/validations/auth";
+import { registerSchema } from '@/lib/validations/auth';
 
 function buildAuthCallbackUrl(requestUrl: string, nextPath: string) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: {
-            message: "Datos de registro invalidos",
+            message: 'Datos de registro invalidos',
             details: validation.error.flatten(),
           },
         },
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     }
 
     const { firstName, lastName, email, password, birthDate } = validation.data;
-    const fullName = [firstName, lastName].filter(Boolean).join(" ");
+    const fullName = [firstName, lastName].filter(Boolean).join(' ');
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         emailRedirectTo: buildAuthCallbackUrl(request.url, '/dashboard'),
         data: {
           first_name: firstName,
-          last_name: lastName ?? "",
+          last_name: lastName ?? '',
           full_name: fullName,
           birth_date: birthDate,
         },
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: {
-            message: "No se pudo registrar el usuario",
+            message: 'No se pudo registrar el usuario',
           },
         },
         { status: 400 },
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
           email: data.user?.email,
           fullName,
         },
-        message: "Usuario registrado correctamente",
+        message: 'Usuario registrado correctamente',
       },
       { status: 201 },
     );
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: {
-          message: "Error inesperado al registrar usuario",
+          message: 'Error inesperado al registrar usuario',
         },
       },
       { status: 500 },

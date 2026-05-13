@@ -1,25 +1,25 @@
-import { z } from "zod";
-import { PrimaryEmotion } from "@/types/reflection";
+import { z } from 'zod';
+import { PrimaryEmotion } from '@/types/reflection';
 
 export const createReflectionSessionSchema = z.object({
   title: z
     .string()
     .trim()
-    .max(120, "El titulo no puede tener mas de 120 caracteres")
+    .max(120, 'El titulo no puede tener mas de 120 caracteres')
     .optional(),
 });
 
 const questionIdSchema = z.enum([
-  "Q1_SIT",
-  "Q2_THO",
-  "Q3_EMO",
-  "Q4_INT",
-  "Q5_TEL",
-  "Q6_CON_MINE",
-  "Q6_CON_OTHERS",
-  "Q7_ALT",
-  "SYS_GROUNDING",
-  "SYS_AI_ADJUSTMENT",
+  'Q1_SIT',
+  'Q2_THO',
+  'Q3_EMO',
+  'Q4_INT',
+  'Q5_TEL',
+  'Q6_CON_MINE',
+  'Q6_CON_OTHERS',
+  'Q7_ALT',
+  'SYS_GROUNDING',
+  'SYS_AI_ADJUSTMENT',
 ]);
 
 const metadataPatchSchema = z
@@ -49,12 +49,12 @@ export const addReflectionResponseSchema = z.object({
     .refine(
       (data) =>
         Boolean(data.text) ||
-        typeof data.value === "number" ||
+        typeof data.value === 'number' ||
         Boolean(data.status) ||
         Boolean(data.method) ||
         Boolean(data.intervention),
       {
-        message: "La respuesta debe incluir texto, valor, estado, metodo o intervencion",
+        message: 'La respuesta debe incluir texto, valor, estado, metodo o intervencion',
       },
     ),
   metadataPatch: metadataPatchSchema,
@@ -64,7 +64,7 @@ export const completeReflectionSessionSchema = z.object({
   title: z
     .string()
     .trim()
-    .max(120, "El titulo no puede tener mas de 120 caracteres")
+    .max(120, 'El titulo no puede tener mas de 120 caracteres')
     .optional(),
   metadataPatch: metadataPatchSchema,
 });
@@ -78,44 +78,44 @@ export const wizardFormSchema = z.object({
   situacion: z
     .string()
     .trim()
-    .min(5, "Por favor, describe brevemente la situación.")
-    .max(3000, "Límite de 3000 caracteres"),
+    .min(5, 'Por favor, describe brevemente la situación.')
+    .max(3000, 'Límite de 3000 caracteres'),
   pensamiento: z
     .string()
     .trim()
-    .min(3, "Identificar el pensamiento es el paso más difícil")
-    .max(3000, "Límite de 3000 caracteres"),
+    .min(3, 'Identificar el pensamiento es el paso más difícil')
+    .max(3000, 'Límite de 3000 caracteres'),
   emocion: z
     .string()
-    .min(1, "Por favor, selecciona una emoción principal.")
+    .min(1, 'Por favor, selecciona una emoción principal.')
     .refine(
       (value) => Object.values(PrimaryEmotion).includes(value as PrimaryEmotion),
-      "Por favor, selecciona una emoción principal."
+      'Por favor, selecciona una emoción principal.'
     ),
   intensidad: z
     .number()
-    .min(1, "La intensidad mínima es 1")
-    .max(10, "La intensidad máxima es 10"),
+    .min(1, 'La intensidad mínima es 1')
+    .max(10, 'La intensidad máxima es 10'),
   proposito: z
     .string()
     .trim()
-    .min(3, "Por favor, describe el propósito.")
-    .max(3000, "Límite de 3000 caracteres"),
+    .min(3, 'Por favor, describe el propósito.')
+    .max(3000, 'Límite de 3000 caracteres'),
   controlMio: z
     .string()
     .trim()
-    .min(3, "Identifica lo que estaba bajo tu control.")
-    .max(3000, "Límite de 3000 caracteres"),
+    .min(3, 'Identifica lo que estaba bajo tu control.')
+    .max(3000, 'Límite de 3000 caracteres'),
   controlOtros: z
     .string()
     .trim()
-    .min(3, "Identifica lo que dependía de otros.")
-    .max(3000, "Límite de 3000 caracteres"),
+    .min(3, 'Identifica lo que dependía de otros.')
+    .max(3000, 'Límite de 3000 caracteres'),
   alternativa: z
     .string()
     .trim()
-    .min(5, "Plantea una perspectiva alternativa.")
-    .max(3000, "Límite de 3000 caracteres"),
+    .min(5, 'Plantea una perspectiva alternativa.')
+    .max(3000, 'Límite de 3000 caracteres'),
 });
 
 export type WizardFormValues = z.infer<typeof wizardFormSchema>;

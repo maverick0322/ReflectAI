@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { useMemo, useState } from "react";
-import CameraIcon from "@/components/icons/CameraIcon";
+import Image from 'next/image';
+import { useMemo, useState } from 'react';
+import CameraIcon from '@/components/icons/CameraIcon';
 
 type ManualScreenshotProps = Readonly<{
   src: string;
@@ -14,11 +14,11 @@ type ManualScreenshotProps = Readonly<{
 export default function ManualScreenshot({
   src,
   alt,
-  calloutText = "Haz clic aquí",
+  calloutText = 'Haz clic aquí',
   caption,
 }: ManualScreenshotProps) {
   const [hasError, setHasError] = useState(false);
-  const imageSrc = useMemo(() => (src.startsWith("/") ? src : `/${src}`), [src]);
+  const imageSrc = useMemo(() => (src.startsWith('/') ? src : `/${src}`), [src]);
 
   return (
     <figure className="w-full">

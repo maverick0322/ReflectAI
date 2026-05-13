@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function getAuthenticatedUser() {
   const supabase = await createServerSupabaseClient();
@@ -12,7 +12,7 @@ export async function getAuthenticatedUser() {
     return {
       supabase,
       user: null,
-      error: "No autorizado",
+      error: 'No autorizado',
     };
   }
 

@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
-import Button from "@/components/ui/Button";
-import CustomLink from "@/components/ui/CustomLink";
-import GlassCard from "@/components/ui/GlassCard";
-import Input from "@/components/ui/Input";
-import { ApiError } from "@/lib/api/http";
-import { recoverPassword } from "@/lib/api/auth";
-import { recoverPasswordSchema, type RecoverPasswordFormValues } from "@/lib/validations/auth";
+import Button from '@/components/ui/Button';
+import CustomLink from '@/components/ui/CustomLink';
+import GlassCard from '@/components/ui/GlassCard';
+import Input from '@/components/ui/Input';
+import { ApiError } from '@/lib/api/http';
+import { recoverPassword } from '@/lib/api/auth';
+import { recoverPasswordSchema, type RecoverPasswordFormValues } from '@/lib/validations/auth';
 
 export default function RecoverPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,7 +22,7 @@ export default function RecoverPasswordPage() {
     formState: { errors },
   } = useForm<RecoverPasswordFormValues>({
     resolver: zodResolver(recoverPasswordSchema),
-    mode: "onTouched",
+    mode: 'onTouched',
   });
 
   const onSubmit = async (data: RecoverPasswordFormValues) => {
@@ -36,7 +36,7 @@ export default function RecoverPasswordPage() {
       const message =
         error instanceof ApiError && error.payload?.message
           ? error.payload.message
-          : "No se pudo enviar el enlace";
+          : 'No se pudo enviar el enlace';
       setFormError(message);
     } finally {
       setIsSubmitting(false);
@@ -58,7 +58,7 @@ export default function RecoverPasswordPage() {
 
         <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-4 flex flex-col gap-4">
           <Input
-            {...register("email")}
+            {...register('email')}
             type="email"
             placeholder="Correo electrónico"
             maxLength={254}
@@ -74,13 +74,13 @@ export default function RecoverPasswordPage() {
               Revisa tu correo para continuar con el restablecimiento.
             </p>
           )}
-          <Button type="submit" disabled={isSubmitting} className={isSubmitting ? "opacity-60" : ""}>
-            {isSubmitting ? "Enviando..." : "Enviar enlace"}
+          <Button type="submit" disabled={isSubmitting} className={isSubmitting ? 'opacity-60' : ''}>
+            {isSubmitting ? 'Enviando...' : 'Enviar enlace'}
           </Button>
         </form>
 
         <footer className="mt-4 text-center text-sm text-reflect-dark/70">
-          ¿Recordaste tu contraseña?{" "}
+          ¿Recordaste tu contraseña?{' '}
           <CustomLink href="/login">Volver a iniciar sesión</CustomLink>
         </footer>
       </GlassCard>

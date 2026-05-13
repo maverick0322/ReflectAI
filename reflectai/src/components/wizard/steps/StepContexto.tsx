@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 
-import Button from "@/components/ui/Button";
-import { useValidationContext } from "@/contexts/ValidationContext";
-import { WizardFormValues } from "@/lib/validations/reflection";
+import Button from '@/components/ui/Button';
+import { useValidationContext } from '@/contexts/ValidationContext';
+import { WizardFormValues } from '@/lib/validations/reflection';
 
 interface StepProps {
   onNext: () => void;
@@ -12,7 +12,7 @@ interface StepProps {
 }
 
 const DEFAULT_QUESTION =
-  "¿Qué situación específica detonó la necesidad de reflexionar hoy?";
+  '¿Qué situación específica detonó la necesidad de reflexionar hoy?';
 
 export const StepContexto = ({
   onNext,
@@ -24,7 +24,7 @@ export const StepContexto = ({
   } = useFormContext<WizardFormValues>();
 
   const { shouldShowErrors } = useValidationContext();
-  const textValue = useWatch({ control, name: "situacion" }) ?? "";
+  const textValue = useWatch({ control, name: 'situacion' }) ?? '';
 
   const shouldShowError = !!errors.situacion && shouldShowErrors;
 
@@ -45,20 +45,20 @@ export const StepContexto = ({
           render={({ field }) => (
             <textarea
               {...field}
-              value={field.value ?? ""}
+              value={field.value ?? ''}
               maxLength={3000}
               placeholder="Escribe aquí..."
               className={`w-full min-h-[180px] p-4 bg-white/30 backdrop-blur-sm rounded-2xl outline-none transition-all resize-none text-slate-700 placeholder:text-slate-400 ${
                 shouldShowError
-                  ? "border-2 border-red-400 focus:ring-red-400"
-                  : "border border-white/60 focus:ring-2 focus:ring-indigo-300/50 focus:border-indigo-400"
+                  ? 'border-2 border-red-400 focus:ring-red-400'
+                  : 'border border-white/60 focus:ring-2 focus:ring-indigo-300/50 focus:border-indigo-400'
               }`}
             />
           )}
         />
         <div className="flex justify-between items-start px-2">
           <span className="text-xs font-bold text-red-500 max-w-[80%]">
-            {shouldShowError ? (errors.situacion?.message as string) : ""}
+            {shouldShowError ? (errors.situacion?.message as string) : ''}
           </span>
           <span className="text-xs font-bold text-slate-400 whitespace-nowrap">
             {textValue.length}/3000

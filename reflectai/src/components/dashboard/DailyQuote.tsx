@@ -1,8 +1,13 @@
-import GlassCard from "@/components/ui/GlassCard";
+import GlassCard from '@/components/ui/GlassCard';
 
-export function DailyQuote({ text, author }: { text: string; author: string }) {
+interface DailyQuoteProps {
+  text: string;
+  author: string;
+}
+
+export function DailyQuote({ text, author }: DailyQuoteProps) {
   return (
-    <GlassCard className="p-6 flex flex-col gap-3 text-center bg-white/10 dark:bg-black/10 border-white/20">
+    <GlassCard className="flex flex-col gap-3 border-white/20 bg-white/10 p-6 text-center dark:bg-black/10">
       <p className="text-lg font-serif italic leading-relaxed text-slate-800 dark:text-slate-100">
         &ldquo;{text}&rdquo;
       </p>

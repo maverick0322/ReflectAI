@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import { getAuthenticatedUser } from "@/lib/auth/getAuthenticatedUser";
-import { appendResponse, applyMetadataPatch, normalizePayload } from "@/lib/reflection/payload";
-import { addReflectionResponseSchema } from "@/lib/validations/reflection";
+import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import { appendResponse, applyMetadataPatch, normalizePayload } from '@/lib/reflection/payload';
+import { addReflectionResponseSchema } from '@/lib/validations/reflection';
 
 type RouteParams = {
   params: Promise<{
@@ -16,7 +16,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const { supabase, user, error: authError } = await getAuthenticatedUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: { message: "No autorizado" } }, { status: 401 });
+      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
     }
 
     const body = await request.json().catch(() => null);
@@ -26,7 +26,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       return NextResponse.json(
         {
           error: {
-            message: "Datos invalidos",
+            message: 'Datos invalidos',
             details: validation.error.flatten(),
           },
         },
@@ -35,24 +35,24 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     const { data: session, error: sessionError } = await supabase
-      .from("reflection_sessions")
-      .select("id, status, payload, started_at")
-      .eq("id", id)
-      .eq("user_id", user.id)
+      .from('reflection_sessions')
+      .select('id, status, payload, started_at')
+      .eq('id', id)
+      .eq('user_id', user.id)
       .single();
 
     if (sessionError || !session) {
       return NextResponse.json(
-        { error: { message: "Sesion no encontrada" } },
+        { error: { message: 'Sesion no encontrada' } },
         { status: 404 },
       );
     }
 
-    if (session.status === "completed") {
+    if (session.status === 'completed') {
       return NextResponse.json(
         {
           error: {
-            message: "No se pueden agregar respuestas a una sesion completada",
+            message: 'No se pueden agregar respuestas a una sesion completada',
           },
         },
         { status: 409 },
@@ -70,18 +70,18 @@ export async function POST(request: Request, { params }: RouteParams) {
     );
 
     const { data, error } = await supabase
-      .from("reflection_sessions")
+      .from('reflection_sessions')
       .update({
         payload: updatedPayload,
       })
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .select("id, title, status, started_at, completed_at, payload, ai_analysis")
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select('id, title, status, started_at, completed_at, payload, ai_analysis')
       .single();
 
     if (error) {
       return NextResponse.json(
-        { error: { message: "No se pudo guardar la respuesta" } },
+        { error: { message: 'No se pudo guardar la respuesta' } },
         { status: 500 },
       );
     }
@@ -89,13 +89,13 @@ export async function POST(request: Request, { params }: RouteParams) {
     return NextResponse.json(
       {
         data,
-        message: "Respuesta guardada correctamente",
+        message: 'Respuesta guardada correctamente',
       },
       { status: 201 },
     );
   } catch {
     return NextResponse.json(
-      { error: { message: "Error inesperado al guardar la respuesta" } },
+      { error: { message: 'Error inesperado al guardar la respuesta' } },
       { status: 500 },
     );
   }

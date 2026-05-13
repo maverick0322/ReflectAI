@@ -1,26 +1,36 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import WarningIcon from "@/components/icons/WarningIcon";
-import GlassCard from "@/components/ui/GlassCard";
-import Input from "@/components/ui/Input";
-import { ApiError } from "@/lib/api/http";
-import { deleteAccount } from "@/lib/api/auth";
+import { useRef, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
+import WarningIcon from '@/components/icons/WarningIcon';
+import GlassCard from '@/components/ui/GlassCard';
+import Input from '@/components/ui/Input';
+import { deleteAccount } from '@/lib/api/auth';
+import { ApiError } from '@/lib/api/http';
 
 
 export default function EliminarCuentaPage() {
   const router = useRouter();
-  const [confirmText, setConfirmText] = useState("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [confirmText, setConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const isConfirmed = confirmText === "ELIMINAR";
+  const isConfirmed = confirmText === 'ELIMINAR';
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const onlyLetters = e.target.value.replaceAll(/[^A-Za-z]/g, "").slice(0, 8);
-    setConfirmText(onlyLetters.toUpperCase());
+    const normalizedText = e.target.value
+      .replace(/[^A-Za-z]/g, '')
+      .slice(0, 8)
+      .toUpperCase();
+
+    setConfirmText(normalizedText);
+
+    requestAnimationFrame(() => {
+      inputRef.current?.setSelectionRange(normalizedText.length, normalizedText.length);
+    });
   };
 
   const handleDelete = async () => {
@@ -31,13 +41,13 @@ export default function EliminarCuentaPage() {
     try {
       await deleteAccount();
       setTimeout(() => {
-        router.push("/login");
+        router.push('/login');
       }, 2500);
     } catch (error) {
       const message =
         error instanceof ApiError && error.payload?.message
           ? error.payload.message
-          : "No se pudo eliminar la cuenta";
+          : 'No se pudo eliminar la cuenta';
       setFormError(message);
       setIsDeleting(false);
     }
@@ -83,6 +93,7 @@ export default function EliminarCuentaPage() {
                   id="delete-confirm-input"
                   value={confirmText}
                   onChange={handleInputChange}
+                  ref={inputRef}
                   placeholder="ELIMINAR"
                   className="text-center font-bold tracking-widest text-reflect-dark uppercase"
                 />
@@ -106,8 +117,8 @@ export default function EliminarCuentaPage() {
                   disabled={!isConfirmed}
                   className={`flex-1 py-4 rounded-2xl font-bold text-lg transition-all duration-300 ${
                     isConfirmed
-                      ? "!bg-black !text-white border border-black shadow-xl hover:!bg-slate-900 hover:scale-[1.02] active:scale-95"
-                      : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                      ? '!bg-black !text-white border border-black shadow-xl hover:!bg-slate-900 hover:scale-[1.02] active:scale-95'
+                      : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
                   }`}
                 >
                   Eliminar

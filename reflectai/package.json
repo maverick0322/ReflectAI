@@ -6,12 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint src __tests__",
+    "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:unit": "vitest run --exclude __tests__/integration/** --exclude __tests__/regression/**",
     "test:integration": "vitest run __tests__/integration",
     "test:regression": "vitest run __tests__/regression",
     "test:coverage": "vitest run --coverage"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

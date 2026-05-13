@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from "@testing-library/user-event";
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import PerfilPage from '@/app/perfil/page';
 
@@ -60,7 +60,7 @@ vi.mock('@/lib/api/auth', () => ({
   logoutUser: logoutUserMock,
 }));
 
-vi.mock("next/navigation", () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: pushMock,
   }),
@@ -76,7 +76,7 @@ describe('PerfilPage', () => {
 
     expect(await screen.findByRole('heading', { name: /arturo cuevas/i })).toBeInTheDocument();
     
-    expect(screen.getByText("AC")).toBeInTheDocument();
+    expect(screen.getByText('AC')).toBeInTheDocument();
   });
 
   it('valida el nombre, limpia el error al corregir y guarda los cambios', async () => {
@@ -178,7 +178,7 @@ describe('PerfilPage', () => {
     await user.click(logoutBtn);
 
     expect(logoutUserMock).toHaveBeenCalled();
-    expect(pushMock).toHaveBeenCalledWith("/login");
+    expect(pushMock).toHaveBeenCalledWith('/login');
   });
 
   it('maneja la selección de foto de perfil simulando la subida al backend', async () => {

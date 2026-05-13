@@ -32,12 +32,20 @@ function extractErrorPayload(payload: unknown): ApiErrorPayload | undefined {
   return undefined;
 }
 
+async function readJsonPayload(response: Response): Promise<unknown> {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function requestJson<T>(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<T> {
   const response = await fetch(input, init);
-  const payload = await response.json().catch(() => null);
+  const payload = await readJsonPayload(response);
 
   if (!response.ok) {
     const errorPayload = extractErrorPayload(payload) ?? {

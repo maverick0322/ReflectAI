@@ -48,7 +48,7 @@ describe('Validaciones de Registro', () => {
   });
 
   it('5.1. Debe fallar si el apellido excede los 120 caracteres', () => {
-    const apellidoLargo = "a".repeat(121); 
+    const apellidoLargo = 'a'.repeat(121); 
     const resultado = registerSchema.safeParse({ ...usuarioValido, lastName: apellidoLargo });
     expect(resultado.success).toBe(false);
     if (!resultado.success) expect(resultado.error.issues[0].message).toBe('Se alcanzó el límite');
@@ -111,22 +111,30 @@ describe('Validaciones de Registro', () => {
   });
 
   it('12. Debe fallar si el nombre excede los 120 caracteres', () => {
-    const nombreLargo = "a".repeat(121); 
+    const nombreLargo = 'a'.repeat(121); 
     const resultado = registerSchema.safeParse({ ...usuarioValido, firstName: nombreLargo });
     expect(resultado.success).toBe(false);
     if (!resultado.success) expect(resultado.error.issues[0].message).toBe('Se alcanzó el límite');
   });
 
   it('13. Debe fallar si el correo excede más de 254 caracteres', () => {
-    const correoLargo = "a".repeat(245) + "@gmail.com"; 
-    const resultado = registerSchema.safeParse({ ...usuarioValido, email: correoLargo, confirmEmail: correoLargo });
+    const correoLargo = 'a'.repeat(245) + '@gmail.com';
+    const resultado = registerSchema.safeParse({
+      ...usuarioValido,
+      email: correoLargo,
+      confirmEmail: correoLargo,
+    });
     expect(resultado.success).toBe(false);
     if (!resultado.success) expect(resultado.error.issues[0].message).toBe('Se alcanzó el límite');
   });
 
   it('14. Debe fallar si la contraseña excede más de 64 caracteres', () => {
-    const passwordLarga = "A1" + "a".repeat(63); 
-    const resultado = registerSchema.safeParse({ ...usuarioValido, password: passwordLarga, confirmPassword: passwordLarga });
+    const passwordLarga = 'A1' + 'a'.repeat(63);
+    const resultado = registerSchema.safeParse({
+      ...usuarioValido,
+      password: passwordLarga,
+      confirmPassword: passwordLarga,
+    });
     expect(resultado.success).toBe(false);
     if (!resultado.success) expect(resultado.error.issues[0].message).toBe('Se alcanzó el límite');
   });

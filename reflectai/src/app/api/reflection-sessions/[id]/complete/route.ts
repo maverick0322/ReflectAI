@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import { getAuthenticatedUser } from "@/lib/auth/getAuthenticatedUser";
+import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 import {
   analyzeReflectionSession,
   buildFallbackAnalysis,
-} from "@/lib/ai/reflectionAnalysis";
-import { applyMetadataPatch, normalizePayload } from "@/lib/reflection/payload";
-import { completeReflectionSessionSchema } from "@/lib/validations/reflection";
+} from '@/lib/ai/reflectionAnalysis';
+import { applyMetadataPatch, normalizePayload } from '@/lib/reflection/payload';
+import { completeReflectionSessionSchema } from '@/lib/validations/reflection';
 
 type RouteParams = {
   params: Promise<{
@@ -20,7 +20,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const { supabase, user, error: authError } = await getAuthenticatedUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: { message: "No autorizado" } }, { status: 401 });
+      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
     }
 
     const body = await request.json().catch(() => ({}));
@@ -30,7 +30,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       return NextResponse.json(
         {
           error: {
-            message: "Datos invalidos",
+            message: 'Datos invalidos',
             details: validation.error.flatten(),
           },
         },
@@ -39,22 +39,22 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     }
 
     const { data: session, error: sessionError } = await supabase
-      .from("reflection_sessions")
-      .select("id, status, payload, started_at")
-      .eq("id", id)
-      .eq("user_id", user.id)
+      .from('reflection_sessions')
+      .select('id, status, payload, started_at')
+      .eq('id', id)
+      .eq('user_id', user.id)
       .single();
 
     if (sessionError || !session) {
       return NextResponse.json(
-        { error: { message: "Sesion no encontrada" } },
+        { error: { message: 'Sesion no encontrada' } },
         { status: 404 },
       );
     }
 
-    if (session.status === "completed") {
+    if (session.status === 'completed') {
       return NextResponse.json(
-        { error: { message: "La sesion ya esta completada" } },
+        { error: { message: 'La sesion ya esta completada' } },
         { status: 409 },
       );
     }
@@ -66,7 +66,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     if (payload.responses.length === 0) {
       return NextResponse.json(
-        { error: { message: "No se puede completar una sesion sin respuestas" } },
+        { error: { message: 'No se puede completar una sesion sin respuestas' } },
         { status: 409 },
       );
     }
@@ -97,13 +97,13 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     }
 
     const updateData: {
-      status: "completed";
+      status: 'completed';
       completed_at: string;
       title?: string;
       payload: typeof payload;
       ai_analysis: Record<string, unknown>;
     } = {
-      status: "completed",
+      status: 'completed',
       completed_at: completedAt,
       payload: payloadWithCompletion,
       ai_analysis: analysis,
@@ -116,27 +116,27 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     }
 
     const { data, error } = await supabase
-      .from("reflection_sessions")
+      .from('reflection_sessions')
       .update(updateData)
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .select("id, title, status, started_at, completed_at, payload, ai_analysis")
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select('id, title, status, started_at, completed_at, payload, ai_analysis')
       .single();
 
     if (error) {
       return NextResponse.json(
-        { error: { message: "No se pudo completar la sesion" } },
+        { error: { message: 'No se pudo completar la sesion' } },
         { status: 500 },
       );
     }
 
     return NextResponse.json({
       data,
-      message: "Sesion completada correctamente",
+      message: 'Sesion completada correctamente',
     });
   } catch {
     return NextResponse.json(
-      { error: { message: "Error inesperado al completar la sesion" } },
+      { error: { message: 'Error inesperado al completar la sesion' } },
       { status: 500 },
     );
   }

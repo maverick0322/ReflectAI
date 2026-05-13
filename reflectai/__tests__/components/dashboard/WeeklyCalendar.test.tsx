@@ -4,9 +4,9 @@ import { WeeklyCalendar } from '@/components/dashboard/WeeklyCalendar';
 import type { DayRecord } from '@/types/dashboard';
 
 const mockWeekDays: DayRecord[] = [
-  { date: "2026-04-13", label: "L", num: 13, isToday: false, isFuture: false, hasSessions: false },
-  { date: "2026-04-14", label: "M", num: 14, isToday: false, isFuture: false, hasSessions: true }, // Día con sesión (violeta)
-  { date: "2026-04-15", label: "M", num: 15, isToday: true, isFuture: false, hasSessions: false }, // Hoy sin sesión (Borde)
+  { date: '2026-04-13', label: 'L', num: 13, isToday: false, isFuture: false, hasSessions: false },
+  { date: '2026-04-14', label: 'M', num: 14, isToday: false, isFuture: false, hasSessions: true }, // Día con sesión (violeta)
+  { date: '2026-04-15', label: 'M', num: 15, isToday: true, isFuture: false, hasSessions: false }, // Hoy sin sesión (Borde)
 ];
 
 describe('WeeklyCalendar (Camino A - Visual)', () => {
