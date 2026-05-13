@@ -164,4 +164,3 @@ Ejemplo de cómo se captura una reflexión donde el usuario inicialmente no iden
     { "id": "SYS_AI_ADJUSTMENT", "intervention": "Reenfocar en responsabilidad radical" }
   ]
 }
-----
