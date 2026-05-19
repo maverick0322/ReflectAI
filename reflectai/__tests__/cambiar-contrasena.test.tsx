@@ -113,7 +113,7 @@ describe('CambiarContraseña - Paso 2 (Nueva contraseña)', () => {
     });
 
     await user.clear(newPasswordInput);
-    await user.type(newPasswordInput, 'ValidPassword123');
+    await user.type(newPasswordInput, 'ValidPassword123!');
 
     await waitFor(() => {
       expect(
@@ -162,15 +162,15 @@ describe('CambiarContraseña - Paso 2 (Nueva contraseña)', () => {
     const newPasswordInput = passwordInputs[0];
     const confirmPasswordInput = passwordInputs[1];
 
-    await user.type(newPasswordInput, 'ValidPassword123');
-    await user.type(confirmPasswordInput, 'DifferentPassword123');
+    await user.type(newPasswordInput, 'ValidPassword123!');
+    await user.type(confirmPasswordInput, 'DifferentPassword123!');
 
     await waitFor(() => {
       expect(screen.getByText(/las contraseñas no coinciden/i)).toBeInTheDocument();
     });
 
     await user.clear(confirmPasswordInput);
-    await user.type(confirmPasswordInput, 'ValidPassword123');
+    await user.type(confirmPasswordInput, 'ValidPassword123!');
 
     await waitFor(() => {
       expect(screen.queryByText(/las contraseñas no coinciden/i)).not.toBeInTheDocument();
@@ -189,8 +189,8 @@ describe('CambiarContraseña - Paso 2 (Nueva contraseña)', () => {
       expect(screen.getByText(/paso 2 de 2/i)).toBeInTheDocument();
     });
 
-    await user.type(screen.getByPlaceholderText('Nueva contraseña'), 'ValidPassword123');
-    await user.type(screen.getByPlaceholderText('Confirmar nueva contraseña'), 'ValidPassword123');
+    await user.type(screen.getByPlaceholderText('Nueva contraseña'), 'ValidPassword123!');
+    await user.type(screen.getByPlaceholderText('Confirmar nueva contraseña'), 'ValidPassword123!');
     await user.click(screen.getByRole('button', { name: /actualizar/i }));
 
     expect(
