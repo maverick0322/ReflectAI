@@ -28,30 +28,38 @@ export function WizardSuccessState({
           </div>
 
           <section className="flex flex-col gap-3">
-            <div className="rounded-2xl bg-white/35 border border-white/60 p-4">
-              <h3 className="text-sm font-bold text-indigo-600 uppercase tracking-wide">
-                Resumen
-              </h3>
-              <p className="text-sm text-slate-600 font-medium mt-2 leading-relaxed">
-                {summary.summary}
-              </p>
-            </div>
+            {summary.summary && (
+              <div className="rounded-2xl bg-white/35 border border-white/60 p-4">
+                <h3 className="text-sm font-bold text-indigo-600 uppercase tracking-wide">
+                  Resumen
+                </h3>
+                <p className="text-sm text-slate-600 font-medium mt-2 leading-relaxed">
+                  {summary.summary}
+                </p>
+              </div>
+            )}
 
-            <div className="rounded-2xl bg-white/35 border border-white/60 p-4">
-              <h3 className="text-sm font-bold text-indigo-600 uppercase tracking-wide">
-                Recomendación
-              </h3>
-              <p className="text-sm text-slate-600 font-medium mt-2 leading-relaxed">
-                {summary.recommendation}
-              </p>
-            </div>
+            {summary.recommendation && (
+              <div className="rounded-2xl bg-white/35 border border-white/60 p-4">
+                <h3 className="text-sm font-bold text-indigo-600 uppercase tracking-wide">
+                  Recomendación
+                </h3>
+                <p className="text-sm text-slate-600 font-medium mt-2 leading-relaxed">
+                  {summary.recommendation}
+                </p>
+              </div>
+            )}
 
-            <p className="text-sm text-slate-600 font-semibold leading-relaxed">
-              {summary.encouragement}
-            </p>
-            <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              {summary.professionalReminder}
-            </p>
+            {summary.encouragement && (
+              <p className="text-sm text-slate-600 font-semibold leading-relaxed">
+                {summary.encouragement}
+              </p>
+            )}
+            {summary.professionalReminder && (
+              <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                {summary.professionalReminder}
+              </p>
+            )}
           </section>
 
           <button

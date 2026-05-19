@@ -1,14 +1,40 @@
 import { NextResponse } from 'next/server';
 
+import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { recoverPasswordSchema } from '@/lib/validations/auth';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 function buildRedirectUrl(requestUrl: string) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  const baseUrl = siteUrl ?? new URL(requestUrl).origin;
+  const baseUrl = new URL(requestUrl).origin;
   const callbackUrl = new URL('/auth/callback', baseUrl);
   callbackUrl.searchParams.set('next', '/cambiar-contrasena?mode=recovery');
   return callbackUrl.toString();
+}
+
+async function buildDevelopmentRecoveryLink(email: string, redirectTo: string) {
+  if (process.env.NODE_ENV === 'production') {
+    return null;
+  }
+
+  try {
+    const supabaseAdmin = createAdminSupabaseClient();
+    const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'recovery',
+      email,
+      options: {
+        redirectTo,
+      },
+    });
+
+    if (error) {
+      console.error('Supabase recovery link generation failed', error.message);
+      return null;
+    }
+
+    return data.properties.action_link;
+  } catch {
+    return null;
+  }
 }
 
 export async function POST(request: Request) {
@@ -38,9 +64,42 @@ export async function POST(request: Request) {
     );
 
     if (error) {
+      console.error('Supabase password recovery failed', error.message);
+      const normalizedMessage = error.message.toLowerCase();
+      const isRateLimited =
+        normalizedMessage.includes('rate limit') ||
+        normalizedMessage.includes('security purposes');
+      const isEmailDeliveryError = normalizedMessage.includes('error sending');
+
+      if (isRateLimited || isEmailDeliveryError) {
+        const recoveryLink = await buildDevelopmentRecoveryLink(
+          validation.data.email,
+          redirectTo,
+        );
+
+        if (recoveryLink) {
+          return NextResponse.json({
+            data: {
+              recoveryLink,
+            },
+            message:
+              'Supabase no pudo enviar el correo, pero se genero un enlace de recuperacion para desarrollo.',
+          });
+        }
+      }
+
       return NextResponse.json(
-        { error: { message: 'No se pudo enviar el enlace de recuperacion' } },
-        { status: 500 },
+        {
+          error: {
+            message: isRateLimited
+              ? 'Se hicieron demasiados intentos. Espera unos minutos antes de pedir otro enlace.'
+              : isEmailDeliveryError
+                ? 'Supabase no pudo enviar el correo de recuperacion. Revisa la configuracion SMTP o intenta con otro correo.'
+              : 'No se pudo enviar el enlace de recuperacion',
+            details: error.message,
+          },
+        },
+        { status: isRateLimited ? 429 : 500 },
       );
     }
 

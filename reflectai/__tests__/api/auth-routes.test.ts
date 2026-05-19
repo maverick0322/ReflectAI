@@ -143,7 +143,6 @@ describe('rutas API de autenticacion', () => {
   });
 
   it('envia recuperacion de password con callback seguro', async () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://reflectai.example';
     const resetPasswordForEmail = vi.fn(async () => ({ error: null }));
     vi.mocked(createServerSupabaseClient).mockResolvedValue({
       auth: { resetPasswordForEmail },
@@ -160,8 +159,86 @@ describe('rutas API de autenticacion', () => {
     expect(body.message).toBe('Enlace de recuperacion enviado');
     expect(resetPasswordForEmail).toHaveBeenCalledWith('ana@reflectai.com', {
       redirectTo:
-        'https://reflectai.example/auth/callback?next=%2Fcambiar-contrasena%3Fmode%3Drecovery',
+        'http://localhost/auth/callback?next=%2Fcambiar-contrasena%3Fmode%3Drecovery',
     });
+  });
+
+  it('devuelve 429 cuando Supabase limita los correos de recuperacion', async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue({
+      auth: {
+        resetPasswordForEmail: vi.fn(async () => ({
+          error: { message: 'email rate limit exceeded' },
+        })),
+      },
+    } as never);
+
+    const response = await recoverPost(
+      jsonRequest('/api/auth/recover', {
+        email: 'ana@reflectai.com',
+      }),
+    );
+    const body = await readJson(response);
+
+    expect(response.status).toBe(429);
+    expect(body.error?.message).toBe(
+      'Se hicieron demasiados intentos. Espera unos minutos antes de pedir otro enlace.',
+    );
+  });
+
+  it('explica errores de entrega de email en recuperacion', async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue({
+      auth: {
+        resetPasswordForEmail: vi.fn(async () => ({
+          error: { message: 'Error sending recovery email' },
+        })),
+      },
+    } as never);
+
+    const response = await recoverPost(
+      jsonRequest('/api/auth/recover', {
+        email: 'ana@reflectai.com',
+      }),
+    );
+    const body = await readJson(response);
+
+    expect(response.status).toBe(500);
+    expect(body.error?.message).toBe(
+      'Supabase no pudo enviar el correo de recuperacion. Revisa la configuracion SMTP o intenta con otro correo.',
+    );
+  });
+
+  it('genera enlace de recuperacion de desarrollo si falla el envio de email', async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue({
+      auth: {
+        resetPasswordForEmail: vi.fn(async () => ({
+          error: { message: 'Error sending recovery email' },
+        })),
+      },
+    } as never);
+    vi.mocked(createAdminSupabaseClient).mockReturnValue({
+      auth: {
+        admin: {
+          generateLink: vi.fn(async () => ({
+            data: {
+              properties: {
+                action_link: 'https://supabase.example/recover-link',
+              },
+            },
+            error: null,
+          })),
+        },
+      },
+    } as never);
+
+    const response = await recoverPost(
+      jsonRequest('/api/auth/recover', {
+        email: 'ana@reflectai.com',
+      }),
+    );
+    const body = await readJson(response);
+
+    expect(response.status).toBe(200);
+    expect(body.data?.recoveryLink).toBe('https://supabase.example/recover-link');
   });
 
   it('confirma recuperacion solo cuando Supabase devuelve sesion', async () => {
@@ -205,9 +282,9 @@ describe('rutas API de autenticacion', () => {
 
     const response = await changePasswordPost(
       jsonRequest('/api/auth/change-password', {
-        currentPassword: 'PasswordActual123',
-        newPassword: 'PasswordNueva123',
-        confirmNewPassword: 'PasswordNueva123',
+        currentPassword: 'PasswordActual123!',
+        newPassword: 'PasswordNueva123!',
+        confirmNewPassword: 'PasswordNueva123!',
       }),
     );
     const body = await readJson(response);
@@ -216,9 +293,9 @@ describe('rutas API de autenticacion', () => {
     expect(body.message).toBe('Contraseña actualizada correctamente');
     expect(signInWithPassword).toHaveBeenCalledWith({
       email: 'ana@reflectai.com',
-      password: 'PasswordActual123',
+      password: 'PasswordActual123!',
     });
-    expect(updateUser).toHaveBeenCalledWith({ password: 'PasswordNueva123' });
+    expect(updateUser).toHaveBeenCalledWith({ password: 'PasswordNueva123!' });
   });
 
   it('bloquea cambio de password sin sesion o con password actual incorrecta', async () => {
@@ -226,8 +303,8 @@ describe('rutas API de autenticacion', () => {
 
     const unauthorizedResponse = await changePasswordPost(
       jsonRequest('/api/auth/change-password', {
-        newPassword: 'PasswordNueva123',
-        confirmNewPassword: 'PasswordNueva123',
+        newPassword: 'PasswordNueva123!',
+        confirmNewPassword: 'PasswordNueva123!',
       }),
     );
     const unauthorizedBody = await readJson(unauthorizedResponse);
@@ -242,9 +319,9 @@ describe('rutas API de autenticacion', () => {
 
     const badCurrentResponse = await changePasswordPost(
       jsonRequest('/api/auth/change-password', {
-        currentPassword: 'PasswordActual123',
-        newPassword: 'PasswordNueva123',
-        confirmNewPassword: 'PasswordNueva123',
+        currentPassword: 'PasswordActual123!',
+        newPassword: 'PasswordNueva123!',
+        confirmNewPassword: 'PasswordNueva123!',
       }),
     );
     const badCurrentBody = await readJson(badCurrentResponse);
@@ -259,12 +336,8 @@ describe('rutas API de autenticacion', () => {
       supabase: { auth: { signOut } },
     });
 
-    const sessionsTable = createDeleteTableMock();
-    const profilesTable = createDeleteTableMock();
     const deleteUser = vi.fn(async () => ({ error: null }));
-    const from = vi.fn().mockReturnValueOnce(sessionsTable).mockReturnValueOnce(profilesTable);
     vi.mocked(createAdminSupabaseClient).mockReturnValue({
-      from,
       auth: { admin: { deleteUser } },
     } as never);
 
@@ -273,49 +346,21 @@ describe('rutas API de autenticacion', () => {
 
     expect(response.status).toBe(200);
     expect(body.message).toBe('Cuenta eliminada correctamente');
-    expect(from).toHaveBeenCalledWith('reflection_sessions');
-    expect(from).toHaveBeenCalledWith('profiles');
     expect(deleteUser).toHaveBeenCalledWith('user-1');
     expect(signOut).toHaveBeenCalled();
   });
 
-  it('reporta errores por etapa al eliminar cuenta', async () => {
+  it('reporta errores al eliminar cuenta', async () => {
     mockAuthenticatedUser();
 
     vi.mocked(createAdminSupabaseClient).mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce(createDeleteTableMock({ message: 'db' })),
-      auth: { admin: { deleteUser: vi.fn() } },
-    } as never);
-
-    const sessionsResponse = await deleteAccountDelete();
-    expect(sessionsResponse.status).toBe(500);
-    expect((await readJson(sessionsResponse)).error?.message).toBe(
-      'No se pudo eliminar el historial',
-    );
-
-    vi.mocked(createAdminSupabaseClient).mockReturnValueOnce({
-      from: vi
-        .fn()
-        .mockReturnValueOnce(createDeleteTableMock())
-        .mockReturnValueOnce(createDeleteTableMock({ message: 'db' })),
-      auth: { admin: { deleteUser: vi.fn() } },
-    } as never);
-
-    const profileResponse = await deleteAccountDelete();
-    expect(profileResponse.status).toBe(500);
-    expect((await readJson(profileResponse)).error?.message).toBe(
-      'No se pudo eliminar el perfil',
-    );
-
-    vi.mocked(createAdminSupabaseClient).mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce(createDeleteTableMock()).mockReturnValueOnce(createDeleteTableMock()),
       auth: { admin: { deleteUser: vi.fn(async () => ({ error: { message: 'db' } })) } },
     } as never);
 
     const authResponse = await deleteAccountDelete();
     expect(authResponse.status).toBe(500);
     expect((await readJson(authResponse)).error?.message).toBe(
-      'No se pudo eliminar la cuenta',
+      'No se pudo eliminar la cuenta. Revisa las relaciones en cascada de profiles y reflection_sessions.',
     );
   });
 
@@ -367,6 +412,19 @@ describe('callback de autenticacion', () => {
     );
   });
 
+  it('redirige a recuperar cuando Supabase devuelve un enlace expirado', async () => {
+    const response = await authCallbackGet(
+      new Request(
+        'http://localhost/auth/callback?error=access_denied&error_code=otp_expired&next=%2Fcambiar-contrasena%3Fmode%3Drecovery',
+      ),
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'http://localhost/recuperar?recovery_error=otp_expired',
+    );
+  });
+
   it('intercambia codigo y redirige solo a rutas internas', async () => {
     const exchangeCodeForSession = vi.fn(async () => ({ error: null }));
     vi.mocked(createServerSupabaseClient).mockResolvedValue({
@@ -380,5 +438,24 @@ describe('callback de autenticacion', () => {
     expect(response.status).toBe(307);
     expect(response.headers.get('location')).toBe('http://localhost/perfil');
     expect(exchangeCodeForSession).toHaveBeenCalledWith('ok');
+  });
+
+  it('redirige a recuperar cuando falla un codigo de recuperacion', async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue({
+      auth: {
+        exchangeCodeForSession: vi.fn(async () => ({ error: { message: 'invalid code' } })),
+      },
+    } as never);
+
+    const response = await authCallbackGet(
+      new Request(
+        'http://localhost/auth/callback?code=bad&next=%2Fcambiar-contrasena%3Fmode%3Drecovery',
+      ),
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'http://localhost/recuperar?recovery_error=invalid_code',
+    );
   });
 });

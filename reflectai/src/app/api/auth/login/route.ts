@@ -27,8 +27,21 @@ export async function POST(request: Request) {
     });
 
     if (error || !data.user) {
+      if (error) {
+        console.error('Supabase login failed', error.message);
+      }
+
+      const isUnconfirmedEmail = error?.message.toLowerCase().includes('email not confirmed');
+
       return NextResponse.json(
-        { error: { message: 'Credenciales incorrectas' } },
+        {
+          error: {
+            message: isUnconfirmedEmail
+              ? 'Esta cuenta existe pero el correo no esta confirmado. Crea una cuenta nueva o confirma el usuario en Supabase.'
+              : 'Credenciales incorrectas',
+            details: error?.message,
+          },
+        },
         { status: 401 },
       );
     }

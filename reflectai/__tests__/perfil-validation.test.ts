@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+
 import { changePasswordSchema, profileSchema } from '@/lib/validations/profile';
 
 const baseProfile = {
@@ -54,9 +55,9 @@ describe('Validaciones de Perfil', () => {
 
   it('rechaza cambio de contrasena con confirmacion distinta', () => {
     const result = changePasswordSchema.safeParse({
-      currentPassword: 'PasswordActual123',
-      newPassword: 'PasswordNueva123',
-      confirmNewPassword: 'OtraPassword123',
+      currentPassword: 'PasswordActual123!',
+      newPassword: 'PasswordNueva123!',
+      confirmNewPassword: 'OtraPassword123!',
     });
 
     expect(result.success).toBe(false);

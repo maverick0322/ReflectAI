@@ -11,7 +11,7 @@ export interface ReflectionAnalysisResult {
   summary: string | null;
   recommendation: string | null;
   encouraging_message: string | null;
-  professional_support_reminder: string;
+  professional_support_reminder: string | null;
 }
 
 function findResponse(
@@ -99,7 +99,7 @@ export function parseAnalysisResult(content: string): ReflectionAnalysisResult |
     professional_support_reminder:
       typeof parsed.professional_support_reminder === 'string'
         ? parsed.professional_support_reminder
-        : 'Esta reflexion no sustituye la atencion profesional. Si el malestar es intenso, persistente o afecta tu vida diaria, lo mejor es consultar a un profesional.',
+        : null,
   };
 }
 
@@ -110,9 +110,10 @@ export function buildFallbackAnalysis(
   const intensity = findResponse(payload, 'Q4_INT')?.value;
   const situation = findResponse(payload, 'Q1_SIT')?.text;
   const alternative = findResponse(payload, 'Q7_ALT')?.text;
-  const titleSource = alternative || situation || 'Sesion de reflexion';
-  const normalizedTitle =
-    titleSource.length > 64 ? `${titleSource.slice(0, 61).trim()}...` : titleSource;
+  const titleSource = alternative || situation || null;
+  const normalizedTitle = titleSource && titleSource.length > 64
+    ? `${titleSource.slice(0, 61).trim()}...`
+    : titleSource;
 
   return {
     primary_emotions: emotion ? [emotion] : [],
@@ -120,14 +121,10 @@ export function buildFallbackAnalysis(
     key_themes: [],
     cognitive_distortion_detected: null,
     session_title: normalizedTitle,
-    summary:
-      'Registraste la situacion, el pensamiento asociado, la emocion principal y una interpretacion alternativa para mirar lo ocurrido con mas claridad.',
-    recommendation:
-      'Usa tu perspectiva alternativa como punto de apoyo y elige una accion pequena que dependa de ti para el siguiente paso.',
-    encouraging_message:
-      'Tomarte este tiempo para ordenar lo que sientes es un avance concreto.',
-    professional_support_reminder:
-      'Esta reflexion no sustituye la atencion profesional. Si el malestar es intenso, persistente o afecta tu vida diaria, lo mejor es consultar a un profesional.',
+    summary: null,
+    recommendation: null,
+    encouraging_message: null,
+    professional_support_reminder: null,
   };
 }
 

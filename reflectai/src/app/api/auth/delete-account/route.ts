@@ -13,35 +13,11 @@ export async function DELETE() {
 
     const adminClient = createAdminSupabaseClient();
 
-    const { error: sessionsError } = await adminClient
-      .from('reflection_sessions')
-      .delete()
-      .eq('user_id', user.id);
-
-    if (sessionsError) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo eliminar el historial' } },
-        { status: 500 },
-      );
-    }
-
-    const { error: profileError } = await adminClient
-      .from('profiles')
-      .delete()
-      .eq('id', user.id);
-
-    if (profileError) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo eliminar el perfil' } },
-        { status: 500 },
-      );
-    }
-
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
       return NextResponse.json(
-        { error: { message: 'No se pudo eliminar la cuenta' } },
+        { error: { message: 'No se pudo eliminar la cuenta. Revisa las relaciones en cascada de profiles y reflection_sessions.' } },
         { status: 500 },
       );
     }

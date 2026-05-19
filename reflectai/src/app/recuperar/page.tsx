@@ -1,8 +1,10 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'next/navigation';
 
 import Button from '@/components/ui/Button';
 import CustomLink from '@/components/ui/CustomLink';
@@ -12,9 +14,24 @@ import { ApiError } from '@/lib/api/http';
 import { recoverPassword } from '@/lib/api/auth';
 import { recoverPasswordSchema, type RecoverPasswordFormValues } from '@/lib/validations/auth';
 
-export default function RecoverPasswordPage() {
+function getRecoveryErrorMessage(errorCode: string | null) {
+  if (errorCode === 'otp_expired') {
+    return 'El enlace expiro o ya fue usado. Solicita uno nuevo para restablecer tu contrasena.';
+  }
+
+  if (errorCode) {
+    return 'El enlace no es valido. Solicita uno nuevo para restablecer tu contrasena.';
+  }
+
+  return null;
+}
+
+function RecoverPasswordContent() {
+  const searchParams = useSearchParams();
+  const recoveryError = getRecoveryErrorMessage(searchParams.get('recovery_error'));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [developmentRecoveryLink, setDevelopmentRecoveryLink] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
@@ -30,7 +47,8 @@ export default function RecoverPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      await recoverPassword(data.email);
+      const response = await recoverPassword(data.email);
+      setDevelopmentRecoveryLink(response.data?.recoveryLink ?? null);
       setIsSuccess(true);
     } catch (error) {
       const message =
@@ -69,10 +87,27 @@ export default function RecoverPasswordPage() {
               {formError}
             </p>
           )}
-          {isSuccess && (
-            <p className="text-sm text-green-600 font-semibold" role="status">
-              Revisa tu correo para continuar con el restablecimiento.
+          {recoveryError && !formError && !isSuccess && (
+            <p className="text-sm text-red-500 font-semibold" role="alert">
+              {recoveryError}
             </p>
+          )}
+          {isSuccess && (
+            <div className="flex flex-col gap-2 text-sm font-semibold text-green-600" role="status">
+              <p>
+                {developmentRecoveryLink
+                  ? 'Se genero un enlace de recuperacion para desarrollo.'
+                  : 'Revisa tu correo para continuar con el restablecimiento.'}
+              </p>
+              {developmentRecoveryLink && (
+                <a
+                  href={developmentRecoveryLink}
+                  className="text-reflect-dark underline underline-offset-4"
+                >
+                  Abrir enlace de recuperacion
+                </a>
+              )}
+            </div>
           )}
           <Button type="submit" disabled={isSubmitting} className={isSubmitting ? 'opacity-60' : ''}>
             {isSubmitting ? 'Enviando...' : 'Enviar enlace'}
@@ -85,5 +120,13 @@ export default function RecoverPasswordPage() {
         </footer>
       </GlassCard>
     </main>
+  );
+}
+
+export default function RecoverPasswordPage() {
+  return (
+    <Suspense>
+      <RecoverPasswordContent />
+    </Suspense>
   );
 }

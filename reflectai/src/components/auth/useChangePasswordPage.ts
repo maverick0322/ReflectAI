@@ -98,8 +98,14 @@ export function useChangePasswordPage(): UseChangePasswordPageResult {
     let isMounted = true;
 
     const runRecoveryConfirmation = async () => {
+      if (!isRecoveryFlow) {
+        setRecoveryReady(false);
+        return;
+      }
+
       if (!recoveryCode) {
         setRecoveryReady(true);
+        setStep(2);
         return;
       }
 
@@ -132,7 +138,7 @@ export function useChangePasswordPage(): UseChangePasswordPageResult {
     return () => {
       isMounted = false;
     };
-  }, [recoveryCode]);
+  }, [isRecoveryFlow, recoveryCode]);
 
   const goToPreviousStep = useCallback(() => {
     setFormError(null);
