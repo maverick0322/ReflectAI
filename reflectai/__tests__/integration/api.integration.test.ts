@@ -538,15 +538,11 @@ describe('Critical API integration - version 2026-05-12', () => {
       imageFile('image/png', 'avatar.png'),
     );
 
-    const response = await avatarPost(
-      new Request('http://localhost/api/profile/avatar', {
-        method: 'POST',
-        headers: {
-          Origin: 'http://localhost',
-        },
-        body: formData,
-      }),
-    );
+    const response = await avatarPost({
+      url: 'http://localhost/api/profile/avatar',
+      headers: new Headers({ Origin: 'http://localhost' }),
+      formData: vi.fn(async () => formData),
+    } as unknown as Request);
     const body = await readJson(response);
 
     expect(response.status).toBe(200);
