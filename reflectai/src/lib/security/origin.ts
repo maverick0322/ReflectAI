@@ -44,6 +44,19 @@ function getOriginFromHeader(value: string | null) {
   }
 }
 
+function isLocalOrigin(origin: string | null) {
+  if (!origin) {
+    return false;
+  }
+
+  try {
+    const { hostname } = new URL(origin);
+    return LOCAL_HOSTNAMES.has(hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function assertTrustedMutationOrigin(request: Request) {
   const trustedOrigin = getTrustedSiteOrigin(request.url);
   const originHeader = getOriginFromHeader(request.headers.get('origin'));
@@ -55,6 +68,12 @@ export function assertTrustedMutationOrigin(request: Request) {
   const refererHeader = getOriginFromHeader(request.headers.get('referer'));
   if (refererHeader === trustedOrigin) {
     return;
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    if (isLocalOrigin(originHeader) || isLocalOrigin(refererHeader)) {
+      return;
+    }
   }
 
   throw new Error('Untrusted origin');

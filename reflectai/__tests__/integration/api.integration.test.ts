@@ -512,19 +512,19 @@ describe('Critical API integration - version 2026-05-12', () => {
     });
   });
 
-  it('TC-02-02 uploads a valid avatar and persists the public bucket URL', async () => {
+  it('TC-02-02 uploads a valid avatar and persists the private bucket reference', async () => {
     const avatarProfile = {
       id: 'user-a',
       first_name: 'Ana',
       last_name: 'Lopez',
       full_name: 'Ana Lopez',
       birth_date: '2000-01-01',
-      avatar_url: 'https://cdn.test/user-a/avatar.png',
+      avatar_url: 'user-a/avatar-123.png',
     };
     const updateAvatar = createChain({
       singleResult: { data: avatarProfile, error: null },
     });
-    const { storage, bucket } = createStorageBucket(avatarProfile.avatar_url);
+    const { storage, bucket } = createStorageBucket('https://cdn.test/user-a/avatar.png');
     const supabaseMock = createSupabaseMock({
       user: { id: 'user-a', email: 'ana@reflectai.com' },
       builders: [updateAvatar],
@@ -545,7 +545,7 @@ describe('Critical API integration - version 2026-05-12', () => {
 
     expect(response.status).toBe(200);
     expect(body.message).toBe('Foto de perfil actualizada correctamente');
-    expect(body.data?.avatar_url).toBe(avatarProfile.avatar_url);
+    expect(body.data?.avatar_url).toBe('https://cdn.test/user-a/avatar.png?token=abc');
     expect(bucket.upload).toHaveBeenCalledWith(
       expect.stringMatching(/^user-a\/avatar-\d+\.png$/),
       expect.any(File),
@@ -556,7 +556,7 @@ describe('Critical API integration - version 2026-05-12', () => {
       },
     );
     expect(updateAvatar.update).toHaveBeenCalledWith({
-      avatar_url: avatarProfile.avatar_url,
+      avatar_url: expect.stringMatching(/^user-a\/avatar-\d+\.png$/),
     });
   });
 

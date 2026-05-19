@@ -60,10 +60,11 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const signInResult = await supabase.auth.signInWithPassword({
       email: user.email,
       password: validation.data.currentPassword,
     });
+    const signInError = signInResult?.error ?? null;
 
     if (signInError) {
       return NextResponse.json(
