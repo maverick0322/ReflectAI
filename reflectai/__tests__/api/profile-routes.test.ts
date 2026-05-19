@@ -181,6 +181,64 @@ describe('rutas API de perfil', () => {
 
     expect(untrustedResponse.status).toBe(403);
   });
+
+  it('crea perfil si no existe y maneja errores al leer o crear', async () => {
+    const readBuilder = createBuilder({
+      maybeSingleResult: { data: null, error: null },
+    });
+    const createBuilderMock = createBuilder({
+      singleResult: { data: null, error: { message: 'db' } },
+    });
+    const from = vi
+      .fn()
+      .mockReturnValueOnce(readBuilder)
+      .mockReturnValueOnce(createBuilderMock);
+    mockAuthenticatedUser({ supabase: { from } });
+
+    const response = await profileGet();
+    expect(response.status).toBe(500);
+    expect((await readJson(response)).error?.message).toBe(
+      'No se pudo crear el perfil',
+    );
+
+    const errorBuilder = createBuilder({
+      maybeSingleResult: { data: null, error: { message: 'db' } },
+    });
+    mockAuthenticatedUser({ supabase: { from: vi.fn(() => errorBuilder) } });
+
+    const errorResponse = await profileGet();
+    expect(errorResponse.status).toBe(500);
+    expect((await readJson(errorResponse)).error?.message).toBe(
+      'No se pudo obtener el perfil',
+    );
+  });
+
+  it('rechaza payload invalido y errores al actualizar perfil', async () => {
+    mockAuthenticatedUser();
+
+    const invalidResponse = await profilePatch(
+      patchRequest({ firstName: '' }),
+    );
+    expect(invalidResponse.status).toBe(400);
+
+    const updateBuilder = createBuilder({
+      singleResult: { data: null, error: { message: 'db' } },
+    });
+    mockAuthenticatedUser({ supabase: { from: vi.fn(() => updateBuilder) } });
+
+    const updateResponse = await profilePatch(
+      patchRequest({
+        firstName: 'Ana',
+        lastName: 'Lopez',
+        birthDate: '2000-01-01',
+      }),
+    );
+
+    expect(updateResponse.status).toBe(500);
+    expect((await readJson(updateResponse)).error?.message).toBe(
+      'No se pudo actualizar el perfil',
+    );
+  });
 });
 
 describe('ruta API de avatar', () => {
@@ -254,5 +312,89 @@ describe('ruta API de avatar', () => {
     );
 
     expect(response.status).toBe(403);
+  });
+
+  it('rechaza avatar faltante o con tipo invalido', async () => {
+    mockAuthenticatedUser();
+
+    const missingResponse = await avatarPost(avatarRequest());
+    expect(missingResponse.status).toBe(400);
+    expect((await readJson(missingResponse)).error?.message).toBe(
+      'La foto de perfil es obligatoria',
+    );
+
+    const invalidTypeResponse = await avatarPost(
+      avatarRequest(new File([new Uint8Array([0x01])], 'avatar.gif', { type: 'image/gif' })),
+    );
+    expect(invalidTypeResponse.status).toBe(400);
+    expect((await readJson(invalidTypeResponse)).error?.message).toBe(
+      'Solo se permiten formatos JPG, PNG o WEBP',
+    );
+  });
+
+  it('rechaza avatar con tamano excesivo o firma invalida', async () => {
+    mockAuthenticatedUser();
+
+    const largeFile = new File([
+      new Uint8Array(2 * 1024 * 1024 + 1),
+    ], 'big.png', { type: 'image/png' });
+    const tooLargeResponse = await avatarPost(avatarRequest(largeFile));
+    expect(tooLargeResponse.status).toBe(400);
+    expect((await readJson(tooLargeResponse)).error?.message).toBe(
+      'La imagen debe pesar menos de 2MB',
+    );
+
+    const badSignature = new File([
+      new Uint8Array([0x00, 0x01, 0x02]),
+    ], 'bad.png', { type: 'image/png' });
+    const badSignatureResponse = await avatarPost(avatarRequest(badSignature));
+    expect(badSignatureResponse.status).toBe(400);
+    expect((await readJson(badSignatureResponse)).error?.message).toBe(
+      'El contenido de la imagen no coincide con el formato permitido',
+    );
+  });
+
+  it('maneja errores al subir o actualizar avatar', async () => {
+    const upload = vi.fn(async () => ({ error: { message: 'storage' } }));
+    const bucket = { upload, createSignedUrl: vi.fn() };
+    mockAuthenticatedUser({
+      supabase: {
+        storage: { from: vi.fn(() => bucket) },
+        from: vi.fn(),
+      },
+    });
+
+    const uploadResponse = await avatarPost(
+      avatarRequest(imageFile('image/png', 'avatar.png')),
+    );
+    expect(uploadResponse.status).toBe(500);
+    expect((await readJson(uploadResponse)).error?.message).toBe(
+      'No se pudo subir la foto. Verifica que exista el bucket profile-avatars en Supabase Storage.',
+    );
+
+    const updateBuilder = createBuilder({
+      singleResult: { data: null, error: { message: 'db' } },
+    });
+    const okBucket = {
+      upload: vi.fn(async () => ({ error: null })),
+      createSignedUrl: vi.fn(async () => ({
+        data: { signedUrl: 'https://cdn.test/avatar.png?token=abc' },
+        error: null,
+      })),
+    };
+    mockAuthenticatedUser({
+      supabase: {
+        storage: { from: vi.fn(() => okBucket) },
+        from: vi.fn(() => updateBuilder),
+      },
+    });
+
+    const updateResponse = await avatarPost(
+      avatarRequest(imageFile('image/png', 'avatar.png')),
+    );
+    expect(updateResponse.status).toBe(500);
+    expect((await readJson(updateResponse)).error?.message).toBe(
+      'No se pudo actualizar la foto de perfil',
+    );
   });
 });

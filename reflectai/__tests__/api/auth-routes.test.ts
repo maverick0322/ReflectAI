@@ -7,6 +7,7 @@ import { DELETE as deleteAccountDelete } from '@/app/api/auth/delete-account/rou
 import { POST as loginPost } from '@/app/api/auth/login/route';
 import { POST as logoutPost } from '@/app/api/auth/logout/route';
 import { POST as recoverPost } from '@/app/api/auth/recover/route';
+import { POST as registerPost } from '@/app/api/auth/register/route';
 import { GET as sessionStatusGet } from '@/app/api/auth/session-status/route';
 import { POST as verifyPasswordPost } from '@/app/api/auth/verify-password/route';
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
@@ -144,6 +145,51 @@ describe('rutas API de autenticacion', () => {
     );
   });
 
+  it('rechaza payload invalido en login', async () => {
+    const response = await loginPost(
+      mutationRequest('/api/auth/login', {
+        email: 'ana@reflectai.com',
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expect((await readJson(response)).error?.message).toBe('Datos invalidos');
+  });
+
+  it('rechaza payload invalido en registro y maneja errores de redirect', async () => {
+    const invalidResponse = await registerPost(
+      mutationRequest('/api/auth/register', {
+        email: 'ana@reflectai.com',
+      }),
+    );
+    expect(invalidResponse.status).toBe(400);
+    expect((await readJson(invalidResponse)).error?.message).toBe(
+      'Datos de registro invalidos',
+    );
+
+    const createUser = vi.fn(async () => ({
+      data: { user: null },
+      error: { message: 'Redirect not allowed' },
+    }));
+    vi.mocked(createAdminSupabaseClient).mockReturnValue({
+      auth: { admin: { createUser } },
+    } as never);
+
+    const redirectResponse = await registerPost(
+      mutationRequest('/api/auth/register', {
+        firstName: 'Ana',
+        lastName: 'Lopez',
+        email: 'ana@reflectai.com',
+        password: 'PasswordFuerte123!',
+        birthDate: '2000-01-01',
+      }),
+    );
+    expect(redirectResponse.status).toBe(400);
+    expect((await readJson(redirectResponse)).error?.message).toBe(
+      'No se pudo completar el registro.',
+    );
+  });
+
   it('envia recuperacion de password con callback seguro', async () => {
     const resetPasswordForEmail = vi.fn(async () => ({ error: null }));
     vi.mocked(createServerSupabaseClient).mockResolvedValue({
@@ -165,6 +211,49 @@ describe('rutas API de autenticacion', () => {
     });
   });
 
+  it('rechaza payload invalido y maneja errores de recuperacion', async () => {
+    const invalidResponse = await recoverPost(
+      mutationRequest('/api/auth/recover', {
+        email: '',
+      }),
+    );
+    expect(invalidResponse.status).toBe(400);
+
+    const resetPasswordForEmail = vi.fn(async () => ({
+      error: { message: 'email rate limit exceeded' },
+    }));
+    vi.mocked(createServerSupabaseClient).mockResolvedValueOnce({
+      auth: { resetPasswordForEmail },
+    } as never);
+
+    const rateLimitResponse = await recoverPost(
+      mutationRequest('/api/auth/recover', {
+        email: 'ana@reflectai.com',
+      }),
+    );
+    expect(rateLimitResponse.status).toBe(429);
+    expect((await readJson(rateLimitResponse)).error?.message).toBe(
+      'Se hicieron demasiados intentos. Espera unos minutos antes de pedir otro enlace.',
+    );
+
+    const emailError = vi.fn(async () => ({
+      error: { message: 'error sending email' },
+    }));
+    vi.mocked(createServerSupabaseClient).mockResolvedValueOnce({
+      auth: { resetPasswordForEmail: emailError },
+    } as never);
+
+    const emailErrorResponse = await recoverPost(
+      mutationRequest('/api/auth/recover', {
+        email: 'ana@reflectai.com',
+      }),
+    );
+    expect(emailErrorResponse.status).toBe(500);
+    expect((await readJson(emailErrorResponse)).error?.message).toBe(
+      'Supabase no pudo enviar el correo de recuperacion. Revisa la configuracion SMTP o intenta con otro correo.',
+    );
+  });
+
   it('confirma recuperacion solo cuando Supabase devuelve sesion', async () => {
     const exchangeCodeForSession = vi.fn(async () => ({
       data: { session: { access_token: 'token' } },
@@ -180,6 +269,29 @@ describe('rutas API de autenticacion', () => {
 
     expect(response.status).toBe(200);
     expect((await readJson(response)).message).toBe('Recuperacion confirmada');
+  });
+
+  it('rechaza payload invalido o sesion inexistente en confirmacion', async () => {
+    const invalidResponse = await confirmRecoveryPost(
+      mutationRequest('/api/auth/confirm-recovery', { code: '' }),
+    );
+    expect(invalidResponse.status).toBe(400);
+
+    const exchangeCodeForSession = vi.fn(async () => ({
+      data: { session: null },
+      error: { message: 'bad' },
+    }));
+    vi.mocked(createServerSupabaseClient).mockResolvedValue({
+      auth: { exchangeCodeForSession },
+    } as never);
+
+    const failedResponse = await confirmRecoveryPost(
+      mutationRequest('/api/auth/confirm-recovery', { code: 'code-1' }),
+    );
+    expect(failedResponse.status).toBe(400);
+    expect((await readJson(failedResponse)).error?.message).toBe(
+      'No se pudo confirmar la recuperacion',
+    );
   });
 
   it('actualiza y verifica password con usuario autenticado', async () => {
@@ -209,6 +321,69 @@ describe('rutas API de autenticacion', () => {
     expect(verifyResponse.status).toBe(200);
     expect((await readJson(verifyResponse)).message).toBe(
       'Contrasena actual validada correctamente',
+    );
+  });
+
+  it('rechaza cambio de password si falta email o si es la misma contrasena', async () => {
+    mockAuthenticatedUser({
+      user: { id: 'user-1' },
+    });
+
+    const missingEmailResponse = await changePasswordPost(
+      mutationRequest('/api/auth/change-password', {
+        currentPassword: 'PasswordActual123!',
+        newPassword: 'PasswordNueva123!',
+        confirmNewPassword: 'PasswordNueva123!',
+      }),
+    );
+    expect(missingEmailResponse.status).toBe(400);
+    expect((await readJson(missingEmailResponse)).error?.message).toBe(
+      'No se pudo validar la contrasena actual',
+    );
+
+    const updateUser = vi.fn(async () => ({
+      error: { message: 'same password' },
+    }));
+    mockAuthenticatedUser({
+      supabase: { auth: { updateUser } },
+    });
+
+    const samePasswordResponse = await changePasswordPost(
+      mutationRequest('/api/auth/change-password', {
+        newPassword: 'PasswordActual123!',
+        confirmNewPassword: 'PasswordActual123!',
+      }),
+    );
+    expect(samePasswordResponse.status).toBe(400);
+    expect((await readJson(samePasswordResponse)).error?.message).toBe(
+      'La nueva contrasena debe ser diferente a la actual.',
+    );
+  });
+
+  it('rechaza verificacion de password sin email o con credenciales invalidas', async () => {
+    mockAuthenticatedUser({ user: { id: 'user-1' } });
+
+    const missingEmailResponse = await verifyPasswordPost(
+      mutationRequest('/api/auth/verify-password', {
+        currentPassword: 'PasswordActual123!',
+      }),
+    );
+    expect(missingEmailResponse.status).toBe(400);
+    expect((await readJson(missingEmailResponse)).error?.message).toBe(
+      'No se pudo validar la contrasena actual',
+    );
+
+    const signInWithPassword = vi.fn(async () => ({ error: { message: 'bad' } }));
+    mockAuthenticatedUser({ supabase: { auth: { signInWithPassword } } });
+
+    const badPasswordResponse = await verifyPasswordPost(
+      mutationRequest('/api/auth/verify-password', {
+        currentPassword: 'PasswordActual123!',
+      }),
+    );
+    expect(badPasswordResponse.status).toBe(400);
+    expect((await readJson(badPasswordResponse)).error?.message).toBe(
+      'La contrasena actual es incorrecta',
     );
   });
 
@@ -290,6 +465,32 @@ describe('rutas API de autenticacion', () => {
     });
     expect(deleteUser).toHaveBeenCalledWith('user-1');
     expect(signOut).toHaveBeenCalled();
+  });
+
+  it('devuelve error si falla eliminar cuenta en Supabase', async () => {
+    const signInWithPassword = vi.fn(async () => ({ error: null }));
+    const signOut = vi.fn();
+    mockAuthenticatedUser({
+      supabase: { auth: { signInWithPassword, signOut } },
+    });
+
+    const deleteUser = vi.fn(async () => ({ error: { message: 'fail' } }));
+    vi.mocked(createAdminSupabaseClient).mockReturnValue({
+      auth: { admin: { deleteUser } },
+    } as never);
+
+    const response = await deleteAccountDelete(
+      mutationRequest(
+        '/api/auth/delete-account',
+        { currentPassword: 'PasswordActual123!' },
+        'DELETE',
+      ),
+    );
+
+    expect(response.status).toBe(500);
+    expect((await readJson(response)).error?.message).toBe(
+      'No se pudo eliminar la cuenta. Revisa las relaciones en cascada de profiles y reflection_sessions.',
+    );
   });
 
   it('rechaza eliminacion sin password o con origen no confiable', async () => {
