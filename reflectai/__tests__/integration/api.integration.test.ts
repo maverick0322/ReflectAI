@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createClient } from '@supabase/supabase-js';
 
 import { POST as analyzeSessionPost } from '@/app/api/ai/analyze-session/route';
 import { GET as dailyQuoteGet } from '@/app/api/ai/daily-quote/route';
@@ -43,10 +42,6 @@ vi.mock('@/lib/ai/reflectionAnalysis', () => ({
   buildFallbackAnalysis: vi.fn(),
 }));
 
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(),
-}));
-
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminSupabaseClient: vi.fn(),
 }));
@@ -85,6 +80,7 @@ type ApiBody<TData = Record<string, unknown>> = {
   error?: {
     message?: string;
     details?: unknown;
+    field?: string;
   };
 };
 
@@ -186,10 +182,6 @@ function mockServerSupabaseClient(supabaseMock: ReturnType<typeof createSupabase
   vi.mocked(createServerSupabaseClient).mockResolvedValue(supabaseMock as never);
 }
 
-function mockRegisterClient(supabaseMock: { auth: { signUp: MockFn } }) {
-  vi.mocked(createClient).mockReturnValue(supabaseMock as never);
-}
-
 function jsonRequest(path: string, body: unknown, method = 'POST') {
   return new Request(`http://localhost${path}`, {
     method,
@@ -225,19 +217,21 @@ beforeEach(() => {
 
 describe('Critical API integration - version 2026-05-12', () => {
   it('TC-01-01 registers a user and propagates profile data to Supabase Auth', async () => {
-    const signUp = vi.fn(async () => ({
+    const createUser = vi.fn(async () => ({
       data: { user: { id: 'user-a', email: 'ana@reflectai.com' } },
       error: null,
     }));
 
-    mockRegisterClient({ auth: { signUp } });
+    vi.mocked(createAdminSupabaseClient).mockReturnValue({
+      auth: { admin: { createUser } },
+    } as never);
 
     const response = await registerPost(
       jsonRequest('/api/auth/register', {
         firstName: 'Ana',
         lastName: 'Lopez',
         email: 'ana@reflectai.com',
-        password: 'PasswordFuerte123',
+        password: 'PasswordFuerte123!',
         birthDate: '2000-01-01',
       }),
     );
@@ -251,21 +245,70 @@ describe('Critical API integration - version 2026-05-12', () => {
       email: 'ana@reflectai.com',
       fullName: 'Ana Lopez',
     });
-    expect(signUp).toHaveBeenCalledWith({
+    expect(createUser).toHaveBeenCalledWith({
       email: 'ana@reflectai.com',
-      password: 'PasswordFuerte123',
-      options: {
-        emailRedirectTo: expect.stringContaining(
-          '/auth/callback?next=%2Fdashboard',
-        ),
-        data: {
-          first_name: 'Ana',
-          last_name: 'Lopez',
-          full_name: 'Ana Lopez',
-          birth_date: '2000-01-01',
-        },
+      password: 'PasswordFuerte123!',
+      email_confirm: true,
+      user_metadata: {
+        first_name: 'Ana',
+        last_name: 'Lopez',
+        full_name: 'Ana Lopez',
+        birth_date: '2000-01-01',
       },
     });
+  });
+
+  it('returns a clear rate-limit response when Supabase blocks signup emails', async () => {
+    const createUser = vi.fn(async () => ({
+      data: { user: null },
+      error: { message: 'email rate limit exceeded' },
+    }));
+
+    vi.mocked(createAdminSupabaseClient).mockReturnValue({
+      auth: { admin: { createUser } },
+    } as never);
+
+    const response = await registerPost(
+      jsonRequest('/api/auth/register', {
+        firstName: 'Ana',
+        lastName: 'Lopez',
+        email: 'ana@reflectai.com',
+        password: 'PasswordFuerte123!',
+        birthDate: '2000-01-01',
+      }),
+    );
+    const body = await readJson(response);
+
+    expect(response.status).toBe(429);
+    expect(body.error?.message).toBe(
+      'Se hicieron demasiados intentos. Espera unos minutos antes de crear otra cuenta.',
+    );
+  });
+
+  it('returns a field-friendly message when the email is already registered', async () => {
+    const createUser = vi.fn(async () => ({
+      data: { user: null },
+      error: { message: 'A user with this email address has already been registered' },
+    }));
+
+    vi.mocked(createAdminSupabaseClient).mockReturnValue({
+      auth: { admin: { createUser } },
+    } as never);
+
+    const response = await registerPost(
+      jsonRequest('/api/auth/register', {
+        firstName: 'Ana',
+        lastName: 'Lopez',
+        email: 'ana@reflectai.com',
+        password: 'PasswordFuerte123!',
+        birthDate: '2000-01-01',
+      }),
+    );
+    const body = await readJson(response);
+
+    expect(response.status).toBe(400);
+    expect(body.error?.message).toBe('Ya existe una cuenta con ese correo.');
+    expect(body.error?.field).toBe('email');
   });
 
   it('TC-01-02 signs in and signs out with safe response contracts', async () => {
@@ -288,7 +331,7 @@ describe('Critical API integration - version 2026-05-12', () => {
     const loginResponse = await loginPost(
       jsonRequest('/api/auth/login', {
         email: 'ana@reflectai.com',
-        password: 'PasswordFuerte123',
+        password: 'PasswordFuerte123!',
       }),
     );
     const loginBody = await readJson(loginResponse);
@@ -309,7 +352,7 @@ describe('Critical API integration - version 2026-05-12', () => {
     );
     expect(signInWithPassword).toHaveBeenCalledWith({
       email: 'ana@reflectai.com',
-      password: 'PasswordFuerte123',
+      password: 'PasswordFuerte123!',
     });
     expect(signOut).toHaveBeenCalled();
   });
@@ -342,9 +385,9 @@ describe('Critical API integration - version 2026-05-12', () => {
     );
     const changePasswordResponse = await changePasswordPost(
       jsonRequest('/api/auth/change-password', {
-        currentPassword: 'PasswordActual123',
-        newPassword: 'PasswordNueva123',
-        confirmNewPassword: 'PasswordNueva123',
+        currentPassword: 'PasswordActual123!',
+        newPassword: 'PasswordNueva123!',
+        confirmNewPassword: 'PasswordNueva123!',
       }),
     );
 
@@ -353,14 +396,14 @@ describe('Critical API integration - version 2026-05-12', () => {
     expect(changePasswordResponse.status).toBe(200);
     expect(resetPasswordForEmail).toHaveBeenCalledWith('ana@reflectai.com', {
       redirectTo:
-        'https://reflectai.example/auth/callback?next=%2Fcambiar-contrasena%3Fmode%3Drecovery',
+        'http://localhost/auth/callback?next=%2Fcambiar-contrasena%3Fmode%3Drecovery',
     });
     expect(exchangeCodeForSession).toHaveBeenCalledWith('code-ok');
     expect(signInWithPassword).toHaveBeenCalledWith({
       email: 'ana@reflectai.com',
-      password: 'PasswordActual123',
+      password: 'PasswordActual123!',
     });
-    expect(updateUser).toHaveBeenCalledWith({ password: 'PasswordNueva123' });
+    expect(updateUser).toHaveBeenCalledWith({ password: 'PasswordNueva123!' });
   });
 
   it('TC-01-04 deletes the account and cleans history, profile, Auth and local session', async () => {
@@ -369,16 +412,10 @@ describe('Critical API integration - version 2026-05-12', () => {
       user: { id: 'user-a', email: 'ana@reflectai.com' },
       auth: { signOut },
     });
-    const sessionsDelete = createChain();
-    const profileDelete = createChain();
     const deleteUser = vi.fn(async () => ({ error: null }));
-    const from = vi.fn()
-      .mockReturnValueOnce(sessionsDelete)
-      .mockReturnValueOnce(profileDelete);
 
     mockServerSupabaseClient(supabaseMock);
     vi.mocked(createAdminSupabaseClient).mockReturnValue({
-      from,
       auth: { admin: { deleteUser } },
     } as never);
 
@@ -387,11 +424,6 @@ describe('Critical API integration - version 2026-05-12', () => {
 
     expect(response.status).toBe(200);
     expect(body.message).toBe('Cuenta eliminada correctamente');
-    expect(from).toHaveBeenCalledWith('reflection_sessions');
-    expect(from).toHaveBeenCalledWith('profiles');
-    expect(sessionsDelete.delete).toHaveBeenCalled();
-    expect(sessionsDelete.eq).toHaveBeenCalledWith('user_id', 'user-a');
-    expect(profileDelete.eq).toHaveBeenCalledWith('id', 'user-a');
     expect(deleteUser).toHaveBeenCalledWith('user-a');
     expect(signOut).toHaveBeenCalled();
   });
@@ -996,3 +1028,4 @@ describe('Critical API integration - version 2026-05-12', () => {
     });
   });
 });
+

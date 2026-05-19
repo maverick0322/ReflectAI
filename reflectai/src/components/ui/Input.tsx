@@ -25,6 +25,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       <div className="flex flex-col w-full">
         <div className="relative w-full">
           <input
+            {...props}
             ref={ref}
             id={id}
             maxLength={maxLength}
@@ -35,7 +36,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               error ? 'border-red-500 focus:ring-red-400' : 'border-white/80 focus:ring-reflect-dark/30'            } rounded-2xl text-reflect-dark placeholder:text-reflect-dark/50 focus:outline-none focus:ring-2 transition-all ${
               rightElement ? 'pr-12' : ''
             } ${className}`}
-            {...props}
           />
           
           {rightElement && (

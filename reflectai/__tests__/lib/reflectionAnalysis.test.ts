@@ -77,6 +77,10 @@ describe('reflection analysis', () => {
     expect(fallback.primary_emotions).toEqual(['ansiedad']);
     expect(fallback.average_intensity).toBe(8);
     expect(fallback.session_title).toBe('Puedo responder con mas calma.');
+    expect(fallback.summary).toBeNull();
+    expect(fallback.recommendation).toBeNull();
+    expect(fallback.encouraging_message).toBeNull();
+    expect(fallback.professional_support_reminder).toBeNull();
   });
 
   it('runs analysis using Groq client', async () => {

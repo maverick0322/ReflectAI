@@ -1,14 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
+import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { registerSchema } from '@/lib/validations/auth';
 
-function buildAuthCallbackUrl(requestUrl: string, nextPath: string) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  const baseUrl = siteUrl ?? new URL(requestUrl).origin;
-  const callbackUrl = new URL('/auth/callback', baseUrl);
-  callbackUrl.searchParams.set('next', nextPath);
-  return callbackUrl.toString();
+function getRegisterErrorMessage(message: string) {
+  const normalizedMessage = message.toLowerCase();
+
+  if (
+    normalizedMessage.includes('already registered') ||
+    normalizedMessage.includes('already exists') ||
+    normalizedMessage.includes('already been registered')
+  ) {
+    return 'Ya existe una cuenta con ese correo.';
+  }
+
+  if (normalizedMessage.includes('rate limit')) {
+    return 'Se hicieron demasiados intentos. Espera unos minutos antes de crear otra cuenta.';
+  }
+
+  if (normalizedMessage.includes('redirect') || normalizedMessage.includes('not allowed')) {
+    return 'La URL de confirmacion no esta permitida en Supabase.';
+  }
+
+  return 'No se pudo registrar el usuario';
+}
+
+function getRegisterErrorField(message: string) {
+  return getRegisterErrorMessage(message).includes('correo') ? 'email' : undefined;
 }
 
 export async function POST(request: Request) {
@@ -36,33 +54,32 @@ export async function POST(request: Request) {
     const { firstName, lastName, email, password, birthDate } = validation.data;
     const fullName = [firstName, lastName].filter(Boolean).join(' ');
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    );
-
-    const { data, error } = await supabase.auth.signUp({
+    const supabase = createAdminSupabaseClient();
+    const { data, error } = await supabase.auth.admin.createUser({
       email,
       password,
-      options: {
-        emailRedirectTo: buildAuthCallbackUrl(request.url, '/dashboard'),
-        data: {
-          first_name: firstName,
-          last_name: lastName ?? '',
-          full_name: fullName,
-          birth_date: birthDate,
-        },
+      email_confirm: true,
+      user_metadata: {
+        first_name: firstName,
+        last_name: lastName ?? '',
+        full_name: fullName,
+        birth_date: birthDate,
       },
     });
 
     if (error) {
+      console.error('Supabase register failed', error.message);
+      const isRateLimited = error.message.toLowerCase().includes('rate limit');
+
       return NextResponse.json(
         {
           error: {
-            message: 'No se pudo registrar el usuario',
+            message: getRegisterErrorMessage(error.message),
+            details: error.message,
+            field: getRegisterErrorField(error.message),
           },
         },
-        { status: 400 },
+        { status: isRateLimited ? 429 : 400 },
       );
     }
 

@@ -126,4 +126,23 @@ describe('Dashboard Page Integration (Estado con Datos)', () => {
     expect(await screen.findByText(/Observa con calma antes de responder/i)).toBeInTheDocument();
     expect(screen.getByText(/ReflectAI/i)).toBeInTheDocument();
   });
+
+  it('usa la cita por defecto si falla la cita diaria', async () => {
+    fetchDailyQuoteMock.mockRejectedValueOnce(new Error('quote unavailable'));
+
+    render(<DashboardPage />);
+
+    expect(await screen.findByText(/Marco Aurelio/i)).toBeInTheDocument();
+    expect(screen.getByText(/La reflexi/i)).toBeInTheDocument();
+  });
+
+  it('muestra error si falla la carga principal del dashboard', async () => {
+    listSessionsMock.mockRejectedValueOnce(new Error('network'));
+
+    render(<DashboardPage />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      /No se pudo cargar el dashboard/i,
+    );
+  });
 });

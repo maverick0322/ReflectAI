@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import NuevaSesionPage from '@/app/nueva-sesion/page';
+import { WizardSuccessState } from '@/components/wizard/WizardSuccessState';
 import type { ReflectionSessionPayload, SessionResponse } from '@/types/reflection';
 
 interface ReflectionResponseShape {
@@ -195,7 +196,29 @@ describe('Wizard Nueva Sesión (Integración UI)', () => {
     await waitFor(() => {
       expect(screen.getByText(/¡Reflexión Guardada!/i)).toBeInTheDocument();
     });
+    expect(screen.getByText('Resumen generado')).toBeInTheDocument();
+    expect(screen.getByText('Recomendacion generada')).toBeInTheDocument();
   }, 10000);
+
+  it('no muestra mensajes hardcodeados si el analisis no trae textos de IA', () => {
+    render(
+      <WizardSuccessState
+        summary={{
+          title: 'Sesion sin analisis',
+          summary: null,
+          recommendation: null,
+          encouragement: null,
+          professionalReminder: null,
+        }}
+        onGoToDashboard={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/reflexi.n guardada/i)).toBeInTheDocument();
+    expect(screen.queryByText('Resumen')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Tu reflexion quedo registrada/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Vuelve a leer tu perspectiva alternativa/i)).not.toBeInTheDocument();
+  });
 
   it('UI Reactiva: Debe quitar el mensaje de error tan pronto como el usuario escribe algo válido', async () => {
     const user = userEvent.setup();

@@ -18,6 +18,20 @@ interface RegisterFormSectionProps {
   onSubmit: (data: RegisterFormValues) => Promise<void>;
 }
 
+const REGISTER_FIELDS: (keyof RegisterFormValues)[] = [
+  'firstName',
+  'lastName',
+  'email',
+  'confirmEmail',
+  'password',
+  'confirmPassword',
+  'birthDate',
+];
+
+function getTodayInputValue() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function RegisterNameFields({
   form,
 }: Readonly<{ form: UseFormReturn<RegisterFormValues> }>) {
@@ -116,8 +130,13 @@ export function RegisterFormSection({
   const {
     register,
     handleSubmit,
+    trigger,
     formState: { errors },
   } = form;
+
+  const validateBeforeSubmit = async () => {
+    await trigger(REGISTER_FIELDS, { shouldFocus: true });
+  };
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -129,19 +148,24 @@ export function RegisterFormSection({
         {...register('birthDate')}
         type="date"
         placeholder="Fecha de nacimiento"
+        max={getTodayInputValue()}
         className="text-reflect-dark/70"
         error={errors.birthDate?.message}
       />
 
       {formError && (
-        <p className="text-sm text-red-500 font-semibold" role="alert">
+        <div
+          className="rounded-2xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm font-semibold text-red-700 shadow-sm"
+          role="alert"
+        >
           {formError}
-        </p>
+        </div>
       )}
 
       <div className="mt-2">
         <Button
           type="submit"
+          onClick={validateBeforeSubmit}
           disabled={isSubmitting}
           className={isSubmitting ? 'opacity-60' : ''}
         >

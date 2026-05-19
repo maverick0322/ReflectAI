@@ -18,35 +18,45 @@ function buildDistributionGradient(emotions: StatisticsEmotionItem[]) {
 }
 
 export function EmotionDistributionCard({ emotions }: Readonly<EmotionDistributionCardProps>) {
+  const distributionGradient = emotions.length
+    ? `conic-gradient(${buildDistributionGradient(emotions)})`
+    : 'conic-gradient(#E2E8F0 0% 100%)';
+
   return (
     <GlassCard className="p-5 gap-4 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex flex-col gap-1">
         <h2 className="text-base font-semibold text-slate-900">Emociones frecuentes</h2>
-        <p className="text-sm text-slate-500">Resumen visual listo para datos reales.</p>
+        <p className="text-sm text-slate-500">Distribucion de emociones registradas.</p>
       </div>
 
       <div className="flex flex-col items-center gap-4">
         <div
           aria-label="Distribucion de emociones"
           className="relative flex h-24 w-24 items-center justify-center rounded-full shadow-inner"
-          style={{ background: `conic-gradient(${buildDistributionGradient(emotions)})` }}
+          style={{ background: distributionGradient }}
         >
           <div className="h-16 w-16 rounded-full bg-white/85 backdrop-blur-md" />
         </div>
 
-        <div className="w-full space-y-2">
-          {emotions.map((emotion) => (
-            <div key={emotion.id} className="flex items-center gap-2 text-sm text-slate-600">
-              <span
-                aria-hidden="true"
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: emotion.colorHex }}
-              />
-              <span className="flex-1">{emotion.label}</span>
-              <span className="font-semibold text-slate-700">{emotion.percentage}%</span>
-            </div>
-          ))}
-        </div>
+        {emotions.length > 0 ? (
+          <div className="w-full space-y-2">
+            {emotions.map((emotion) => (
+              <div key={emotion.id} className="flex items-center gap-2 text-sm text-slate-600">
+                <span
+                  aria-hidden="true"
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: emotion.colorHex }}
+                />
+                <span className="flex-1">{emotion.label}</span>
+                <span className="font-semibold text-slate-700">{emotion.percentage}%</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-sm font-medium text-slate-400">
+            Sin emociones registradas.
+          </p>
+        )}
       </div>
     </GlassCard>
   );

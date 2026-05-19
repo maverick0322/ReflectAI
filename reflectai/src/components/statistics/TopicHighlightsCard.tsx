@@ -11,20 +11,26 @@ export function TopicHighlightsCard({ topics }: Readonly<TopicHighlightsCardProp
       <div className="flex flex-col gap-1">
         <h2 className="text-base font-semibold text-slate-900">Temas frecuentes</h2>
         <p className="text-sm text-slate-500">
-          Etiquetas front-only preparadas para un conteo real por backend.
+          Temas detectados en tus sesiones completadas.
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {topics.map((topic) => (
-          <span
-            key={topic.id}
-            className="rounded-full border border-violet-200 bg-white/55 px-3 py-1.5 text-xs font-semibold text-violet-700"
-          >
-            {topic.label} ({topic.sessionCount})
-          </span>
-        ))}
-      </div>
+      {topics.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {topics.map((topic) => (
+            <span
+              key={topic.id}
+              className="rounded-full border border-violet-200 bg-white/55 px-3 py-1.5 text-xs font-semibold text-violet-700"
+            >
+              {topic.label} ({topic.sessionCount})
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm font-medium text-slate-400">
+          Aun no hay temas suficientes.
+        </p>
+      )}
     </GlassCard>
   );
 }

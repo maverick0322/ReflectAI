@@ -11,6 +11,9 @@ export interface LoginResponse {
 
 export interface SimpleMessageResponse {
   message: string;
+  data?: {
+    recoveryLink?: string;
+  };
 }
 
 export async function loginUser(email: string, password: string) {

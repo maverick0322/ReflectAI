@@ -13,10 +13,10 @@ export type QuestionPrompts = Partial<Record<QuestionId, string>>;
 
 export interface CompletionSummary {
   title?: string | null;
-  summary: string;
-  recommendation: string;
-  encouragement: string;
-  professionalReminder: string;
+  summary: string | null;
+  recommendation: string | null;
+  encouragement: string | null;
+  professionalReminder: string | null;
 }
 
 export const STEP_FIELDS: Record<number, (keyof FormValues)[]> = {
@@ -36,11 +36,6 @@ export const DEFAULT_FORM_VALUES: FormValues = {
   controlOtros: '',
   alternativa: '',
 };
-
-export const PROFESSIONAL_REMINDER =
-  'Este acompanamiento no sustituye la atencion psicologica o medica. ' +
-  'Si lo que sientes es intenso, recurrente o afecta tu vida diaria, ' +
-  'lo mejor es consultar a un profesional.';
 
 export const STEP_QUESTION_IDS: Record<number, QuestionId[]> = {
   1: ['Q1_SIT'],
@@ -149,10 +144,9 @@ function buildStepFiveResponses(values: FormValues): SessionResponse[] {
 function getAnalysisText(
   analysis: Record<string, unknown>,
   key: string,
-  fallback: string,
 ) {
   const value = analysis[key];
-  return typeof value === 'string' && value.trim() ? value.trim() : fallback;
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
 export function buildFormValues(payload: ReflectionSessionPayload): FormValues {
@@ -190,28 +184,10 @@ export function buildCompletionSummary(
 ): CompletionSummary {
   return {
     title,
-    summary: getAnalysisText(
-      analysis,
-      'summary',
-      'Tu reflexion quedo registrada. Identificaste lo que ocurrio, ' +
-        'como lo interpretaste y una forma mas util de mirarlo.',
-    ),
-    recommendation: getAnalysisText(
-      analysis,
-      'recommendation',
-      'Vuelve a leer tu perspectiva alternativa cuando sientas que la emocion ' +
-        'sube de intensidad y elige una accion pequena que si dependa de ti.',
-    ),
-    encouragement: getAnalysisText(
-      analysis,
-      'encouraging_message',
-      'Hacer una pausa para ordenar lo que sientes ya es un paso valioso.',
-    ),
-    professionalReminder: getAnalysisText(
-      analysis,
-      'professional_support_reminder',
-      PROFESSIONAL_REMINDER,
-    ),
+    summary: getAnalysisText(analysis, 'summary'),
+    recommendation: getAnalysisText(analysis, 'recommendation'),
+    encouragement: getAnalysisText(analysis, 'encouraging_message'),
+    professionalReminder: getAnalysisText(analysis, 'professional_support_reminder'),
   };
 }
 
