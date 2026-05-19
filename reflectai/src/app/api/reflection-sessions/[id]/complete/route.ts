@@ -6,6 +6,7 @@ import {
   buildFallbackAnalysis,
 } from '@/lib/ai/reflectionAnalysis';
 import { applyMetadataPatch, normalizePayload } from '@/lib/reflection/payload';
+import { assertTrustedMutationOrigin } from '@/lib/security/origin';
 import { completeReflectionSessionSchema } from '@/lib/validations/reflection';
 
 type RouteParams = {
@@ -16,6 +17,8 @@ type RouteParams = {
 
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
+    assertTrustedMutationOrigin(request);
+
     const { id } = await params;
     const { supabase, user, error: authError } = await getAuthenticatedUser();
 
@@ -134,7 +137,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       data,
       message: 'Sesion completada correctamente',
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Untrusted origin') {
+      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
+    }
+
     return NextResponse.json(
       { error: { message: 'Error inesperado al completar la sesion' } },
       { status: 500 },

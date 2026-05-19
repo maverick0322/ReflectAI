@@ -1,10 +1,25 @@
 import { NextResponse } from 'next/server';
 
+import { assertTrustedMutationOrigin } from '@/lib/security/origin';
+import { checkRateLimit } from '@/lib/security/rateLimit';
+import { rateLimitResponse } from '@/lib/security/responses';
 import { loginSchema } from '@/lib/validations/auth';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
+    assertTrustedMutationOrigin(request);
+
+    const rateLimit = checkRateLimit(request, {
+      key: 'auth:login',
+      maxRequests: 10,
+      windowMs: 15 * 60 * 1000,
+    });
+
+    if (rateLimit.limited) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
+    }
+
     const body = await request.json().catch(() => null);
     const validation = loginSchema.safeParse(body ?? {});
 
@@ -18,6 +33,17 @@ export async function POST(request: Request) {
         },
         { status: 400 },
       );
+    }
+
+    const accountRateLimit = checkRateLimit(request, {
+      key: 'auth:login:account',
+      identifier: validation.data.email,
+      maxRequests: 5,
+      windowMs: 15 * 60 * 1000,
+    });
+
+    if (accountRateLimit.limited) {
+      return rateLimitResponse(accountRateLimit.retryAfterSeconds);
     }
 
     const supabase = await createServerSupabaseClient();
@@ -37,9 +63,8 @@ export async function POST(request: Request) {
         {
           error: {
             message: isUnconfirmedEmail
-              ? 'Esta cuenta existe pero el correo no esta confirmado. Crea una cuenta nueva o confirma el usuario en Supabase.'
-              : 'Credenciales incorrectas',
-            details: error?.message,
+              ? 'No se pudo iniciar sesion con las credenciales proporcionadas.'
+              : 'No se pudo iniciar sesion con las credenciales proporcionadas.',
           },
         },
         { status: 401 },
@@ -54,7 +79,11 @@ export async function POST(request: Request) {
       },
       message: 'Sesion iniciada correctamente',
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Untrusted origin') {
+      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
+    }
+
     return NextResponse.json(
       { error: { message: 'Error inesperado al iniciar sesion' } },
       { status: 500 },

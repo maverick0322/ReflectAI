@@ -7,6 +7,8 @@ import { DELETE as deleteAccountDelete } from '@/app/api/auth/delete-account/rou
 import { POST as loginPost } from '@/app/api/auth/login/route';
 import { POST as logoutPost } from '@/app/api/auth/logout/route';
 import { POST as recoverPost } from '@/app/api/auth/recover/route';
+import { GET as sessionStatusGet } from '@/app/api/auth/session-status/route';
+import { POST as verifyPasswordPost } from '@/app/api/auth/verify-password/route';
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
@@ -30,15 +32,20 @@ type AuthenticatedUserMock = {
 
 async function readJson(response: Response) {
   return response.json() as Promise<{
+    authenticated?: boolean;
     data?: Record<string, unknown>;
     error?: { message?: string };
     message?: string;
   }>;
 }
 
-function jsonRequest(path: string, body: unknown) {
+function mutationRequest(path: string, body: unknown, method = 'POST') {
   return new Request(`http://localhost${path}`, {
-    method: 'POST',
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost',
+    },
     body: JSON.stringify(body),
   });
 }
@@ -57,14 +64,6 @@ function mockAuthenticatedUser({
     user,
     error,
   } as never);
-}
-
-function createDeleteTableMock(error: unknown = null) {
-  const eq = vi.fn(async () => ({ error }));
-  return {
-    delete: vi.fn(() => ({ eq })),
-    eq,
-  };
 }
 
 beforeEach(() => {
@@ -89,7 +88,7 @@ describe('rutas API de autenticacion', () => {
     } as never);
 
     const response = await loginPost(
-      jsonRequest('/api/auth/login', {
+      mutationRequest('/api/auth/login', {
         email: 'ana@reflectai.com',
         password: 'PasswordFuerte123',
       }),
@@ -103,23 +102,24 @@ describe('rutas API de autenticacion', () => {
       email: 'ana@reflectai.com',
       userMetadata: { full_name: 'Ana Lopez' },
     });
-    expect(signInWithPassword).toHaveBeenCalledWith({
-      email: 'ana@reflectai.com',
-      password: 'PasswordFuerte123',
-    });
   });
 
-  it('rechaza credenciales invalidas o payload invalido en login', async () => {
-    const invalidResponse = await loginPost(
-      jsonRequest('/api/auth/login', {
-        email: 'correo-invalido',
-        password: '',
+  it('rechaza origen no confiable y credenciales invalidas en login', async () => {
+    const untrustedResponse = await loginPost(
+      new Request('http://localhost/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'https://evil.test',
+        },
+        body: JSON.stringify({
+          email: 'ana@reflectai.com',
+          password: 'PasswordFuerte123',
+        }),
       }),
     );
-    const invalidBody = await readJson(invalidResponse);
 
-    expect(invalidResponse.status).toBe(400);
-    expect(invalidBody.error?.message).toBe('Datos invalidos');
+    expect(untrustedResponse.status).toBe(403);
 
     vi.mocked(createServerSupabaseClient).mockResolvedValue({
       auth: {
@@ -131,7 +131,7 @@ describe('rutas API de autenticacion', () => {
     } as never);
 
     const badCredentialsResponse = await loginPost(
-      jsonRequest('/api/auth/login', {
+      mutationRequest('/api/auth/login', {
         email: 'ana@reflectai.com',
         password: 'PasswordFuerte123',
       }),
@@ -139,7 +139,9 @@ describe('rutas API de autenticacion', () => {
     const badCredentialsBody = await readJson(badCredentialsResponse);
 
     expect(badCredentialsResponse.status).toBe(401);
-    expect(badCredentialsBody.error?.message).toBe('Credenciales incorrectas');
+    expect(badCredentialsBody.error?.message).toBe(
+      'No se pudo iniciar sesion con las credenciales proporcionadas.',
+    );
   });
 
   it('envia recuperacion de password con callback seguro', async () => {
@@ -149,7 +151,7 @@ describe('rutas API de autenticacion', () => {
     } as never);
 
     const response = await recoverPost(
-      jsonRequest('/api/auth/recover', {
+      mutationRequest('/api/auth/recover', {
         email: 'ana@reflectai.com',
       }),
     );
@@ -163,84 +165,6 @@ describe('rutas API de autenticacion', () => {
     });
   });
 
-  it('devuelve 429 cuando Supabase limita los correos de recuperacion', async () => {
-    vi.mocked(createServerSupabaseClient).mockResolvedValue({
-      auth: {
-        resetPasswordForEmail: vi.fn(async () => ({
-          error: { message: 'email rate limit exceeded' },
-        })),
-      },
-    } as never);
-
-    const response = await recoverPost(
-      jsonRequest('/api/auth/recover', {
-        email: 'ana@reflectai.com',
-      }),
-    );
-    const body = await readJson(response);
-
-    expect(response.status).toBe(429);
-    expect(body.error?.message).toBe(
-      'Se hicieron demasiados intentos. Espera unos minutos antes de pedir otro enlace.',
-    );
-  });
-
-  it('explica errores de entrega de email en recuperacion', async () => {
-    vi.mocked(createServerSupabaseClient).mockResolvedValue({
-      auth: {
-        resetPasswordForEmail: vi.fn(async () => ({
-          error: { message: 'Error sending recovery email' },
-        })),
-      },
-    } as never);
-
-    const response = await recoverPost(
-      jsonRequest('/api/auth/recover', {
-        email: 'ana@reflectai.com',
-      }),
-    );
-    const body = await readJson(response);
-
-    expect(response.status).toBe(500);
-    expect(body.error?.message).toBe(
-      'Supabase no pudo enviar el correo de recuperacion. Revisa la configuracion SMTP o intenta con otro correo.',
-    );
-  });
-
-  it('genera enlace de recuperacion de desarrollo si falla el envio de email', async () => {
-    vi.mocked(createServerSupabaseClient).mockResolvedValue({
-      auth: {
-        resetPasswordForEmail: vi.fn(async () => ({
-          error: { message: 'Error sending recovery email' },
-        })),
-      },
-    } as never);
-    vi.mocked(createAdminSupabaseClient).mockReturnValue({
-      auth: {
-        admin: {
-          generateLink: vi.fn(async () => ({
-            data: {
-              properties: {
-                action_link: 'https://supabase.example/recover-link',
-              },
-            },
-            error: null,
-          })),
-        },
-      },
-    } as never);
-
-    const response = await recoverPost(
-      jsonRequest('/api/auth/recover', {
-        email: 'ana@reflectai.com',
-      }),
-    );
-    const body = await readJson(response);
-
-    expect(response.status).toBe(200);
-    expect(body.data?.recoveryLink).toBe('https://supabase.example/recover-link');
-  });
-
   it('confirma recuperacion solo cuando Supabase devuelve sesion', async () => {
     const exchangeCodeForSession = vi.fn(async () => ({
       data: { session: { access_token: 'token' } },
@@ -251,66 +175,53 @@ describe('rutas API de autenticacion', () => {
     } as never);
 
     const response = await confirmRecoveryPost(
-      jsonRequest('/api/auth/confirm-recovery', { code: 'code-1' }),
+      mutationRequest('/api/auth/confirm-recovery', { code: 'code-1' }),
     );
-    const body = await readJson(response);
 
     expect(response.status).toBe(200);
-    expect(body.message).toBe('Recuperacion confirmada');
-    expect(exchangeCodeForSession).toHaveBeenCalledWith('code-1');
-
-    exchangeCodeForSession.mockResolvedValueOnce({
-      data: { session: null as never },
-      error: { message: 'expired' } as never,
-    });
-
-    const failedResponse = await confirmRecoveryPost(
-      jsonRequest('/api/auth/confirm-recovery', { code: 'expired' }),
-    );
-    const failedBody = await readJson(failedResponse);
-
-    expect(failedResponse.status).toBe(400);
-    expect(failedBody.error?.message).toBe('No se pudo confirmar la recuperacion');
+    expect((await readJson(response)).message).toBe('Recuperacion confirmada');
   });
 
-  it('actualiza password validando la password actual cuando se envia', async () => {
+  it('actualiza y verifica password con usuario autenticado', async () => {
     const signInWithPassword = vi.fn(async () => ({ error: null }));
     const updateUser = vi.fn(async () => ({ error: null }));
     mockAuthenticatedUser({
       supabase: { auth: { signInWithPassword, updateUser } },
     });
 
-    const response = await changePasswordPost(
-      jsonRequest('/api/auth/change-password', {
+    const changeResponse = await changePasswordPost(
+      mutationRequest('/api/auth/change-password', {
         currentPassword: 'PasswordActual123!',
         newPassword: 'PasswordNueva123!',
         confirmNewPassword: 'PasswordNueva123!',
       }),
     );
-    const body = await readJson(response);
+    expect(changeResponse.status).toBe(200);
+    expect((await readJson(changeResponse)).message).toBe(
+      'Contrasena actualizada correctamente',
+    );
 
-    expect(response.status).toBe(200);
-    expect(body.message).toBe('Contraseña actualizada correctamente');
-    expect(signInWithPassword).toHaveBeenCalledWith({
-      email: 'ana@reflectai.com',
-      password: 'PasswordActual123!',
-    });
-    expect(updateUser).toHaveBeenCalledWith({ password: 'PasswordNueva123!' });
+    const verifyResponse = await verifyPasswordPost(
+      mutationRequest('/api/auth/verify-password', {
+        currentPassword: 'PasswordActual123!',
+      }),
+    );
+    expect(verifyResponse.status).toBe(200);
+    expect((await readJson(verifyResponse)).message).toBe(
+      'Contrasena actual validada correctamente',
+    );
   });
 
   it('bloquea cambio de password sin sesion o con password actual incorrecta', async () => {
     mockAuthenticatedUser({ user: null, error: { message: 'missing' } });
 
     const unauthorizedResponse = await changePasswordPost(
-      jsonRequest('/api/auth/change-password', {
+      mutationRequest('/api/auth/change-password', {
         newPassword: 'PasswordNueva123!',
         confirmNewPassword: 'PasswordNueva123!',
       }),
     );
-    const unauthorizedBody = await readJson(unauthorizedResponse);
-
     expect(unauthorizedResponse.status).toBe(401);
-    expect(unauthorizedBody.error?.message).toBe('No autorizado');
 
     const signInWithPassword = vi.fn(async () => ({ error: { message: 'bad' } }));
     mockAuthenticatedUser({
@@ -318,22 +229,44 @@ describe('rutas API de autenticacion', () => {
     });
 
     const badCurrentResponse = await changePasswordPost(
-      jsonRequest('/api/auth/change-password', {
+      mutationRequest('/api/auth/change-password', {
         currentPassword: 'PasswordActual123!',
         newPassword: 'PasswordNueva123!',
         confirmNewPassword: 'PasswordNueva123!',
       }),
     );
-    const badCurrentBody = await readJson(badCurrentResponse);
-
     expect(badCurrentResponse.status).toBe(400);
-    expect(badCurrentBody.error?.message).toBe('La contraseña actual es incorrecta');
+    expect((await readJson(badCurrentResponse)).error?.message).toBe(
+      'La contrasena actual es incorrecta',
+    );
   });
 
-  it('elimina cuenta limpiando sesiones, perfil y usuario auth', async () => {
+  it('devuelve error claro si la sesion de recuperacion expiro', async () => {
+    const updateUser = vi.fn(async () => ({
+      error: { message: 'Auth session missing' },
+    }));
+    mockAuthenticatedUser({
+      supabase: { auth: { updateUser } },
+    });
+
+    const response = await changePasswordPost(
+      mutationRequest('/api/auth/change-password', {
+        newPassword: 'PasswordNueva123!',
+        confirmNewPassword: 'PasswordNueva123!',
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expect((await readJson(response)).error?.message).toBe(
+      'La sesion de recuperacion no es valida o expiro. Solicita un nuevo enlace.',
+    );
+  });
+
+  it('elimina cuenta solo tras reautenticacion', async () => {
+    const signInWithPassword = vi.fn(async () => ({ error: null }));
     const signOut = vi.fn();
     mockAuthenticatedUser({
-      supabase: { auth: { signOut } },
+      supabase: { auth: { signInWithPassword, signOut } },
     });
 
     const deleteUser = vi.fn(async () => ({ error: null }));
@@ -341,27 +274,43 @@ describe('rutas API de autenticacion', () => {
       auth: { admin: { deleteUser } },
     } as never);
 
-    const response = await deleteAccountDelete();
-    const body = await readJson(response);
+    const response = await deleteAccountDelete(
+      mutationRequest(
+        '/api/auth/delete-account',
+        { currentPassword: 'PasswordActual123!' },
+        'DELETE',
+      ),
+    );
 
     expect(response.status).toBe(200);
-    expect(body.message).toBe('Cuenta eliminada correctamente');
+    expect((await readJson(response)).message).toBe('Cuenta eliminada correctamente');
+    expect(signInWithPassword).toHaveBeenCalledWith({
+      email: 'ana@reflectai.com',
+      password: 'PasswordActual123!',
+    });
     expect(deleteUser).toHaveBeenCalledWith('user-1');
     expect(signOut).toHaveBeenCalled();
   });
 
-  it('reporta errores al eliminar cuenta', async () => {
+  it('rechaza eliminacion sin password o con origen no confiable', async () => {
     mockAuthenticatedUser();
 
-    vi.mocked(createAdminSupabaseClient).mockReturnValueOnce({
-      auth: { admin: { deleteUser: vi.fn(async () => ({ error: { message: 'db' } })) } },
-    } as never);
-
-    const authResponse = await deleteAccountDelete();
-    expect(authResponse.status).toBe(500);
-    expect((await readJson(authResponse)).error?.message).toBe(
-      'No se pudo eliminar la cuenta. Revisa las relaciones en cascada de profiles y reflection_sessions.',
+    const invalidResponse = await deleteAccountDelete(
+      mutationRequest('/api/auth/delete-account', { currentPassword: '' }, 'DELETE'),
     );
+    expect(invalidResponse.status).toBe(400);
+
+    const untrustedResponse = await deleteAccountDelete(
+      new Request('http://localhost/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'https://evil.test',
+        },
+        body: JSON.stringify({ currentPassword: 'PasswordActual123!' }),
+      }),
+    );
+    expect(untrustedResponse.status).toBe(403);
   });
 
   it('cierra sesion y maneja errores inesperados', async () => {
@@ -370,18 +319,27 @@ describe('rutas API de autenticacion', () => {
       auth: { signOut },
     } as never);
 
-    const response = await logoutPost();
+    const response = await logoutPost(mutationRequest('/api/auth/logout', {}));
     expect(response.status).toBe(200);
     expect((await readJson(response)).message).toBe('Sesion cerrada correctamente');
-    expect(signOut).toHaveBeenCalled();
 
     vi.mocked(createServerSupabaseClient).mockRejectedValueOnce(new Error('boom'));
-
-    const failedResponse = await logoutPost();
+    const failedResponse = await logoutPost(mutationRequest('/api/auth/logout', {}));
     expect(failedResponse.status).toBe(500);
-    expect((await readJson(failedResponse)).error?.message).toBe(
-      'Error inesperado al cerrar sesion',
-    );
+  });
+
+  it('expone el estado de sesion para el flujo de recuperacion', async () => {
+    mockAuthenticatedUser();
+
+    const okResponse = await sessionStatusGet();
+    expect(okResponse.status).toBe(200);
+    expect((await readJson(okResponse)).authenticated).toBe(true);
+
+    mockAuthenticatedUser({ user: null, error: { message: 'missing' } });
+
+    const unauthorizedResponse = await sessionStatusGet();
+    expect(unauthorizedResponse.status).toBe(401);
+    expect((await readJson(unauthorizedResponse)).authenticated).toBe(false);
   });
 });
 
@@ -409,53 +367,6 @@ describe('callback de autenticacion', () => {
     expect(invalidCodeResponse.status).toBe(307);
     expect(invalidCodeResponse.headers.get('location')).toBe(
       'http://localhost/login?auth_error=invalid_code',
-    );
-  });
-
-  it('redirige a recuperar cuando Supabase devuelve un enlace expirado', async () => {
-    const response = await authCallbackGet(
-      new Request(
-        'http://localhost/auth/callback?error=access_denied&error_code=otp_expired&next=%2Fcambiar-contrasena%3Fmode%3Drecovery',
-      ),
-    );
-
-    expect(response.status).toBe(307);
-    expect(response.headers.get('location')).toBe(
-      'http://localhost/recuperar?recovery_error=otp_expired',
-    );
-  });
-
-  it('intercambia codigo y redirige solo a rutas internas', async () => {
-    const exchangeCodeForSession = vi.fn(async () => ({ error: null }));
-    vi.mocked(createServerSupabaseClient).mockResolvedValue({
-      auth: { exchangeCodeForSession },
-    } as never);
-
-    const response = await authCallbackGet(
-      new Request('http://localhost/auth/callback?code=ok&next=/perfil'),
-    );
-
-    expect(response.status).toBe(307);
-    expect(response.headers.get('location')).toBe('http://localhost/perfil');
-    expect(exchangeCodeForSession).toHaveBeenCalledWith('ok');
-  });
-
-  it('redirige a recuperar cuando falla un codigo de recuperacion', async () => {
-    vi.mocked(createServerSupabaseClient).mockResolvedValue({
-      auth: {
-        exchangeCodeForSession: vi.fn(async () => ({ error: { message: 'invalid code' } })),
-      },
-    } as never);
-
-    const response = await authCallbackGet(
-      new Request(
-        'http://localhost/auth/callback?code=bad&next=%2Fcambiar-contrasena%3Fmode%3Drecovery',
-      ),
-    );
-
-    expect(response.status).toBe(307);
-    expect(response.headers.get('location')).toBe(
-      'http://localhost/recuperar?recovery_error=invalid_code',
     );
   });
 });

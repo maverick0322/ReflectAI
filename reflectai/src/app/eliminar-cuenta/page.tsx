@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import WarningIcon from '@/components/icons/WarningIcon';
 import GlassCard from '@/components/ui/GlassCard';
 import Input from '@/components/ui/Input';
+import PasswordInput from '@/components/ui/PasswordInput';
 import { deleteAccount } from '@/lib/api/auth';
 import { ApiError } from '@/lib/api/http';
 
@@ -15,10 +16,11 @@ export default function EliminarCuentaPage() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [confirmText, setConfirmText] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const isConfirmed = confirmText === 'ELIMINAR';
+  const isConfirmed = confirmText === 'ELIMINAR' && currentPassword.trim().length > 0;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const normalizedText = e.target.value
@@ -39,7 +41,7 @@ export default function EliminarCuentaPage() {
     setFormError(null);
 
     try {
-      await deleteAccount();
+      await deleteAccount(currentPassword);
       setTimeout(() => {
         router.push('/login');
       }, 2500);
@@ -96,6 +98,20 @@ export default function EliminarCuentaPage() {
                   ref={inputRef}
                   placeholder="ELIMINAR"
                   className="text-center font-bold tracking-widest text-reflect-dark uppercase"
+                />
+              </div>
+
+              <div className="flex flex-col gap-3 p-4 rounded-xl bg-reflect-dark/5">
+                <label htmlFor="delete-password-input" className="text-xs font-medium text-reflect-dark text-center">
+                  Ingresa tu contrasena actual para confirmar la eliminacion:
+                </label>
+                <PasswordInput
+                  id="delete-password-input"
+                  value={currentPassword}
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                  placeholder="Contrasena actual"
+                  autoComplete="current-password"
+                  className="text-center font-semibold"
                 />
               </div>
 

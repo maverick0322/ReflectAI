@@ -8,6 +8,23 @@ export interface NextQuestionResult {
   questionText: string;
 }
 
+function buildContextPayload(payload: ReflectionSessionPayload) {
+  return {
+    metadata: {
+      version: payload.metadata.version,
+      completed_at: payload.metadata.completed_at ?? null,
+    },
+    responses: payload.responses.map((response) => ({
+      id: response.id,
+      value: response.value ?? null,
+      category: response.category ?? null,
+      status: response.status ?? null,
+      method: response.method ?? null,
+      text: response.text ? response.text.slice(0, 120) : null,
+    })),
+  };
+}
+
 export function buildNextQuestionMessages(
   payload: ReflectionSessionPayload,
   questionId: QuestionId,
@@ -28,7 +45,7 @@ export function buildNextQuestionMessages(
       content: JSON.stringify({
         next_question_id: questionId,
         base_question: baseQuestion,
-        payload,
+        payload: buildContextPayload(payload),
       }),
     },
   ];

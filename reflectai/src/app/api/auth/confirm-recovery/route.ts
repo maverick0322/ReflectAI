@@ -1,10 +1,25 @@
 import { NextResponse } from 'next/server';
 
+import { assertTrustedMutationOrigin } from '@/lib/security/origin';
+import { checkRateLimit } from '@/lib/security/rateLimit';
+import { rateLimitResponse } from '@/lib/security/responses';
 import { confirmRecoverySchema } from '@/lib/validations/auth';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
+    assertTrustedMutationOrigin(request);
+
+    const rateLimit = checkRateLimit(request, {
+      key: 'auth:confirm-recovery',
+      maxRequests: 10,
+      windowMs: 15 * 60 * 1000,
+    });
+
+    if (rateLimit.limited) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
+    }
+
     const body = await request.json().catch(() => null);
     const validation = confirmRecoverySchema.safeParse(body ?? {});
 
@@ -35,7 +50,11 @@ export async function POST(request: Request) {
     return NextResponse.json({
       message: 'Recuperacion confirmada',
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Untrusted origin') {
+      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
+    }
+
     return NextResponse.json(
       { error: { message: 'Error inesperado al confirmar recuperacion' } },
       { status: 500 },

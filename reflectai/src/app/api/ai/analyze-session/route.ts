@@ -6,10 +6,25 @@ import {
 } from '@/lib/ai/reflectionAnalysis';
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 import { normalizePayload } from '@/lib/reflection/payload';
+import { assertTrustedMutationOrigin } from '@/lib/security/origin';
+import { checkRateLimit } from '@/lib/security/rateLimit';
+import { rateLimitResponse } from '@/lib/security/responses';
 import { analyzeSessionSchema } from '@/lib/validations/ai';
 
 export async function POST(request: Request) {
   try {
+    assertTrustedMutationOrigin(request);
+
+    const rateLimit = checkRateLimit(request, {
+      key: 'ai:analyze-session',
+      maxRequests: 20,
+      windowMs: 60 * 60 * 1000,
+    });
+
+    if (rateLimit.limited) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
+    }
+
     const body = await request.json().catch(() => null);
     const validation = analyzeSessionSchema.safeParse(body ?? {});
 
@@ -79,7 +94,11 @@ export async function POST(request: Request) {
       data,
       message: 'Analisis generado correctamente',
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Untrusted origin') {
+      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
+    }
+
     return NextResponse.json(
       { error: { message: 'Error inesperado al generar analisis' } },
       { status: 500 },

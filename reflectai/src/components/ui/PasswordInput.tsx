@@ -7,10 +7,11 @@ import { EyeOffIcon } from '@/components/icons/EyeOffIcon';
 
 interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
+  hideErrorMessage?: boolean;
 }
 
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ placeholder, error, className, ...props }, ref) => {
+  ({ placeholder, error, hideErrorMessage = false, className, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
 
     const eyeButton = (
@@ -30,6 +31,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         type={showPassword ? 'text' : 'password'} 
         placeholder={placeholder} 
         error={error}
+        hideErrorMessage={hideErrorMessage}
         rightElement={eyeButton} 
         className={`[&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${className || ''}`}
         {...props} 

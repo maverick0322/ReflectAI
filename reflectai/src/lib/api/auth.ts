@@ -11,9 +11,10 @@ export interface LoginResponse {
 
 export interface SimpleMessageResponse {
   message: string;
-  data?: {
-    recoveryLink?: string;
-  };
+}
+
+export interface SessionStatusResponse {
+  authenticated: boolean;
 }
 
 export async function loginUser(email: string, password: string) {
@@ -62,6 +63,20 @@ export async function confirmRecovery(code: string) {
   });
 }
 
+export async function fetchSessionStatus() {
+  return requestJson<SessionStatusResponse>('/api/auth/session-status');
+}
+
+export async function verifyCurrentPassword(currentPassword: string) {
+  return requestJson<SimpleMessageResponse>('/api/auth/verify-password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ currentPassword }),
+  });
+}
+
 export async function changePassword(payload: {
   currentPassword?: string;
   newPassword: string;
@@ -76,9 +91,13 @@ export async function changePassword(payload: {
   });
 }
 
-export async function deleteAccount() {
+export async function deleteAccount(currentPassword: string) {
   return requestJson<SimpleMessageResponse>('/api/auth/delete-account', {
     method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ currentPassword }),
   });
 }
 

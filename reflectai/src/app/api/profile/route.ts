@@ -1,10 +1,31 @@
 import { NextResponse } from 'next/server';
 
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import { resolveAvatarUrl } from '@/lib/profile/avatar';
+import { assertTrustedMutationOrigin } from '@/lib/security/origin';
 import { profileSchema } from '@/lib/validations/profile';
 
 function buildFullName(firstName: string, lastName?: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ');
+}
+
+async function buildProfileResponse(
+  supabase: Awaited<ReturnType<typeof getAuthenticatedUser>>['supabase'],
+  profile: {
+    id: string;
+    first_name: string;
+    last_name: string | null;
+    full_name: string;
+    birth_date: string | null;
+    avatar_url: string | null;
+  },
+  email: string | null | undefined,
+) {
+  return {
+    ...profile,
+    avatar_url: await resolveAvatarUrl(supabase, profile.avatar_url),
+    email: email ?? null,
+  };
 }
 
 export async function GET() {
@@ -57,10 +78,7 @@ export async function GET() {
       }
 
       return NextResponse.json({
-        data: {
-          ...created,
-          email: user.email,
-        },
+        data: await buildProfileResponse(supabase, created, user.email),
         message: 'Perfil obtenido correctamente',
       });
     }
@@ -72,11 +90,15 @@ export async function GET() {
       );
     }
 
+    if (!data) {
+      return NextResponse.json(
+        { error: { message: 'No se pudo obtener el perfil' } },
+        { status: 500 },
+      );
+    }
+
     return NextResponse.json({
-      data: {
-        ...data,
-        email: user.email,
-      },
+      data: await buildProfileResponse(supabase, data, user.email),
       message: 'Perfil obtenido correctamente',
     });
   } catch {
@@ -89,6 +111,8 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
+    assertTrustedMutationOrigin(request);
+
     const { supabase, user, error: authError } = await getAuthenticatedUser();
 
     if (authError || !user) {
@@ -132,13 +156,14 @@ export async function PATCH(request: Request) {
     }
 
     return NextResponse.json({
-      data: {
-        ...data,
-        email: user.email,
-      },
+      data: await buildProfileResponse(supabase, data, user.email),
       message: 'Perfil actualizado correctamente',
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Untrusted origin') {
+      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
+    }
+
     return NextResponse.json(
       { error: { message: 'Error inesperado al actualizar perfil' } },
       { status: 500 },

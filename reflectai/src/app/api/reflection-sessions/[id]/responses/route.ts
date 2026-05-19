@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 import { appendResponse, applyMetadataPatch, normalizePayload } from '@/lib/reflection/payload';
+import { assertTrustedMutationOrigin } from '@/lib/security/origin';
 import { addReflectionResponseSchema } from '@/lib/validations/reflection';
 
 type RouteParams = {
@@ -12,6 +13,8 @@ type RouteParams = {
 
 export async function POST(request: Request, { params }: RouteParams) {
   try {
+    assertTrustedMutationOrigin(request);
+
     const { id } = await params;
     const { supabase, user, error: authError } = await getAuthenticatedUser();
 
@@ -93,7 +96,11 @@ export async function POST(request: Request, { params }: RouteParams) {
       },
       { status: 201 },
     );
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Untrusted origin') {
+      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
+    }
+
     return NextResponse.json(
       { error: { message: 'Error inesperado al guardar la respuesta' } },
       { status: 500 },

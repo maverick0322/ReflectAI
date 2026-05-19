@@ -165,8 +165,9 @@ function createSupabaseMock(options: {
 function createStorageBucket(publicUrl = 'https://cdn.test/user-a/avatar.png') {
   const bucket = {
     upload: vi.fn(async () => ({ error: null })),
-    getPublicUrl: vi.fn(() => ({
-      data: { publicUrl },
+    createSignedUrl: vi.fn(async () => ({
+      data: { signedUrl: `${publicUrl}?token=abc` },
+      error: null,
     })),
   };
 
@@ -185,8 +186,20 @@ function mockServerSupabaseClient(supabaseMock: ReturnType<typeof createSupabase
 function jsonRequest(path: string, body: unknown, method = 'POST') {
   return new Request(`http://localhost${path}`, {
     method,
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost',
+    },
     body: JSON.stringify(body),
   });
+}
+
+function imageFile(type: 'image/png', name: string) {
+  return new File(
+    [new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])],
+    name,
+    { type },
+  );
 }
 
 function routeParams(id = SESSION_ID) {
@@ -344,7 +357,9 @@ describe('Critical API integration - version 2026-05-12', () => {
       userMetadata: { full_name: 'Ana Lopez' },
     });
 
-    const logoutResponse = await logoutPost();
+    const logoutResponse = await logoutPost(
+      jsonRequest('/api/auth/logout', {}),
+    );
 
     expect(logoutResponse.status).toBe(200);
     expect((await readJson(logoutResponse)).message).toBe(
@@ -396,7 +411,7 @@ describe('Critical API integration - version 2026-05-12', () => {
     expect(changePasswordResponse.status).toBe(200);
     expect(resetPasswordForEmail).toHaveBeenCalledWith('ana@reflectai.com', {
       redirectTo:
-        'http://localhost/auth/callback?next=%2Fcambiar-contrasena%3Fmode%3Drecovery',
+        'https://reflectai.example/auth/callback?next=%2Fcambiar-contrasena%3Fmode%3Drecovery',
     });
     expect(exchangeCodeForSession).toHaveBeenCalledWith('code-ok');
     expect(signInWithPassword).toHaveBeenCalledWith({
@@ -419,7 +434,13 @@ describe('Critical API integration - version 2026-05-12', () => {
       auth: { admin: { deleteUser } },
     } as never);
 
-    const response = await deleteAccountDelete();
+    const response = await deleteAccountDelete(
+      jsonRequest(
+        '/api/auth/delete-account',
+        { currentPassword: 'PasswordActual123!' },
+        'DELETE',
+      ),
+    );
     const body = await readJson(response);
 
     expect(response.status).toBe(200);
@@ -514,7 +535,7 @@ describe('Critical API integration - version 2026-05-12', () => {
     const formData = new FormData();
     formData.set(
       'avatar',
-      new File(['avatar'], 'avatar.png', { type: 'image/png' }),
+      imageFile('image/png', 'avatar.png'),
     );
 
     const response = await avatarPost({
