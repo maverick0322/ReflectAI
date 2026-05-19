@@ -11,6 +11,7 @@ import { POST as registerPost } from '@/app/api/auth/register/route';
 import { GET as sessionStatusGet } from '@/app/api/auth/session-status/route';
 import { POST as verifyPasswordPost } from '@/app/api/auth/verify-password/route';
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import { checkRateLimit } from '@/lib/security/rateLimit';
 import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -24,6 +25,10 @@ vi.mock('@/lib/supabase/admin', () => ({
 
 vi.mock('@/lib/supabase/server', () => ({
   createServerSupabaseClient: vi.fn(),
+}));
+
+vi.mock('@/lib/security/rateLimit', () => ({
+  checkRateLimit: vi.fn(),
 }));
 
 type AuthenticatedUserMock = {
@@ -70,6 +75,10 @@ function mockAuthenticatedUser({
 beforeEach(() => {
   vi.clearAllMocks();
   delete process.env.NEXT_PUBLIC_SITE_URL;
+  vi.mocked(checkRateLimit).mockReturnValue({
+    limited: false,
+    retryAfterSeconds: 0,
+  });
 });
 
 describe('rutas API de autenticacion', () => {
@@ -385,6 +394,54 @@ describe('rutas API de autenticacion', () => {
     expect((await readJson(badPasswordResponse)).error?.message).toBe(
       'La contrasena actual es incorrecta',
     );
+  });
+
+  it('aplica rate limit en cambio y verificacion de password', async () => {
+    mockAuthenticatedUser({ user: null, error: { message: 'missing' } });
+
+    vi.mocked(checkRateLimit)
+      .mockReturnValueOnce({ limited: false, retryAfterSeconds: 0 })
+      .mockReturnValueOnce({ limited: true, retryAfterSeconds: 120 });
+
+    const changeRequest = new Request('http://localhost/api/auth/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'http://localhost',
+        'x-forwarded-for': '198.51.100.21',
+      },
+      body: JSON.stringify({
+        currentPassword: 'PasswordActual123!',
+        newPassword: 'PasswordNueva123!',
+        confirmNewPassword: 'PasswordNueva123!',
+      }),
+    });
+
+    const firstChange = await changePasswordPost(changeRequest);
+    const secondChange = await changePasswordPost(changeRequest);
+    expect(firstChange.status).toBe(401);
+    expect(secondChange.status).toBe(429);
+
+    vi.mocked(checkRateLimit)
+      .mockReturnValueOnce({ limited: false, retryAfterSeconds: 0 })
+      .mockReturnValueOnce({ limited: true, retryAfterSeconds: 120 });
+
+    const verifyRequest = new Request('http://localhost/api/auth/verify-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'http://localhost',
+        'x-forwarded-for': '198.51.100.22',
+      },
+      body: JSON.stringify({
+        currentPassword: 'PasswordActual123!',
+      }),
+    });
+
+    const firstVerify = await verifyPasswordPost(verifyRequest);
+    const secondVerify = await verifyPasswordPost(verifyRequest);
+    expect(firstVerify.status).toBe(401);
+    expect(secondVerify.status).toBe(429);
   });
 
   it('bloquea cambio de password sin sesion o con password actual incorrecta', async () => {
