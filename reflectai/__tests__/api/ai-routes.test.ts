@@ -120,6 +120,10 @@ function mockAuthenticatedUser({
 function jsonRequest(path: string, body: unknown) {
   return new Request(`http://localhost${path}`, {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost',
+    },
     body: JSON.stringify(body),
   });
 }

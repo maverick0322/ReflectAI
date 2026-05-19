@@ -3,9 +3,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 
-import { changePassword, confirmRecovery } from '@/lib/api/auth';
+import {
+  changePassword,
+  confirmRecovery,
+  fetchSessionStatus,
+  verifyCurrentPassword,
+} from '@/lib/api/auth';
 
 import {
   step1Schema,
@@ -60,15 +65,35 @@ export function useChangePasswordPage(): UseChangePasswordPageResult {
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
+  const newPassword = useWatch({
+    control: form2.control,
+    name: 'newPassword',
+  });
+  const confirmNewPassword = useWatch({
+    control: form2.control,
+    name: 'confirmNewPassword',
+  });
 
   const handleStep1Submit = useCallback(
     async (data: Step1FormValues) => {
-      setCurrentPassword(data.currentPassword);
-      form2.reset({ newPassword: '', confirmNewPassword: '' });
       setFormError(null);
-      setStep(2);
+      setIsSubmitting(true);
+
+      try {
+        await verifyCurrentPassword(data.currentPassword);
+        setCurrentPassword(data.currentPassword);
+        form2.reset({ newPassword: '', confirmNewPassword: '' });
+        setStep(2);
+      } catch (error) {
+        form1.setError('currentPassword', {
+          type: 'server',
+          message: getAuthFormErrorMessage(error, 'No se pudo validar la contrasena actual'),
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     },
-    [form2],
+    [form1, form2],
   );
 
   const handleStep2Submit = useCallback(
@@ -95,6 +120,14 @@ export function useChangePasswordPage(): UseChangePasswordPageResult {
   );
 
   useEffect(() => {
+    if (!newPassword && !confirmNewPassword) {
+      return;
+    }
+
+    void form2.trigger(['newPassword', 'confirmNewPassword']);
+  }, [confirmNewPassword, form2, newPassword]);
+
+  useEffect(() => {
     let isMounted = true;
 
     const runRecoveryConfirmation = async () => {
@@ -104,8 +137,30 @@ export function useChangePasswordPage(): UseChangePasswordPageResult {
       }
 
       if (!recoveryCode) {
-        setRecoveryReady(true);
-        setStep(2);
+        try {
+          const sessionStatus = await fetchSessionStatus();
+
+          if (!isMounted) {
+            return;
+          }
+
+          if (!sessionStatus.authenticated) {
+            setFormError('La sesion de recuperacion no es valida o expiro');
+            return;
+          }
+
+          setRecoveryReady(true);
+          setStep(2);
+        } catch (error) {
+          if (!isMounted) {
+            return;
+          }
+
+          setFormError(
+            getAuthFormErrorMessage(error, 'La sesion de recuperacion no es valida o expiro'),
+          );
+        }
+
         return;
       }
 

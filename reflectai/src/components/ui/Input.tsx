@@ -3,11 +3,12 @@ import React, { forwardRef, useId, useState } from 'react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
-  rightElement?: React.ReactNode; 
+  hideErrorMessage?: boolean;
+  rightElement?: React.ReactNode;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className = '', error, onChange, maxLength, rightElement, ...props }, ref) => {
+  ({ className = '', error, hideErrorMessage = false, onChange, maxLength, rightElement, ...props }, ref) => {
     const fallbackId = useId();
     const id = props.id ?? fallbackId;
     const errorId = `${id}-error`;
@@ -47,7 +48,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         
         <div className="flex justify-between items-start mt-1 min-h-[1.25rem] px-2">
           <div className="flex-1">
-            {error && (
+            {error && !hideErrorMessage && (
               <span id={errorId} className="text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1">
                 {error}
               </span>

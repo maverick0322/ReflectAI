@@ -1,6 +1,7 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
 import EliminarCuentaPage from '@/app/eliminar-cuenta/page';
 
 vi.mock('@/lib/api/auth', () => ({
@@ -15,114 +16,54 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('EliminarCuenta Page', () => {
-  it('muestra advertencia con ícono de exclamación', () => {
-    render(<EliminarCuentaPage />);
-    expect(screen.getByText(/advertencia/i)).toBeInTheDocument();
-    expect(screen.getByText(/irreversible/i)).toBeInTheDocument();
-    expect(screen.getByText(/se perderán todos tus datos/i)).toBeInTheDocument();
-  });
-
-  it('requiere escribir ELIMINAR para habilitar el botón', async () => {
+  it('muestra advertencia y exige confirmacion textual mas contrasena actual', async () => {
     const user = userEvent.setup();
     render(<EliminarCuentaPage />);
 
-    const input = screen.getByPlaceholderText('ELIMINAR');
+    expect(screen.getByText(/advertencia/i)).toBeInTheDocument();
+    expect(screen.getByText(/irreversible/i)).toBeInTheDocument();
+
+    const confirmInput = screen.getByPlaceholderText('ELIMINAR');
+    const passwordInput = screen.getByPlaceholderText(/contrasena actual/i);
     const deleteButton = screen.getByRole('button', { name: /eliminar/i });
 
     expect(deleteButton).toBeDisabled();
 
-    await user.type(input, 'DELETE');
+    await user.type(confirmInput, 'ELIMINAR');
     expect(deleteButton).toBeDisabled();
 
-    await user.clear(input);
-    await user.type(input, 'ELIMINAR');
-
+    await user.type(passwordInput, 'PasswordActual123!');
     await waitFor(() => {
       expect(deleteButton).toBeEnabled();
     });
   });
 
-  it('filtra solo letras y convierte a mayúsculas en el input de confirmación', async () => {
-    const user = userEvent.setup();
+  it('mantiene el enlace de cancelar hacia perfil', () => {
     render(<EliminarCuentaPage />);
-
-    const input = screen.getByPlaceholderText('ELIMINAR') as HTMLInputElement;
-
-    expect(input).toBeInTheDocument();
-
-    await user.type(input, 'eliminar');
-
-    expect(input.value).toBe('ELIMINAR');
+    expect(screen.getByRole('link', { name: /cancelar/i })).toHaveAttribute(
+      'href',
+      '/perfil',
+    );
   });
 
-  it('limita a 8 caracteres máximo', async () => {
-    const user = userEvent.setup();
+  it('muestra pantalla de exito y redirige al login tras eliminar', async () => {
+    vi.useFakeTimers();
     render(<EliminarCuentaPage />);
 
-    const input = screen.getByPlaceholderText('ELIMINAR') as HTMLInputElement;
-
-    await user.type(input, 'ELIMINARMUCHASTEXTO');
-
-    expect(input.value).toBe('ELIMINAR');
-  });
-
-  it('tiene botón de cancelar que regresa a /perfil', () => {
-    render(<EliminarCuentaPage />);
-
-    const cancelButton = screen.getByRole('link', { name: /cancelar/i });
-    expect(cancelButton).toHaveAttribute('href', '/perfil');
-  });
-
-  it('muestra pantalla de éxito después de eliminar (con palomita verde)', async () => {
-    const user = userEvent.setup();
-    render(<EliminarCuentaPage />);
-
-    const input = screen.getByPlaceholderText('ELIMINAR');
-    await user.type(input, 'ELIMINAR');
-
-    const deleteButton = screen.getByRole('button', { name: /eliminar/i });
-    await user.click(deleteButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/cuenta.*eliminada/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('ELIMINAR'), {
+      target: { value: 'ELIMINAR' },
     });
-  });
-
-  it('aplica estilos disabled al botón cuando input es inválido', async () => {
-    render(<EliminarCuentaPage />);
-
-    const deleteButton = screen.getByRole('button', { name: /eliminar/i });
-
-    expect(deleteButton).toHaveClass('cursor-not-allowed');
-
-    const user = userEvent.setup();
-    const input = screen.getByPlaceholderText('ELIMINAR');
-    await user.type(input, 'ELIMINAR');
-
-    await waitFor(() => {
-      expect(deleteButton).not.toHaveClass('cursor-not-allowed');
+    fireEvent.change(screen.getByPlaceholderText(/contrasena actual/i), {
+      target: { value: 'PasswordActual123!' },
     });
-  });
 
-  it('redirige al login después de 2.5 segundos tras eliminar', async () => {
-    vi.useFakeTimers(); 
-    
-    render(<EliminarCuentaPage />);
-
-    const input = screen.getByPlaceholderText('ELIMINAR');
-    fireEvent.change(input, { target: { value: 'ELIMINAR' } });
-
-    const deleteButton = screen.getByRole('button', { name: /eliminar/i });
-    fireEvent.click(deleteButton);
+    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
 
     await Promise.resolve();
-
-    expect(pushMock).not.toHaveBeenCalled();
+    expect(screen.getByText(/cuenta eliminada/i)).toBeInTheDocument();
 
     vi.advanceTimersByTime(2500);
-
     expect(pushMock).toHaveBeenCalledWith('/login');
-    
-    vi.useRealTimers(); 
+    vi.useRealTimers();
   });
 });

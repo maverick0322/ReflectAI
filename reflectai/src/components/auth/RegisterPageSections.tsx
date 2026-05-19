@@ -1,6 +1,6 @@
 'use client';
 
-import type { UseFormReturn } from 'react-hook-form';
+import type { FieldErrors, UseFormReturn } from 'react-hook-form';
 
 import { FacebookIcon } from '@/components/icons/FacebookIcon';
 import { GoogleIcon } from '@/components/icons/GoogleIcon';
@@ -16,17 +16,8 @@ interface RegisterFormSectionProps {
   isSubmitting: boolean;
   formError: string | null;
   onSubmit: (data: RegisterFormValues) => Promise<void>;
+  onInvalidSubmit: (errors: FieldErrors<RegisterFormValues>) => void;
 }
-
-const REGISTER_FIELDS: (keyof RegisterFormValues)[] = [
-  'firstName',
-  'lastName',
-  'email',
-  'confirmEmail',
-  'password',
-  'confirmPassword',
-  'birthDate',
-];
 
 function getTodayInputValue() {
   return new Date().toISOString().slice(0, 10);
@@ -125,21 +116,17 @@ export function RegisterFormSection({
   form,
   isSubmitting,
   formError,
+  onInvalidSubmit,
   onSubmit,
 }: RegisterFormSectionProps) {
   const {
     register,
     handleSubmit,
-    trigger,
     formState: { errors },
   } = form;
 
-  const validateBeforeSubmit = async () => {
-    await trigger(REGISTER_FIELDS, { shouldFocus: true });
-  };
-
   return (
-    <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form noValidate onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="flex flex-col gap-4">
       <RegisterNameFields form={form} />
       <RegisterEmailFields form={form} />
       <RegisterPasswordFields form={form} />
@@ -165,7 +152,6 @@ export function RegisterFormSection({
       <div className="mt-2">
         <Button
           type="submit"
-          onClick={validateBeforeSubmit}
           disabled={isSubmitting}
           className={isSubmitting ? 'opacity-60' : ''}
         >

@@ -1,44 +1,35 @@
 import { NextResponse } from 'next/server';
 
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
-import { recoverPasswordSchema } from '@/lib/validations/auth';
+import {
+  assertTrustedMutationOrigin,
+  getTrustedSiteOrigin,
+} from '@/lib/security/origin';
+import { checkRateLimit } from '@/lib/security/rateLimit';
+import { rateLimitResponse } from '@/lib/security/responses';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { recoverPasswordSchema } from '@/lib/validations/auth';
 
 function buildRedirectUrl(requestUrl: string) {
-  const baseUrl = new URL(requestUrl).origin;
+  const baseUrl = getTrustedSiteOrigin(requestUrl);
   const callbackUrl = new URL('/auth/callback', baseUrl);
   callbackUrl.searchParams.set('next', '/cambiar-contrasena?mode=recovery');
   return callbackUrl.toString();
 }
 
-async function buildDevelopmentRecoveryLink(email: string, redirectTo: string) {
-  if (process.env.NODE_ENV === 'production') {
-    return null;
-  }
-
-  try {
-    const supabaseAdmin = createAdminSupabaseClient();
-    const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'recovery',
-      email,
-      options: {
-        redirectTo,
-      },
-    });
-
-    if (error) {
-      console.error('Supabase recovery link generation failed', error.message);
-      return null;
-    }
-
-    return data.properties.action_link;
-  } catch {
-    return null;
-  }
-}
-
 export async function POST(request: Request) {
   try {
+    assertTrustedMutationOrigin(request);
+
+    const rateLimit = checkRateLimit(request, {
+      key: 'auth:recover',
+      maxRequests: 5,
+      windowMs: 15 * 60 * 1000,
+    });
+
+    if (rateLimit.limited) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
+    }
+
     const body = await request.json().catch(() => null);
     const validation = recoverPasswordSchema.safeParse(body ?? {});
 
@@ -54,14 +45,22 @@ export async function POST(request: Request) {
       );
     }
 
+    const accountRateLimit = checkRateLimit(request, {
+      key: 'auth:recover:account',
+      identifier: validation.data.email,
+      maxRequests: 3,
+      windowMs: 15 * 60 * 1000,
+    });
+
+    if (accountRateLimit.limited) {
+      return rateLimitResponse(accountRateLimit.retryAfterSeconds);
+    }
+
     const supabase = await createServerSupabaseClient();
     const redirectTo = buildRedirectUrl(request.url);
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      validation.data.email,
-      {
-        redirectTo,
-      },
-    );
+    const { error } = await supabase.auth.resetPasswordForEmail(validation.data.email, {
+      redirectTo,
+    });
 
     if (error) {
       console.error('Supabase password recovery failed', error.message);
@@ -71,23 +70,6 @@ export async function POST(request: Request) {
         normalizedMessage.includes('security purposes');
       const isEmailDeliveryError = normalizedMessage.includes('error sending');
 
-      if (isRateLimited || isEmailDeliveryError) {
-        const recoveryLink = await buildDevelopmentRecoveryLink(
-          validation.data.email,
-          redirectTo,
-        );
-
-        if (recoveryLink) {
-          return NextResponse.json({
-            data: {
-              recoveryLink,
-            },
-            message:
-              'Supabase no pudo enviar el correo, pero se genero un enlace de recuperacion para desarrollo.',
-          });
-        }
-      }
-
       return NextResponse.json(
         {
           error: {
@@ -95,8 +77,7 @@ export async function POST(request: Request) {
               ? 'Se hicieron demasiados intentos. Espera unos minutos antes de pedir otro enlace.'
               : isEmailDeliveryError
                 ? 'Supabase no pudo enviar el correo de recuperacion. Revisa la configuracion SMTP o intenta con otro correo.'
-              : 'No se pudo enviar el enlace de recuperacion',
-            details: error.message,
+                : 'No se pudo enviar el enlace de recuperacion',
           },
         },
         { status: isRateLimited ? 429 : 500 },
@@ -106,9 +87,13 @@ export async function POST(request: Request) {
     return NextResponse.json({
       message: 'Enlace de recuperacion enviado',
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Untrusted origin') {
+      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
+    }
+
     return NextResponse.json(
-      { error: { message: 'Error inesperado al recuperar contraseña' } },
+      { error: { message: 'Error inesperado al recuperar contrasena' } },
       { status: 500 },
     );
   }

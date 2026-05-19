@@ -31,7 +31,6 @@ function RecoverPasswordContent() {
   const recoveryError = getRecoveryErrorMessage(searchParams.get('recovery_error'));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [developmentRecoveryLink, setDevelopmentRecoveryLink] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
@@ -47,8 +46,7 @@ function RecoverPasswordContent() {
     setIsSubmitting(true);
 
     try {
-      const response = await recoverPassword(data.email);
-      setDevelopmentRecoveryLink(response.data?.recoveryLink ?? null);
+      await recoverPassword(data.email);
       setIsSuccess(true);
     } catch (error) {
       const message =
@@ -94,19 +92,7 @@ function RecoverPasswordContent() {
           )}
           {isSuccess && (
             <div className="flex flex-col gap-2 text-sm font-semibold text-green-600" role="status">
-              <p>
-                {developmentRecoveryLink
-                  ? 'Se genero un enlace de recuperacion para desarrollo.'
-                  : 'Revisa tu correo para continuar con el restablecimiento.'}
-              </p>
-              {developmentRecoveryLink && (
-                <a
-                  href={developmentRecoveryLink}
-                  className="text-reflect-dark underline underline-offset-4"
-                >
-                  Abrir enlace de recuperacion
-                </a>
-              )}
+              <p>Revisa tu correo para continuar con el restablecimiento.</p>
             </div>
           )}
           <Button type="submit" disabled={isSubmitting} className={isSubmitting ? 'opacity-60' : ''}>

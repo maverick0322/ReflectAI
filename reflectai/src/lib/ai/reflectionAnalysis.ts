@@ -50,6 +50,23 @@ function toStringArray(value: unknown): string[] {
     : [];
 }
 
+function buildRedactedPayload(payload: ReflectionSessionPayload) {
+  return {
+    metadata: {
+      version: payload.metadata.version,
+      completed_at: payload.metadata.completed_at ?? null,
+    },
+    responses: payload.responses.map((response) => ({
+      id: response.id,
+      value: response.value ?? null,
+      category: response.category ?? null,
+      status: response.status ?? null,
+      method: response.method ?? null,
+      text: response.text ? '[REDACTED_SENSITIVE_TEXT]' : null,
+    })),
+  };
+}
+
 export function buildAnalysisMessages(payload: ReflectionSessionPayload): GroqChatMessage[] {
   return [
     {
@@ -66,7 +83,7 @@ export function buildAnalysisMessages(payload: ReflectionSessionPayload): GroqCh
       role: 'user',
       content: JSON.stringify({
         task: 'Analyze the reflection session and summarize insights.',
-        payload,
+        payload: buildRedactedPayload(payload),
       }),
     },
   ];

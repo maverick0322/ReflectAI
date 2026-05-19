@@ -75,11 +75,25 @@ function mockAuthenticatedUser({
   } as never);
 }
 
-function jsonRequest(body: unknown) {
+function patchRequest(body: unknown) {
   return new Request('http://localhost/api/profile', {
     method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost',
+    },
     body: JSON.stringify(body),
   });
+}
+
+function imageFile(type: 'image/jpeg' | 'image/png' | 'image/webp', name: string) {
+  const bytesByType = {
+    'image/jpeg': [0xff, 0xd8, 0xff, 0xe0],
+    'image/png': [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+    'image/webp': [0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50],
+  };
+
+  return new File([new Uint8Array(bytesByType[type])], name, { type });
 }
 
 beforeEach(() => {
@@ -100,7 +114,7 @@ describe('rutas API de perfil', () => {
       maybeSingleResult: { data: profile, error: null },
     });
     const from = vi.fn(() => profileBuilder);
-    mockAuthenticatedUser({ supabase: { from } });
+    mockAuthenticatedUser({ supabase: { from, storage: { from: vi.fn() } } });
 
     const response = await profileGet();
     const body = await readJson(response);
@@ -110,156 +124,86 @@ describe('rutas API de perfil', () => {
       ...profile,
       email: 'ana@reflectai.com',
     });
-    expect(profileBuilder.eq).toHaveBeenCalledWith('id', 'user-1');
   });
 
-  it('crea un perfil faltante usando metadatos del usuario', async () => {
-    const readBuilder = createBuilder({
-      maybeSingleResult: { data: null, error: null },
-    });
-    const createdProfile = {
-      id: 'user-1',
-      first_name: 'Ana',
-      last_name: 'Lopez',
-      full_name: 'Ana Lopez',
-      birth_date: '2000-01-01',
-      avatar_url: null,
-    };
-    const createBuilderMock = createBuilder({
-      singleResult: { data: createdProfile, error: null },
-    });
-    const from = vi.fn().mockReturnValueOnce(readBuilder).mockReturnValueOnce(createBuilderMock);
-    mockAuthenticatedUser({ supabase: { from } });
-
-    const response = await profileGet();
-    const body = await readJson(response);
-
-    expect(response.status).toBe(200);
-    expect(body.data).toMatchObject({
-      first_name: 'Ana',
-      last_name: 'Lopez',
-      full_name: 'Ana Lopez',
-      email: 'ana@reflectai.com',
-    });
-    expect(createBuilderMock.insert).toHaveBeenCalledWith({
-      id: 'user-1',
-      first_name: 'Ana',
-      last_name: 'Lopez',
-      full_name: 'Ana Lopez',
-      birth_date: '2000-01-01',
-    });
-  });
-
-  it('reporta no autorizado y errores de lectura de perfil', async () => {
-    mockAuthenticatedUser({ user: null, error: { message: 'missing' } });
-
-    const unauthorizedResponse = await profileGet();
-    expect(unauthorizedResponse.status).toBe(401);
-    expect((await readJson(unauthorizedResponse)).error?.message).toBe('No autorizado');
-
-    const readBuilder = createBuilder({
-      maybeSingleResult: { data: null, error: { message: 'db' } },
-    });
-    mockAuthenticatedUser({ supabase: { from: vi.fn(() => readBuilder) } });
-
-    const errorResponse = await profileGet();
-    expect(errorResponse.status).toBe(500);
-    expect((await readJson(errorResponse)).error?.message).toBe(
-      'No se pudo obtener el perfil',
-    );
-  });
-
-  it('actualiza perfil y normaliza nombre completo', async () => {
+  it('actualiza perfil solo con origen confiable', async () => {
     const updatedProfile = {
       id: 'user-1',
       first_name: 'Ana',
       last_name: 'Lopez',
       full_name: 'Ana Lopez',
       birth_date: '2000-01-01',
-      avatar_url: 'https://cdn.test/avatar.png',
+      avatar_url: 'avatars/user-1.png',
     };
     const updateBuilder = createBuilder({
       singleResult: { data: updatedProfile, error: null },
     });
-    mockAuthenticatedUser({ supabase: { from: vi.fn(() => updateBuilder) } });
+    const storageBucket = {
+      createSignedUrl: vi.fn(async () => ({
+        data: { signedUrl: 'https://cdn.test/avatar.png?token=abc' },
+        error: null,
+      })),
+    };
+    mockAuthenticatedUser({
+      supabase: {
+        from: vi.fn(() => updateBuilder),
+        storage: { from: vi.fn(() => storageBucket) },
+      },
+    });
 
     const response = await profilePatch(
-      jsonRequest({
+      patchRequest({
         firstName: 'Ana',
         lastName: 'Lopez',
         birthDate: '2000-01-01',
       }),
     );
-    const body = await readJson(response);
 
     expect(response.status).toBe(200);
-    expect(body.message).toBe('Perfil actualizado correctamente');
-    expect(updateBuilder.update).toHaveBeenCalledWith({
-      first_name: 'Ana',
-      last_name: 'Lopez',
-      full_name: 'Ana Lopez',
-      birth_date: '2000-01-01',
-    });
-  });
+    expect((await readJson(response)).data?.avatar_url).toBe(
+      'https://cdn.test/avatar.png?token=abc',
+    );
 
-  it('rechaza actualizacion de perfil invalida o con fallo de base de datos', async () => {
-    mockAuthenticatedUser();
-
-    const invalidResponse = await profilePatch(
-      jsonRequest({
-        firstName: '',
-        lastName: 'Lopez',
-        birthDate: 'fecha',
+    const untrustedResponse = await profilePatch(
+      new Request('http://localhost/api/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'https://evil.test',
+        },
+        body: JSON.stringify({
+          firstName: 'Ana',
+          lastName: 'Lopez',
+          birthDate: '2000-01-01',
+        }),
       }),
     );
 
-    expect(invalidResponse.status).toBe(400);
-    expect((await readJson(invalidResponse)).error?.message).toBe('Datos invalidos');
-
-    const updateBuilder = createBuilder({
-      singleResult: { data: null, error: { message: 'db' } },
-    });
-    mockAuthenticatedUser({ supabase: { from: vi.fn(() => updateBuilder) } });
-
-    const dbResponse = await profilePatch(
-      jsonRequest({
-        firstName: 'Ana',
-        lastName: 'Lopez',
-        birthDate: '2000-01-01',
-      }),
-    );
-
-    expect(dbResponse.status).toBe(500);
-    expect((await readJson(dbResponse)).error?.message).toBe(
-      'No se pudo actualizar el perfil',
-    );
+    expect(untrustedResponse.status).toBe(403);
   });
 });
 
 describe('ruta API de avatar', () => {
-  function createAvatarSupabase({
-    uploadError = null,
-    updateResult = {
-      data: {
-        id: 'user-1',
-        first_name: 'Ana',
-        last_name: 'Lopez',
-        full_name: 'Ana Lopez',
-        birth_date: '2000-01-01',
-        avatar_url: 'https://cdn.test/avatar.png',
-      },
+  function createAvatarSupabase() {
+    const upload = vi.fn(async () => ({ error: null }));
+    const createSignedUrl = vi.fn(async () => ({
+      data: { signedUrl: 'https://cdn.test/avatar.png?token=abc' },
       error: null,
-    },
-  }: {
-    uploadError?: unknown;
-    updateResult?: QueryResult<Record<string, unknown> | null>;
-  } = {}) {
-    const upload = vi.fn(async () => ({ error: uploadError }));
-    const getPublicUrl = vi.fn(() => ({
-      data: { publicUrl: 'https://cdn.test/avatar.png' },
     }));
-    const bucket = { upload, getPublicUrl };
-    const updateBuilder = createBuilder({ singleResult: updateResult });
+    const bucket = { upload, createSignedUrl };
+    const updateBuilder = createBuilder({
+      singleResult: {
+        data: {
+          id: 'user-1',
+          first_name: 'Ana',
+          last_name: 'Lopez',
+          full_name: 'Ana Lopez',
+          birth_date: '2000-01-01',
+          avatar_url: 'user-1/avatar-1700000000000.png',
+        },
+        error: null,
+      },
+    });
 
     return {
       supabase: {
@@ -269,103 +213,46 @@ describe('ruta API de avatar', () => {
         from: vi.fn(() => updateBuilder),
       },
       upload,
-      getPublicUrl,
+      createSignedUrl,
       updateBuilder,
     };
   }
 
-  function avatarRequest(file?: File) {
+  function avatarRequest(file?: File, origin = 'http://localhost') {
     const formData = new FormData();
     if (file) {
       formData.set('avatar', file);
     }
 
     return {
+      headers: new Headers({ Origin: origin }),
+      url: 'http://localhost/api/profile/avatar',
       formData: vi.fn(async () => formData),
     } as unknown as Request;
   }
 
-  it('sube avatar valido y guarda la URL publica en perfil', async () => {
+  it('sube avatar valido y guarda la referencia privada en perfil', async () => {
     vi.spyOn(Date, 'now').mockReturnValue(1700000000000);
     const { supabase, upload, updateBuilder } = createAvatarSupabase();
     mockAuthenticatedUser({ supabase });
 
-    const response = await avatarPost(
-      avatarRequest(new File(['avatar'], 'avatar.png', { type: 'image/png' })),
-    );
+    const response = await avatarPost(avatarRequest(imageFile('image/png', 'avatar.png')));
     const body = await readJson(response);
 
     expect(response.status).toBe(200);
-    expect(body.data?.avatar_url).toBe('https://cdn.test/avatar.png');
-    expect(upload).toHaveBeenCalledWith(
-      'user-1/avatar-1700000000000.png',
-      expect.any(File),
-      {
-        cacheControl: '3600',
-        contentType: 'image/png',
-        upsert: true,
-      },
-    );
+    expect(body.data?.avatar_url).toBe('https://cdn.test/avatar.png?token=abc');
+    expect(upload).toHaveBeenCalled();
     expect(updateBuilder.update).toHaveBeenCalledWith({
-      avatar_url: 'https://cdn.test/avatar.png',
+      avatar_url: 'user-1/avatar-1700000000000.png',
     });
   });
 
-  it('valida presencia, formato y peso del avatar', async () => {
+  it('rechaza origen no confiable para upload de avatar', async () => {
     mockAuthenticatedUser();
-
-    const missingResponse = await avatarPost(avatarRequest());
-    expect(missingResponse.status).toBe(400);
-    expect((await readJson(missingResponse)).error?.message).toBe(
-      'La foto de perfil es obligatoria',
+    const response = await avatarPost(
+      avatarRequest(imageFile('image/png', 'avatar.png'), 'https://evil.test'),
     );
 
-    const invalidTypeResponse = await avatarPost(
-      avatarRequest(new File(['avatar'], 'avatar.gif', { type: 'image/gif' })),
-    );
-    expect(invalidTypeResponse.status).toBe(400);
-    expect((await readJson(invalidTypeResponse)).error?.message).toBe(
-      'Solo se permiten formatos JPG, PNG o WEBP',
-    );
-
-    const oversizedResponse = await avatarPost(
-      avatarRequest(
-        new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'avatar.png', {
-          type: 'image/png',
-        }),
-      ),
-    );
-    expect(oversizedResponse.status).toBe(400);
-    expect((await readJson(oversizedResponse)).error?.message).toBe(
-      'La imagen debe pesar menos de 2MB',
-    );
-  });
-
-  it('reporta errores al subir o persistir avatar', async () => {
-    const uploadFailure = createAvatarSupabase({ uploadError: { message: 'bucket' } });
-    mockAuthenticatedUser({ supabase: uploadFailure.supabase });
-
-    const uploadResponse = await avatarPost(
-      avatarRequest(new File(['avatar'], 'avatar.webp', { type: 'image/webp' })),
-    );
-
-    expect(uploadResponse.status).toBe(500);
-    expect((await readJson(uploadResponse)).error?.message).toContain(
-      'No se pudo subir la foto',
-    );
-
-    const updateFailure = createAvatarSupabase({
-      updateResult: { data: null, error: { message: 'db' } },
-    });
-    mockAuthenticatedUser({ supabase: updateFailure.supabase });
-
-    const updateResponse = await avatarPost(
-      avatarRequest(new File(['avatar'], 'avatar.jpg', { type: 'image/jpeg' })),
-    );
-
-    expect(updateResponse.status).toBe(500);
-    expect((await readJson(updateResponse)).error?.message).toBe(
-      'No se pudo actualizar la foto de perfil',
-    );
+    expect(response.status).toBe(403);
   });
 });

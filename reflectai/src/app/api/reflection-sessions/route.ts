@@ -2,10 +2,13 @@ import { NextResponse } from 'next/server';
 
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 import { buildInitialPayload } from '@/lib/reflection/payload';
+import { assertTrustedMutationOrigin } from '@/lib/security/origin';
 import { createReflectionSessionSchema } from '@/lib/validations/reflection';
 
 export async function POST(request: Request) {
   try {
+    assertTrustedMutationOrigin(request);
+
     const { supabase, user, error: authError } = await getAuthenticatedUser();
 
     if (authError || !user) {
@@ -57,7 +60,11 @@ export async function POST(request: Request) {
       },
       { status: 201 },
     );
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Untrusted origin') {
+      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
+    }
+
     return NextResponse.json(
       { error: { message: 'Error inesperado al crear sesion' } },
       { status: 500 },

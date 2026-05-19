@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import GlassCard from '@/components/ui/GlassCard';
 import type {
@@ -17,38 +17,40 @@ export function SessionComparisonCard({
   sessionOptions,
   defaultSelection,
 }: Readonly<SessionComparisonCardProps>) {
-  const [selection, setSelection] = useState(defaultSelection);
-  const [isComparing, setIsComparing] = useState(false);
-  const selectedSessions = useMemo(() => {
-    const sessionA = sessionOptions.find((option) => option.id === selection.sessionA);
-    const sessionB = sessionOptions.find((option) => option.id === selection.sessionB);
-    return { sessionA, sessionB };
-  }, [selection, sessionOptions]);
+  const [selectionOverride, setSelectionOverride] =
+    useState<StatisticsComparisonSelection | null>(null);
+  const [comparedSelection, setComparedSelection] =
+    useState<StatisticsComparisonSelection | null>(null);
+  const selection = selectionOverride ?? defaultSelection;
+  const comparisonSessions = useMemo(() => {
+    if (!comparedSelection) {
+      return { sessionA: undefined, sessionB: undefined };
+    }
 
-  useEffect(() => {
-    setSelection(defaultSelection);
-    setIsComparing(false);
-  }, [defaultSelection]);
+    const sessionA = sessionOptions.find((option) => option.id === comparedSelection.sessionA);
+    const sessionB = sessionOptions.find((option) => option.id === comparedSelection.sessionB);
+    return { sessionA, sessionB };
+  }, [comparedSelection, sessionOptions]);
 
   const handleSelectionChange = (
     field: keyof StatisticsComparisonSelection,
     value: string,
   ) => {
-    setSelection((currentSelection) => ({
-      ...currentSelection,
+    setSelectionOverride((currentSelection) => ({
+      ...(currentSelection ?? selection),
       [field]: value,
     }));
-    setIsComparing(false);
+    setComparedSelection(null);
   };
 
   const handleCompare = () => {
-    setIsComparing(true);
+    setComparedSelection(selection);
   };
 
   const canCompare = sessionOptions.length >= 2;
   const comparisonInsight = buildComparisonInsight(
-    selectedSessions.sessionA,
-    selectedSessions.sessionB,
+    comparisonSessions.sessionA,
+    comparisonSessions.sessionB,
   );
 
   return (
@@ -103,30 +105,30 @@ export function SessionComparisonCard({
         Ver comparacion
       </button>
 
-      {isComparing && selectedSessions.sessionA && selectedSessions.sessionB ? (
+      {comparedSelection && comparisonSessions.sessionA && comparisonSessions.sessionB ? (
         <div className="space-y-4 rounded-2xl border border-white/60 bg-white/45 p-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-4 text-xs font-semibold text-slate-600">
-              <span>{selectedSessions.sessionA.label}</span>
-              <span>{selectedSessions.sessionA.intensity}%</span>
+              <span>{comparisonSessions.sessionA.label}</span>
+              <span>{comparisonSessions.sessionA.intensity}%</span>
             </div>
             <div className="h-2.5 rounded-full bg-white/70">
               <div
                 className="h-2.5 rounded-full bg-violet-400"
-                style={{ width: `${selectedSessions.sessionA.intensity}%` }}
+                style={{ width: `${comparisonSessions.sessionA.intensity}%` }}
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-4 text-xs font-semibold text-slate-600">
-              <span>{selectedSessions.sessionB.label}</span>
-              <span>{selectedSessions.sessionB.intensity}%</span>
+              <span>{comparisonSessions.sessionB.label}</span>
+              <span>{comparisonSessions.sessionB.intensity}%</span>
             </div>
             <div className="h-2.5 rounded-full bg-white/70">
               <div
                 className="h-2.5 rounded-full bg-indigo-300"
-                style={{ width: `${selectedSessions.sessionB.intensity}%` }}
+                style={{ width: `${comparisonSessions.sessionB.intensity}%` }}
               />
             </div>
           </div>

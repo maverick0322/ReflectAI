@@ -2,9 +2,21 @@ import { NextResponse } from 'next/server';
 
 import { generateDailyQuote, getFallbackQuote } from '@/lib/ai/dailyQuote';
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import { checkRateLimit } from '@/lib/security/rateLimit';
+import { rateLimitResponse } from '@/lib/security/responses';
 
-export async function GET() {
+export async function GET(request?: Request) {
   try {
+    const rateLimit = checkRateLimit(request, {
+      key: 'ai:daily-quote',
+      maxRequests: 30,
+      windowMs: 60 * 60 * 1000,
+    });
+
+    if (rateLimit.limited) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
+    }
+
     const { user, error: authError } = await getAuthenticatedUser();
 
     if (authError || !user) {

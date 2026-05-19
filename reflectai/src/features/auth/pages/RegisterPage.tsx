@@ -19,6 +19,7 @@ export function RegisterPage() {
           form={page.form}
           isSubmitting={page.isSubmitting}
           formError={page.formError}
+          onInvalidSubmit={page.handleInvalidSubmit}
           onSubmit={page.handleSubmitForm}
         />
         <RegisterSocialSection />

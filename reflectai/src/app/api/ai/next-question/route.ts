@@ -4,10 +4,25 @@ import { generateNextQuestion } from '@/lib/ai/nextQuestion';
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 import { getNextQuestionId, getQuestionText } from '@/lib/reflection/questionFlow';
 import { normalizePayload } from '@/lib/reflection/payload';
+import { assertTrustedMutationOrigin } from '@/lib/security/origin';
+import { checkRateLimit } from '@/lib/security/rateLimit';
+import { rateLimitResponse } from '@/lib/security/responses';
 import { nextQuestionSchema } from '@/lib/validations/ai';
 
 export async function POST(request: Request) {
   try {
+    assertTrustedMutationOrigin(request);
+
+    const rateLimit = checkRateLimit(request, {
+      key: 'ai:next-question',
+      maxRequests: 30,
+      windowMs: 60 * 60 * 1000,
+    });
+
+    if (rateLimit.limited) {
+      return rateLimitResponse(rateLimit.retryAfterSeconds);
+    }
+
     const body = await request.json().catch(() => null);
     const validation = nextQuestionSchema.safeParse(body ?? {});
 
@@ -88,7 +103,11 @@ export async function POST(request: Request) {
         questions,
       },
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Untrusted origin') {
+      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
+    }
+
     return NextResponse.json(
       { error: { message: 'Error inesperado al generar pregunta' } },
       { status: 500 },

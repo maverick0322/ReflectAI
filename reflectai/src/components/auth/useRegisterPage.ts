@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { type FieldErrors, useForm } from 'react-hook-form';
 
 import { ApiError } from '@/lib/api/http';
 import { registerUser } from '@/lib/api/auth';
@@ -16,6 +16,7 @@ interface UseRegisterPageResult {
   formError: string | null;
   form: ReturnType<typeof useForm<RegisterFormValues>>;
   handleSubmitForm: (data: RegisterFormValues) => Promise<void>;
+  handleInvalidSubmit: (errors: FieldErrors<RegisterFormValues>) => void;
 }
 
 function getRegisteredEmailError(error: unknown) {
@@ -46,6 +47,7 @@ export function useRegisterPage(): UseRegisterPageResult {
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
+    shouldFocusError: true,
   });
 
   const handleSubmitForm = useCallback(
@@ -86,10 +88,43 @@ export function useRegisterPage(): UseRegisterPageResult {
     [form, router],
   );
 
+  const handleInvalidSubmit = useCallback((errors: FieldErrors<RegisterFormValues>) => {
+    const orderedFields = [
+      'firstName',
+      'lastName',
+      'email',
+      'confirmEmail',
+      'password',
+      'confirmPassword',
+      'birthDate',
+    ] as const;
+
+    const firstFieldWithError = orderedFields.find((fieldName) => Boolean(errors[fieldName]));
+
+    if (firstFieldWithError) {
+      const fieldError = errors[firstFieldWithError];
+      const message =
+        typeof fieldError?.message === 'string'
+          ? fieldError.message
+          : 'Revisa los campos marcados.';
+
+      setFormError(null);
+      form.setError(firstFieldWithError, {
+        type: 'manual',
+        message,
+      });
+      form.setFocus(firstFieldWithError);
+      return;
+    }
+
+    setFormError(null);
+  }, [form]);
+
   return {
     isSubmitting,
     formError,
     form,
     handleSubmitForm,
+    handleInvalidSubmit,
   };
 }

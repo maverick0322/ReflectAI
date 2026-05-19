@@ -1,19 +1,18 @@
 import { NextResponse } from 'next/server';
 
+import { step1Schema } from '@/components/auth/changePasswordSchemas';
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 import { assertTrustedMutationOrigin } from '@/lib/security/origin';
 import { checkRateLimit } from '@/lib/security/rateLimit';
 import { rateLimitResponse } from '@/lib/security/responses';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
-import { deleteAccountSchema } from '@/lib/validations/auth';
 
-export async function DELETE(request: Request) {
+export async function POST(request: Request) {
   try {
     assertTrustedMutationOrigin(request);
 
     const rateLimit = checkRateLimit(request, {
-      key: 'auth:delete-account',
-      maxRequests: 3,
+      key: 'auth:verify-password',
+      maxRequests: 8,
       windowMs: 15 * 60 * 1000,
     });
 
@@ -22,7 +21,7 @@ export async function DELETE(request: Request) {
     }
 
     const body = await request.json().catch(() => null);
-    const validation = deleteAccountSchema.safeParse(body ?? {});
+    const validation = step1Schema.safeParse(body ?? {});
 
     if (!validation.success) {
       return NextResponse.json(
@@ -43,9 +42,9 @@ export async function DELETE(request: Request) {
     }
 
     const userRateLimit = checkRateLimit(request, {
-      key: 'auth:delete-account:user',
+      key: 'auth:verify-password:user',
       identifier: user.id,
-      maxRequests: 2,
+      maxRequests: 5,
       windowMs: 15 * 60 * 1000,
     });
 
@@ -72,25 +71,8 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const adminClient = createAdminSupabaseClient();
-    const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
-
-    if (deleteError) {
-      return NextResponse.json(
-        {
-          error: {
-            message:
-              'No se pudo eliminar la cuenta. Revisa las relaciones en cascada de profiles y reflection_sessions.',
-          },
-        },
-        { status: 500 },
-      );
-    }
-
-    await supabase.auth.signOut();
-
     return NextResponse.json({
-      message: 'Cuenta eliminada correctamente',
+      message: 'Contrasena actual validada correctamente',
     });
   } catch (error) {
     if (error instanceof Error && error.message === 'Untrusted origin') {
@@ -98,7 +80,7 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json(
-      { error: { message: 'Error inesperado al eliminar cuenta' } },
+      { error: { message: 'Error inesperado al validar la contrasena actual' } },
       { status: 500 },
     );
   }
