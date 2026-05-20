@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { AVATAR_BUCKET, resolveAvatarUrl } from '@/lib/profile/avatar';
+import {
+  AVATAR_BUCKET,
+  resolveAvatarUrl,
+  uploadProfileAvatar,
+} from '@/lib/profile/avatar';
 
 function createSupabaseClient(response: {
   data: { signedUrl: string } | null;
@@ -73,5 +77,27 @@ describe('profile avatar helpers', () => {
     await expect(
       resolveAvatarUrl(missingUrlClient.client, 'user-1/avatar.png'),
     ).resolves.toBeNull();
+  });
+
+  it('reports update failures separately when persistence is unavailable', async () => {
+    const file = new File(
+      [new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])],
+      'avatar.png',
+      { type: 'image/png' },
+    );
+    const supabase = {
+      storage: {
+        from: () => ({
+          upload: vi.fn(async () => ({ error: null })),
+          createSignedUrl: vi.fn(),
+        }),
+      },
+    };
+
+    await expect(
+      uploadProfileAvatar(supabase, 'user-1', file, 'png'),
+    ).resolves.toEqual({
+      error: 'update_failed',
+    });
   });
 });

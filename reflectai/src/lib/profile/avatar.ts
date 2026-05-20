@@ -184,9 +184,15 @@ export async function uploadProfileAvatar(
   const avatarPath = `${userId}/avatar-${Date.now()}.${extension}`;
   const bucket = supabase.storage.from(AVATAR_BUCKET);
 
-  if (!bucket.upload || !supabase.from) {
+  if (!bucket.upload) {
     return {
       error: 'upload_failed' as const,
+    };
+  }
+
+  if (!supabase.from) {
+    return {
+      error: 'update_failed' as const,
     };
   }
 

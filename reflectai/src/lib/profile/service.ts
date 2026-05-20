@@ -35,7 +35,8 @@ function readTrimmedMetadataValue(metadata: unknown, key: string) {
   const value = (metadata as Record<string, unknown>)[key];
 
   if (typeof value === 'string') {
-    return value.trim() ? value : null;
+    const trimmedValue = value.trim();
+    return trimmedValue ? trimmedValue : null;
   }
 
   return null;

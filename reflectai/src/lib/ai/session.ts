@@ -46,7 +46,10 @@ export async function buildNextQuestionsResult(
     };
   }
 
-  const questionIds = requestedQuestionIds ?? [nextQuestionId];
+  const questionIds =
+    requestedQuestionIds && requestedQuestionIds.length > 0
+      ? requestedQuestionIds
+      : [nextQuestionId];
   const questions = await Promise.all(
     questionIds.map((questionId) => buildQuestionResult(payload, questionId)),
   );
