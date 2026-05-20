@@ -4,11 +4,14 @@ import { channel } from 'node:diagnostics_channel';
 import {
   buildServerErrorLogEntry,
   logServerError,
+  resetServerErrorLogFallbackTransport,
   SERVER_ERROR_LOG_CHANNEL,
+  setServerErrorLogFallbackTransport,
   type ServerErrorLogEntry,
 } from '@/lib/monitoring/logger';
 
 afterEach(() => {
+  resetServerErrorLogFallbackTransport();
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
 });
@@ -87,6 +90,26 @@ describe('logServerError', () => {
         level: 'error',
         scope: 'scope:unknown',
         message: 'Unknown error',
+      }),
+    );
+  });
+
+  it('uses the structured fallback transport when no subscriber is registered', () => {
+    const fallbackEntries: ServerErrorLogEntry[] = [];
+
+    setServerErrorLogFallbackTransport((entry) => {
+      fallbackEntries.push(entry);
+    });
+    vi.stubEnv('NODE_ENV', 'production');
+
+    logServerError('scope:fallback', new Error('boom'));
+
+    expect(fallbackEntries).toHaveLength(1);
+    expect(fallbackEntries[0]).toEqual(
+      expect.objectContaining({
+        level: 'error',
+        scope: 'scope:fallback',
+        message: 'boom',
       }),
     );
   });

@@ -218,6 +218,26 @@ describe('ruta API de cita diaria', () => {
     expect(generateDailyQuote).toHaveBeenCalledWith(undefined);
   });
 
+  it('propaga fallback cuando el generador de cita devuelve aiGenerated false', async () => {
+    mockAuthenticatedUser();
+    vi.mocked(generateDailyQuote).mockResolvedValue({
+      quote: 'Respira y vuelve al presente.',
+      author: 'ReflectAI',
+      aiGenerated: false,
+    } as never);
+
+    const response = await dailyQuoteGet();
+    const body = await readJson(response);
+
+    expect(response.status).toBe(200);
+    expect(body.message).toBe('Cita local generada correctamente');
+    expect(body.data).toEqual({
+      quote: 'Respira y vuelve al presente.',
+      author: 'ReflectAI',
+      aiGenerated: false,
+    });
+  });
+
   it('usa fallback local si la IA falla y bloquea usuarios anonimos', async () => {
     mockAuthenticatedUser();
     vi.mocked(generateDailyQuote).mockRejectedValue(new Error('groq'));

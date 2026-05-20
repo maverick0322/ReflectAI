@@ -89,9 +89,11 @@ export async function buildDailyQuoteForUser(user: AuthenticatedUser) {
     typeof metadata.full_name === 'string' ? metadata.full_name : undefined;
 
   try {
+    const quote = await generateDailyQuote(userName);
+
     return {
-      data: await generateDailyQuote(userName),
-      aiGenerated: true,
+      data: quote,
+      aiGenerated: quote.aiGenerated,
     };
   } catch (error: unknown) {
     void error;

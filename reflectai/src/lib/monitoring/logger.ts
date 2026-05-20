@@ -11,7 +11,25 @@ export type ServerErrorLogEntry = {
   stack?: string;
 };
 
+export type ServerErrorLogTransport = (entry: ServerErrorLogEntry) => void;
+
 const serverErrorLogChannel = channel(SERVER_ERROR_LOG_CHANNEL);
+
+function writeServerErrorLogToStderr(entry: ServerErrorLogEntry) {
+  process.stderr.write(`${JSON.stringify(entry)}\n`);
+}
+
+let fallbackTransport: ServerErrorLogTransport = writeServerErrorLogToStderr;
+
+export function setServerErrorLogFallbackTransport(
+  transport: ServerErrorLogTransport,
+) {
+  fallbackTransport = transport;
+}
+
+export function resetServerErrorLogFallbackTransport() {
+  fallbackTransport = writeServerErrorLogToStderr;
+}
 
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
@@ -44,5 +62,12 @@ export function logServerError(scope: string, error: unknown) {
     return;
   }
 
-  serverErrorLogChannel.publish(buildServerErrorLogEntry(scope, error));
+  const entry = buildServerErrorLogEntry(scope, error);
+  const hasSubscribers = serverErrorLogChannel.hasSubscribers;
+
+  serverErrorLogChannel.publish(entry);
+
+  if (!hasSubscribers) {
+    fallbackTransport(entry);
+  }
 }
