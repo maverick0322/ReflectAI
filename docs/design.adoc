@@ -2,219 +2,42 @@
 :icons: font
 
 == Diseño arquitectónico
-Descripción global de la infraestructura ReflectAI.
+ReflectAI se apoya en un esquema serverless con autenticación administrada, persistencia en PostgreSQL y un motor de IA externo para generar el flujo guiado de reflexión.
+
+La intención de este documento es mostrar la arquitectura de forma legible en PDF, por lo que los diagramas se incluyen como imágenes vectoriales ya renderizadas.
 
 == Vista de casos de uso (diagrama uml de casos de uso)
-Diagrama que muestra la interacción entre usuarios y el sistema.
-
-[plantuml]
-....
-@startuml
-!theme plain
-left to right direction
-skinparam packageStyle rectangle
-
-actor "Usuario\n(Buscador de Autoconocimiento)" as user
-
-package "ReflectAI : Sistema Core" {
-  
-  usecase "CU-01: Gestionar Cuenta" as UC1
-  usecase "Autenticarse (Email, Google, Apple)" as UC1_Auth
-  usecase "Recuperar Contraseña" as UC1_Recover
-  usecase "Eliminar Cuenta y Datos" as UC1_Delete
-  
-  usecase "CU-02: Iniciar Sesión de Reflexión" as UC2
-  usecase "Responder Flujo Guiado por IA" as UC2_Flow
-  
-  usecase "CU-03: Consultar Historial" as UC3
-  usecase "Visualizar Gráficas de Tendencia" as UC3_Dash
-  
-  usecase "CU-04: Comparar Sesiones" as UC4
-  
-}
-
-' Relaciones principales del Actor
-user --> UC1
-user --> UC2
-user --> UC3
-user --> UC4
-
-@enduml
-....
+Resumen visual de las interacciones clave entre el usuario y el sistema.
+image::diagrams/use-case.svg[Diagrama de casos de uso, align=center]
 
 == Vista lógica (diagrama uml de clases)
-Estructura de clases lógica de las entidades principales.
-
-[mermaid]
-....
-classDiagram
-    direction TB
-    class Usuario {
-        +UUID id
-        +String nombre
-        +String correo
-        +DateTime fechaRegistro
-        +iniciarSesion()
-    }
-    
-    class SesionReflexion {
-        +UUID id
-        +DateTime fechaInicio
-        +DateTime fechaFin
-        +EstadoSesion estado
-        +String tituloResumen
-        +completarSesion()
-    }
-    
-    class EntradaReflexion {
-        +String textoPregunta
-        +String respuestaUsuario
-        +String emocionIdentificada
-        +Int intensidadEmocional
-        +DateTime marcaDeTiempo
-    }
-    
-    Usuario "1" -- "*" SesionReflexion : realiza
-    SesionReflexion "1" *-- "1..*" EntradaReflexion : contiene
-....
+Modelo lógico con las entidades principales y su relación.
+image::diagrams/class-diagram.svg[Diagrama de clases, align=center]
 
 == Vista de despliegue (diagrama uml de despliegue)
-Estructura física de despliegue.
-
-@startuml
-!theme plain
-left to right direction
-skinparam node {
-  BackgroundColor white
-  BorderColor black
-}
-
-node "Dispositivo del Usuario" <<Mobile / Desktop>> as Device {
-  node "Navegador Web" as Browser {
-    component "ReflectAI Client\n" as SPA
-  }
-}
-
-cloud "Vercel Platform" <<Frontend & Serverless Hosting>> as Vercel {
-  node "Next.js Node.js Runtime" as Next {
-    component "Server-Side Rendering\n(UI Components)" as SSR
-    component "API Route Handlers\n(Backend Logic)" as API
-  }
-}
-
-cloud "Supabase Cloud" <<Backend-as-a-Service>> as Supabase {
-  node "Infraestructura Gestionada" {
-    component "GoTrue Server\n(Identity & Auth)" as Auth
-    database "PostgreSQL DB\n" as DB
-  }
-}
-
-cloud "Groq Cloud" <<AI Provider>> as Groq {
-  node "LPU Inference Cluster" {
-    component "LLM Engine\n(Llama 3 / Mixtral)" as LPU
-  }
-}
-
-' Relaciones de red y protocolos
-Device =down=> Vercel : HTTPS (TLS 1.3)
-SPA ..> Auth : HTTPS / JWT (Autenticación OAuth)
-SPA --> SSR : Navegación / Hydration
-SPA --> API : Fetch / REST
-
-API =right=> DB : TCP/IP (Postgres Protocol / Supabase SDK)
-API =down=> LPU : HTTPS / REST (API Keys)
-
-note bottom of Device
-  La sesión temporal (JWT) 
-  se almacena en cookies seguras (HttpOnly).
-end note
-
-note top of Vercel
-  Variables de entorno (API Keys de Groq 
-  y Supabase) inyectadas en tiempo de build.
-end note
-
-@enduml
-
-image::diagrama_despliegue.png[]
+Componentes de infraestructura y sus vínculos de comunicación.
+image::diagrams/deployment.svg[Diagrama de despliegue, align=center]
 
 == Modelo de datos (diagrama de entidad-relación)
-Diseño conceptual de la base de datos (NoSQL / Relacional).
+El modelo mezcla tablas relacionales para identidad y perfil con una carga JSONB flexible para las sesiones de reflexión.
 
-[mermaid]
-....
-erDiagram
-    auth_users ||--|| profiles : "crea perfil (trigger)"
-    profiles ||--o{ reflection_sessions : "registra"
-
-    auth_users {
-        uuid id PK "Gestionado por Supabase Auth"
-        varchar email
-        varchar encrypted_password
-    }
-
-    profiles {
-        uuid id PK "FK -> auth.users.id"
-        varchar full_name
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    reflection_sessions {
-        uuid id PK
-        uuid user_id FK "FK -> profiles.id"
-        timestamp started_at
-        timestamp completed_at
-        varchar status "enum: 'draft', 'completed'"
-        varchar title "Generado por IA al final"
-        jsonb payload "Estructura dinámica de preguntas/respuestas"
-        jsonb ai_analysis "Métricas pre-calculadas para el Dashboard"
-    }
-....
+image::diagrams/er.svg[Modelo entidad-relación, align=center]
 
 === Diccionario de datos
-Definición detallada de cada entidad, atributo y relación en la base de datos.
+Las estructuras clave que persisten en la base de datos son las siguientes:
 
-Tabla reflection_sessions:
+[cols="1,3", options="header"]
+|===
+| Elemento | Uso
+| `payload` | Secuencia ordenada de preguntas, respuestas, emoción detectada e intensidad emocional de cada paso.
+| `ai_analysis` | Resumen calculado para análisis posterior: emociones principales, intensidad promedio, temas y distorsiones detectadas.
+|===
 
-Columna payload:
-
-[source,json]
-----
-[
-  {
-    "step_order": 1,
-    "question": "¿Qué situación detonó este momento de reflexión?",
-    "user_response": "Tuve una discusión en el trabajo...",
-    "timestamp": "2026-04-10T10:00:00Z"
-  },
-  {
-    "step_order": 2,
-    "question": "Al pensar en eso, ¿qué emoción predomina y qué tan intensa es del 1 al 10?",
-    "user_response": "Siento frustración.",
-    "detected_emotion": "frustración",
-    "intensity": 8,
-    "timestamp": "2026-04-10T10:02:30Z"
-  }
-]
-----
-
-Columna ai_analysis:
-
-[source,json]
-----
-{
-  "primary_emotions": ["frustración", "ansiedad"],
-  "average_intensity": 7.5,
-  "key_themes": ["trabajo", "comunicación"],
-  "cognitive_distortion_detected": "Lectura de pensamiento"
-}
-----
+`reflection_sessions` guarda una sesión por usuario con estado `draft` o `completed`. `profiles` conserva los datos visibles del usuario y `auth_users` queda delegada a la capa de autenticación.
 
 
 == Descripciones de casos de uso
-
-
+Se detallan los flujos principales para asegurar cobertura completa del comportamiento esperado.
 === CU-01: Gestionar Cuenta
 
 [cols="1,2", options="header"]

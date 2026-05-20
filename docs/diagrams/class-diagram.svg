@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="840" viewBox="0 0 1400 840">
+  <defs>
+    <style>
+      .bg { fill: #fbfaf7; }
+      .panel { fill: #ffffff; stroke: #d7d2c8; stroke-width: 2; rx: 24; }
+      .title { font: 700 30px Arial, sans-serif; fill: #1f2937; }
+      .subtitle { font: 400 16px Arial, sans-serif; fill: #6b7280; }
+      .box { fill: #fff; stroke: #4f6f81; stroke-width: 2.5; rx: 14; }
+      .head { fill: #eef7ff; stroke: #4f6f81; stroke-width: 2.5; }
+      .name { font: 700 18px Arial, sans-serif; fill: #1f2937; }
+      .attr { font: 400 15px Arial, sans-serif; fill: #334155; }
+      .rel { stroke: #7b8794; stroke-width: 2.5; fill: none; }
+      .label { font: 700 15px Arial, sans-serif; fill: #4b5563; }
+    </style>
+  </defs>
+  <rect class="bg" width="1400" height="840"/>
+  <rect class="panel" x="40" y="40" width="1320" height="760"/>
+  <text class="title" x="80" y="95">Modelo lógico de datos</text>
+  <text class="subtitle" x="80" y="125">Entidades principales para sesiones de reflexión</text>
+
+  <g transform="translate(120,210)">
+    <rect class="box" width="280" height="250" rx="14"/>
+    <rect class="head" width="280" height="52" rx="14"/>
+    <text class="name" x="20" y="34">Usuario</text>
+    <text class="attr" x="20" y="86">+ id: UUID</text>
+    <text class="attr" x="20" y="112">+ nombre: String</text>
+    <text class="attr" x="20" y="138">+ correo: String</text>
+    <text class="attr" x="20" y="164">+ fechaRegistro: DateTime</text>
+    <text class="attr" x="20" y="198">+ iniciarSesion()</text>
+  </g>
+
+  <g transform="translate(540,170)">
+    <rect class="box" width="320" height="330" rx="14"/>
+    <rect class="head" width="320" height="52" rx="14"/>
+    <text class="name" x="20" y="34">SesionReflexion</text>
+    <text class="attr" x="20" y="86">+ id: UUID</text>
+    <text class="attr" x="20" y="112">+ fechaInicio: DateTime</text>
+    <text class="attr" x="20" y="138">+ fechaFin: DateTime</text>
+    <text class="attr" x="20" y="164">+ estado: EstadoSesion</text>
+    <text class="attr" x="20" y="190">+ tituloResumen: String</text>
+    <text class="attr" x="20" y="234">+ completarSesion()</text>
+    <text class="attr" x="20" y="274">Contiene respuestas dinámicas</text>
+  </g>
+
+  <g transform="translate(960,260)">
+    <rect class="box" width="320" height="220" rx="14"/>
+    <rect class="head" width="320" height="52" rx="14"/>
+    <text class="name" x="20" y="34">EntradaReflexion</text>
+    <text class="attr" x="20" y="86">+ textoPregunta: String</text>
+    <text class="attr" x="20" y="112">+ respuestaUsuario: String</text>
+    <text class="attr" x="20" y="138">+ emocionIdentificada: String</text>
+    <text class="attr" x="20" y="164">+ intensidadEmocional: Int</text>
+    <text class="attr" x="20" y="190">+ marcaDeTiempo: DateTime</text>
+  </g>
+
+  <path class="rel" d="M 400 340 C 460 340, 490 340, 540 340"/>
+  <path class="rel" d="M 860 340 C 910 340, 920 340, 960 340"/>
+  <text class="label" x="450" y="320">1 a muchos</text>
+  <text class="label" x="895" y="320">1 a muchos</text>
+</svg>

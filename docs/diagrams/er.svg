@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+  <defs>
+    <style>
+      .bg { fill: #fbfaf7; }
+      .panel { fill: #ffffff; stroke: #d7d2c8; stroke-width: 2; rx: 24; }
+      .title { font: 700 30px Arial, sans-serif; fill: #1f2937; }
+      .subtitle { font: 400 16px Arial, sans-serif; fill: #6b7280; }
+      .box { fill: #fff; stroke: #4f6f81; stroke-width: 2.5; rx: 14; }
+      .head { fill: #eef7ff; stroke: #4f6f81; stroke-width: 2.5; }
+      .name { font: 700 18px Arial, sans-serif; fill: #1f2937; }
+      .attr { font: 400 15px Arial, sans-serif; fill: #334155; }
+      .rel { stroke: #7b8794; stroke-width: 2.5; fill: none; }
+      .label { font: 700 15px Arial, sans-serif; fill: #4b5563; }
+    </style>
+  </defs>
+  <rect class="bg" width="1400" height="760"/>
+  <rect class="panel" x="40" y="40" width="1320" height="680"/>
+  <text class="title" x="80" y="95">Modelo entidad-relación</text>
+  <text class="subtitle" x="80" y="125">Estructura resumida para persistencia de sesiones</text>
+
+  <g transform="translate(90,240)">
+    <rect class="box" width="280" height="200" rx="14"/>
+    <rect class="head" width="280" height="52" rx="14"/>
+    <text class="name" x="20" y="34">auth_users</text>
+    <text class="attr" x="20" y="86">uuid id PK</text>
+    <text class="attr" x="20" y="112">varchar email</text>
+    <text class="attr" x="20" y="138">varchar encrypted_password</text>
+  </g>
+
+  <g transform="translate(500,200)">
+    <rect class="box" width="320" height="260" rx="14"/>
+    <rect class="head" width="320" height="52" rx="14"/>
+    <text class="name" x="20" y="34">profiles</text>
+    <text class="attr" x="20" y="86">uuid id PK</text>
+    <text class="attr" x="20" y="112">varchar full_name</text>
+    <text class="attr" x="20" y="138">timestamp created_at</text>
+    <text class="attr" x="20" y="164">timestamp updated_at</text>
+  </g>
+
+  <g transform="translate(930,240)">
+    <rect class="box" width="360" height="300" rx="14"/>
+    <rect class="head" width="360" height="52" rx="14"/>
+    <text class="name" x="20" y="34">reflection_sessions</text>
+    <text class="attr" x="20" y="86">uuid id PK</text>
+    <text class="attr" x="20" y="112">uuid user_id FK</text>
+    <text class="attr" x="20" y="138">timestamp started_at</text>
+    <text class="attr" x="20" y="164">timestamp completed_at</text>
+    <text class="attr" x="20" y="190">varchar status</text>
+    <text class="attr" x="20" y="216">varchar title</text>
+    <text class="attr" x="20" y="242">jsonb payload</text>
+    <text class="attr" x="20" y="268">jsonb ai_analysis</text>
+  </g>
+
+  <path class="rel" d="M 370 340 C 420 340, 450 330, 500 330"/>
+  <text class="label" x="430" y="320">1 a 1</text>
+  <path class="rel" d="M 820 350 C 860 350, 880 350, 930 350"/>
+  <text class="label" x="845" y="330">1 a muchos</text>
+</svg>

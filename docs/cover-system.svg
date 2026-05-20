@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2480" height="3508" viewBox="0 0 2480 3508">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbfaf7"/>
+      <stop offset="100%" stop-color="#eef4ff"/>
+    </linearGradient>
+    <style>
+      .meta { font: 700 34px Arial, sans-serif; fill: #6b7280; }
+      .footer { font: 700 36px Arial, sans-serif; fill: #1f2937; }
+      .footer-sub { font: 400 30px Arial, sans-serif; fill: #4b5563; }
+        .chip { display: none; }
+        .chip-text { display: none; }
+      .blob1 { fill: #dbeafe; opacity: 0.9; }
+      .blob2 { fill: #ffe4c7; opacity: 0.8; }
+    </style>
+  </defs>
+  <rect width="2480" height="3508" fill="url(#g1)"/>
+  <circle class="blob1" cx="1980" cy="500" r="320"/>
+  <circle class="blob2" cx="320" cy="2800" r="420"/>
+
+  <rect x="220" y="3200" width="2040" height="140" rx="44" fill="#ffffff" opacity="0.85" stroke="#d6d3cc" stroke-width="4"/>
+  <text x="2200" y="3250" text-anchor="end" class="footer">ReflectAI - System Request</text>
+  <text x="2200" y="3290" text-anchor="end" class="footer-sub">ReflecAI Team</text>
+  <text x="2200" y="3330" text-anchor="end" class="footer-sub">Version 1.0, 2026-05-29</text>
+</svg>
