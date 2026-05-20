@@ -4,25 +4,15 @@ import {
   enforceTrustedMutationOrigin,
   parseJsonBody,
   requireAuthenticatedUser,
-  throwRouteError,
   toRouteErrorResponse,
 } from '@/lib/api/route';
-import {
-  analyzeReflectionSession,
-  buildFallbackAnalysis,
-} from '@/lib/ai/reflectionAnalysis';
+import { generateSessionAnalysis } from '@/lib/ai/session';
 import { apiMessages } from '@/lib/copy/api';
-import { normalizePayload } from '@/lib/reflection/payload';
+import {
+  loadReflectionSessionPayload,
+  saveReflectionSessionAnalysis,
+} from '@/lib/reflection/sessionService';
 import { analyzeSessionSchema } from '@/lib/validations/ai';
-
-async function generateSessionAnalysis(payload: ReturnType<typeof normalizePayload>) {
-  try {
-    return (await analyzeReflectionSession(payload)) ?? buildFallbackAnalysis(payload);
-  } catch (error: unknown) {
-    void error;
-    return buildFallbackAnalysis(payload);
-  }
-}
 
 export async function POST(request: Request) {
   try {
@@ -39,37 +29,18 @@ export async function POST(request: Request) {
       invalidMessage: apiMessages.ai.invalidAnalyzeSessionData,
     });
     const { supabase, user } = await requireAuthenticatedUser();
-
-    const { data: session, error } = await supabase
-      .from('reflection_sessions')
-      .select('id, payload, started_at')
-      .eq('id', analyzeRequest.sessionId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (error || !session) {
-      throwRouteError(404, apiMessages.ai.sessionNotFound);
-    }
-
-    const payload = normalizePayload(
-      session.payload,
-      session.started_at ?? new Date().toISOString(),
+    const { payload } = await loadReflectionSessionPayload(
+      supabase,
+      user,
+      analyzeRequest.sessionId,
     );
     const analysis = await generateSessionAnalysis(payload);
-
-    const { data, error: updateError } = await supabase
-      .from('reflection_sessions')
-      .update({
-        ai_analysis: analysis,
-      })
-      .eq('id', analyzeRequest.sessionId)
-      .eq('user_id', user.id)
-      .select('id, ai_analysis')
-      .single();
-
-    if (updateError || !data) {
-      throwRouteError(500, apiMessages.ai.analyzeFailed);
-    }
+    const data = await saveReflectionSessionAnalysis(
+      supabase,
+      user,
+      analyzeRequest.sessionId,
+      analysis,
+    );
 
     return buildSuccessResponse({
       data,
