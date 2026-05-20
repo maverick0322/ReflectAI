@@ -2,7 +2,16 @@ import React from 'react';
 
 interface SocialButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   provider: string;
-  icon: React.ReactNode; 
+  icon: React.ReactNode;
+}
+
+function getSocialButtonClassName(isDisabled: boolean) {
+  return [
+    'flex w-full items-center justify-center gap-2 rounded-2xl border',
+    'border-white/80 bg-white/50 py-3.5 font-semibold text-[#1E1B4B]',
+    'backdrop-blur-sm transition-colors',
+    isDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-white/70',
+  ].join(' ');
 }
 
 export default function SocialButton({ provider, icon, ...props }: SocialButtonProps) {
@@ -11,9 +20,7 @@ export default function SocialButton({ provider, icon, ...props }: SocialButtonP
     <button
       {...props}
       type="button"
-      className={`w-full py-3.5 bg-white/50 backdrop-blur-sm border border-white/80 rounded-2xl text-[#1E1B4B] font-semibold flex items-center justify-center gap-2 transition-colors ${
-        isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/70'
-      }`}
+      className={getSocialButtonClassName(isDisabled)}
     >
       {icon}
       {provider}

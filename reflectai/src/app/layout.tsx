@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   description: 'Your safe space for personal reflection',
 };
 
+const bodyClassName = [
+  'min-h-screen bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF]',
+  'text-[#1E1B4B] antialiased',
+].join(' ');
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -16,7 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         suppressHydrationWarning
-        className="min-h-screen bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF] text-[#1E1B4B] antialiased"
+        className={bodyClassName}
       >
         <div className="flex min-h-screen flex-col">
           <div className="flex-1">{children}</div>

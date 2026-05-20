@@ -347,7 +347,24 @@ Usar `ErrorBoundary` para capturar errores en el árbol de componentes.
 ## 14. Pruebas (Vitest + React Testing Library)
 
 ### 14.1. Estructura
-Colocar archivos de test junto al componente: `Component.test.tsx`.
+Colocar los archivos de prueba fuera del codigo productivo, bajo `reflectai/__tests__`.
+La estructura de `__tests__` debe agrupar las pruebas por area o modulo y puede espejar la ruta
+fuente cuando ayude a la trazabilidad:
+
+```txt
+reflectai/src/features/dashboard/components/WeeklyCalendar.tsx
+reflectai/__tests__/features/dashboard/components/WeeklyCalendar.test.tsx
+```
+
+Las pruebas de integracion y regresion deben mantenerse en carpetas dedicadas:
+
+```txt
+reflectai/__tests__/integration/api.integration.test.ts
+reflectai/__tests__/regression/newFeature.regression.test.tsx
+```
+
+Esta separacion mantiene el codigo fuente limpio, evita incluir pruebas como codigo productivo y
+queda alineada con `sonar-project.properties`, donde `sonar.tests` apunta a `reflectai/__tests__`.
 
 ### 14.2. Patrón AAA
 * **Correcto**:

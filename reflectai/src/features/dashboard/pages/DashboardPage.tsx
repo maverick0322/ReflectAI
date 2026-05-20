@@ -18,6 +18,11 @@ import {
 import { formatDisplayDate, formatTimeAgo } from '@/features/dashboard/utils/metrics';
 import GlassCard from '@/shared/ui/GlassCard';
 
+const latestReflectionHeadingClassName = [
+  'text-sm font-bold uppercase tracking-tighter text-slate-900/40',
+  'dark:text-white/40',
+].join(' ');
+
 export function DashboardPage() {
   const { sessions, isLoading, formError, userProfile, dailyQuote } = useDashboardData();
   const today = useMemo(() => new Date(), []);
@@ -62,7 +67,7 @@ export function DashboardPage() {
         />
 
         <section className="flex flex-col gap-4">
-          <h3 className="text-sm font-bold uppercase tracking-tighter text-slate-900/40 dark:text-white/40">
+          <h3 className={latestReflectionHeadingClassName}>
             Your latest reflection
           </h3>
 

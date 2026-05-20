@@ -37,6 +37,17 @@ interface NewPasswordStepProps {
   onSubmit: (data: Step2FormValues) => Promise<void>;
 }
 
+const sectionHeaderClassName = [
+  'animate-in mb-6 space-y-2 text-center slide-in-from-right-4',
+  'fade-in duration-300',
+].join(' ');
+
+const cancelLinkClassName = [
+  'flex w-full flex-1 items-center justify-center rounded-2xl',
+  'border-2 border-slate-300 py-4 text-lg font-bold text-slate-700',
+  'transition-all duration-300 hover:bg-white/50',
+].join(' ');
+
 function getNewPasswordEyebrow(isRecoveryFlow: boolean) {
   return isRecoveryFlow ? 'Reset password' : 'Step 2 of 2';
 }
@@ -68,7 +79,7 @@ export function ChangePasswordSectionHeader({
   description,
 }: ChangePasswordSectionHeaderProps) {
   return (
-    <header className="animate-in mb-6 space-y-2 text-center slide-in-from-right-4 fade-in duration-300">
+    <header className={sectionHeaderClassName}>
       <p className="text-sm font-medium text-reflect-dark/70">{eyebrow}</p>
       <h2 className="text-xl font-bold text-reflect-dark">{title}</h2>
       <p className="text-xs text-reflect-dark/60">{description}</p>
@@ -126,7 +137,7 @@ export function IdentityVerificationStep({
         <div className="flex gap-3 pt-2">
           <Link
             href={APP_ROUTES.profile}
-            className="flex w-full flex-1 items-center justify-center rounded-2xl border-2 border-slate-300 py-4 text-lg font-bold text-slate-700 transition-all duration-300 hover:bg-white/50"
+            className={cancelLinkClassName}
           >
             Cancel
           </Link>

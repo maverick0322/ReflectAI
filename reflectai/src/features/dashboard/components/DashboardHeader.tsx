@@ -11,6 +11,12 @@ interface DashboardHeaderProps {
   avatarUrl: string | null;
 }
 
+const headerActionFrameClassName = [
+  'flex h-12 w-12 items-center justify-center overflow-hidden rounded-full',
+  'border border-white/40 bg-white/50 backdrop-blur-md transition-colors',
+  'hover:bg-white/80 dark:bg-black/40',
+].join(' ');
+
 export function DashboardHeader({
   isLoading,
   userName,
@@ -33,7 +39,7 @@ export function DashboardHeader({
           aria-label="Help"
           className="rounded-full focus:outline-none focus:ring-2 focus:ring-violet-500"
         >
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/40 bg-white/50 backdrop-blur-md transition-colors hover:bg-white/80 dark:bg-black/40">
+          <div className={headerActionFrameClassName}>
             <HelpIcon className="h-6 w-6 text-slate-600 dark:text-slate-300" />
           </div>
         </Link>
@@ -43,7 +49,7 @@ export function DashboardHeader({
           aria-label="Profile"
           className="rounded-full focus:outline-none focus:ring-2 focus:ring-violet-500"
         >
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/40 bg-white/50 backdrop-blur-md transition-colors hover:bg-white/80 dark:bg-black/40">
+          <div className={headerActionFrameClassName}>
             {avatarUrl ? (
               <Image
                 src={avatarUrl}

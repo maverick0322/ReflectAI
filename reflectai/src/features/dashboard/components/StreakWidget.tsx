@@ -6,11 +6,16 @@ interface StreakWidgetProps {
   streakMessage: string;
 }
 
+const streakIconClassName = [
+  'flex-shrink-0 rounded-full bg-amber-100 p-3 text-amber-500',
+  'dark:bg-amber-900/30',
+].join(' ');
+
 export function StreakWidget({ days, streakMessage }: StreakWidgetProps) {
   return (
     <GlassCard className="p-4">
       <div className="flex w-full flex-row items-center gap-4">
-        <div className="flex-shrink-0 rounded-full bg-amber-100 p-3 text-amber-500 dark:bg-amber-900/30">
+        <div className={streakIconClassName}>
           <LightningIcon className="h-6 w-6" aria-hidden="true" />
         </div>
 

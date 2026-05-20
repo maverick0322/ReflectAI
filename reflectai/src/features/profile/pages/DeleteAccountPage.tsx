@@ -14,8 +14,43 @@ import Input from '@/shared/ui/Input';
 
 const DELETE_CONFIRMATION_TEXT = 'DELETE';
 
+const successStateClassName = [
+  'animate-in zoom-in-95 flex flex-col items-center justify-center',
+  'py-8 duration-500',
+].join(' ');
+
+const successIconClassName = [
+  'mb-6 flex h-20 w-20 items-center justify-center rounded-full',
+  'border-2 border-green-200 bg-green-100 text-green-500 shadow-sm',
+].join(' ');
+
+const warningIconClassName = [
+  'flex h-12 w-12 items-center justify-center rounded-full',
+  'bg-red-100 text-red-500',
+].join(' ');
+
+const cancelLinkClassName = [
+  'flex w-full flex-1 items-center justify-center rounded-2xl',
+  'border-2 border-slate-300 py-4 text-lg font-bold text-slate-700',
+  'transition-all duration-300 hover:bg-white/50',
+].join(' ');
+
+const enabledDeleteButtonClassName = [
+  '!bg-black !text-white border border-black shadow-xl',
+  'hover:!bg-slate-900 hover:scale-[1.02] active:scale-95',
+].join(' ');
+
 function normalizeDeleteConfirmation(value: string) {
   return value.replace(/[^A-Za-z]/g, '').slice(0, 8).toUpperCase();
+}
+
+function getDeleteButtonClassName(canDelete: boolean) {
+  return [
+    'flex-1 rounded-2xl py-4 text-lg font-bold transition-all duration-300',
+    canDelete
+      ? enabledDeleteButtonClassName
+      : 'cursor-not-allowed bg-slate-200 text-slate-400 shadow-none',
+  ].join(' ');
 }
 
 export function DeleteAccountPage() {
@@ -74,8 +109,8 @@ export function DeleteAccountPage() {
         </div>
 
         {isDeleting ? (
-          <div className="animate-in zoom-in-95 flex flex-col items-center justify-center py-8 duration-500">
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border-2 border-green-200 bg-green-100 text-green-500 shadow-sm">
+          <div className={successStateClassName}>
+            <div className={successIconClassName}>
               <svg
                 className="h-10 w-10"
                 fill="none"
@@ -101,7 +136,7 @@ export function DeleteAccountPage() {
           <>
             <header className="animate-in mb-6 space-y-3 text-center fade-in duration-300">
               <div className="flex justify-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-500">
+                <div className={warningIconClassName}>
                   <WarningIcon className="h-7 w-7" />
                 </div>
               </div>
@@ -118,7 +153,8 @@ export function DeleteAccountPage() {
                   htmlFor="delete-confirm-input"
                   className="text-center text-xs font-medium text-reflect-dark"
                 >
-                  To confirm, type <strong>{DELETE_CONFIRMATION_TEXT}</strong> below:
+                  To confirm, type <strong>{DELETE_CONFIRMATION_TEXT}</strong>{' '}
+                  below:
                 </label>
                 <Input
                   id="delete-confirm-input"
@@ -146,7 +182,7 @@ export function DeleteAccountPage() {
               <div className="flex gap-3">
                 <Link
                   href={APP_ROUTES.profile}
-                  className="flex w-full flex-1 items-center justify-center rounded-2xl border-2 border-slate-300 py-4 text-lg font-bold text-slate-700 transition-all duration-300 hover:bg-white/50"
+                  className={cancelLinkClassName}
                 >
                   Cancel
                 </Link>
@@ -155,11 +191,7 @@ export function DeleteAccountPage() {
                   type="button"
                   onClick={handleDelete}
                   disabled={!canDelete}
-                  className={`flex-1 rounded-2xl py-4 text-lg font-bold transition-all duration-300 ${
-                    canDelete
-                      ? '!bg-black !text-white border border-black shadow-xl hover:!bg-slate-900 hover:scale-[1.02] active:scale-95'
-                      : 'cursor-not-allowed bg-slate-200 text-slate-400 shadow-none'
-                  }`}
+                  className={getDeleteButtonClassName(canDelete)}
                 >
                   Delete
                 </button>

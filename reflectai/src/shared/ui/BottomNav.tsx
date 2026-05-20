@@ -34,6 +34,25 @@ const NAV_ITEMS: NavItem[] = [
   { href: APP_ROUTES.profile, ariaLabel: 'Profile', icon: ProfileIcon },
 ];
 
+const navClassName = [
+  'pointer-events-auto mx-auto flex w-full max-w-[480px] items-center',
+  'justify-between rounded-3xl border border-white/40 bg-white/60',
+  'px-6 py-4 shadow-2xl backdrop-blur-xl dark:border-white/10',
+  'dark:bg-black/60',
+].join(' ');
+
+const primaryLinkClassName = [
+  'flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r',
+  'from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/40',
+  'transition-all hover:-translate-y-1 hover:scale-105 focus:outline-none',
+  'focus:ring-4 focus:ring-violet-500/50',
+].join(' ');
+
+const inactiveLinkClassName = [
+  'text-slate-500 hover:scale-110 hover:text-violet-600',
+  'dark:text-slate-400 dark:hover:text-violet-400',
+].join(' ');
+
 function isActivePath(currentPath: string, itemPath: string) {
   if (itemPath === APP_ROUTES.dashboard) {
     return currentPath === itemPath || currentPath === '/';
@@ -42,11 +61,20 @@ function isActivePath(currentPath: string, itemPath: string) {
   return currentPath === itemPath;
 }
 
+function getNavLinkClassName(isActive: boolean) {
+  return [
+    'rounded-full p-1.5 transition-all focus:outline-none',
+    isActive
+      ? 'text-violet-600 dark:text-violet-400'
+      : inactiveLinkClassName,
+  ].join(' ');
+}
+
 export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="pointer-events-auto mx-auto flex w-full max-w-[480px] items-center justify-between rounded-3xl border border-white/40 bg-white/60 px-6 py-4 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-black/60">
+    <nav className={navClassName}>
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const isActive = isActivePath(pathname, item.href);
@@ -56,7 +84,7 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/40 transition-all hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-violet-500/50"
+              className={primaryLinkClassName}
               aria-label={item.ariaLabel}
               aria-current={isActive ? 'page' : undefined}
             >
@@ -69,11 +97,7 @@ export default function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`rounded-full p-1.5 transition-all focus:outline-none ${
-              isActive
-                ? 'text-violet-600 dark:text-violet-400'
-                : 'text-slate-500 hover:scale-110 hover:text-violet-600 dark:text-slate-400 dark:hover:text-violet-400'
-            }`}
+            className={getNavLinkClassName(isActive)}
             aria-label={item.ariaLabel}
             aria-current={isActive ? 'page' : undefined}
           >

@@ -9,7 +9,11 @@ export function ClockIcon({ className, ...props }: React.SVGProps<SVGSVGElement>
       className={className} 
       {...props}
     >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+      />
     </svg>
   );
 }

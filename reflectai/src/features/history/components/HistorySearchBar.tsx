@@ -7,6 +7,11 @@ interface HistorySearchBarProps {
   onChange?: (value: string) => void;
 }
 
+const inputClassName = [
+  'w-full bg-transparent text-sm text-slate-700 outline-none',
+  'placeholder:text-slate-400',
+].join(' ');
+
 export function HistorySearchBar({
   placeholder,
   defaultValue,
@@ -22,8 +27,10 @@ export function HistorySearchBar({
         placeholder={placeholder}
         defaultValue={defaultValue}
         value={value}
-        onChange={onChange ? (event) => onChange(event.target.value) : undefined}
-        className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+        onChange={
+          onChange ? (event) => onChange(event.target.value) : undefined
+        }
+        className={inputClassName}
       />
     </div>
   );

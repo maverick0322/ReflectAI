@@ -6,6 +6,19 @@ interface WizardSuccessStateProps {
   onGoToDashboard: () => void;
 }
 
+const successIconClassName = [
+  'mx-auto flex h-16 w-16 items-center justify-center rounded-full',
+  'bg-indigo-500 text-3xl font-bold text-white shadow-lg',
+  'shadow-indigo-500/30',
+].join(' ');
+
+const dashboardButtonClassName = [
+  'flex w-full items-center justify-center rounded-2xl bg-gradient-to-r',
+  'from-orange-300 to-orange-400 py-4 text-lg font-semibold text-white',
+  'shadow-lg shadow-orange-400/30 transition-transform',
+  'hover:scale-[1.02] active:scale-95',
+].join(' ');
+
 export function WizardSuccessState({
   summary,
   onGoToDashboard,
@@ -14,11 +27,13 @@ export function WizardSuccessState({
     <main className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-lg animate-in zoom-in duration-500">
         <GlassCard className="flex flex-col gap-6 p-8">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500 text-3xl font-bold text-white shadow-lg shadow-indigo-500/30">
+          <div className={successIconClassName}>
             OK
           </div>
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-slate-800">Reflection saved</h2>
+            <h2 className="text-2xl font-bold text-slate-800">
+              Reflection saved
+            </h2>
             {summary.title && (
               <p className="mt-1 text-sm font-semibold text-slate-500">
                 {summary.title}
@@ -56,7 +71,7 @@ export function WizardSuccessState({
           <button
             type="button"
             onClick={onGoToDashboard}
-            className="flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-orange-300 to-orange-400 py-4 text-lg font-semibold text-white shadow-lg shadow-orange-400/30 transition-transform hover:scale-[1.02] active:scale-95"
+            className={dashboardButtonClassName}
           >
             Go to dashboard
           </button>

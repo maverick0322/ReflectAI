@@ -5,7 +5,14 @@ interface TopicHighlightsCardProps {
   topics: StatisticsTopicItem[];
 }
 
-export function TopicHighlightsCard({ topics }: Readonly<TopicHighlightsCardProps>) {
+const topicBadgeClassName = [
+  'rounded-full border border-violet-200 bg-white/55 px-3 py-1.5',
+  'text-xs font-semibold text-violet-700',
+].join(' ');
+
+export function TopicHighlightsCard({
+  topics,
+}: Readonly<TopicHighlightsCardProps>) {
   return (
     <GlassCard className="p-5 gap-4 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex flex-col gap-1">
@@ -19,7 +26,7 @@ export function TopicHighlightsCard({ topics }: Readonly<TopicHighlightsCardProp
         {topics.map((topic) => (
           <span
             key={topic.id}
-            className="rounded-full border border-violet-200 bg-white/55 px-3 py-1.5 text-xs font-semibold text-violet-700"
+            className={topicBadgeClassName}
           >
             {topic.label} ({topic.sessionCount})
           </span>

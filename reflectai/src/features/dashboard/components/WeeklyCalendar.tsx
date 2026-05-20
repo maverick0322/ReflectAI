@@ -16,6 +16,21 @@ function getDayContainerClassName(day: DayRecord) {
   return 'bg-black/5 text-slate-600 dark:bg-white/5 dark:text-slate-400';
 }
 
+function getDayItemClassName(isFuture: boolean) {
+  return [
+    'flex flex-col items-center gap-2',
+    isFuture ? 'opacity-40' : '',
+  ].join(' ');
+}
+
+function getDayNumberClassName(day: DayRecord) {
+  return [
+    'flex h-10 w-10 items-center justify-center rounded-full',
+    'transition-all duration-300',
+    getDayContainerClassName(day),
+  ].join(' ');
+}
+
 export function WeeklyCalendar({ weekDays }: WeeklyCalendarProps) {
   return (
     <div className="flex items-center justify-between py-2" role="list">
@@ -23,13 +38,13 @@ export function WeeklyCalendar({ weekDays }: WeeklyCalendarProps) {
         <div
           key={day.date}
           role="listitem"
-          className={`flex flex-col items-center gap-2 ${day.isFuture ? 'opacity-40' : ''}`}
+          className={getDayItemClassName(day.isFuture)}
         >
           <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
             {day.label}
           </span>
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ${getDayContainerClassName(day)}`}
+            className={getDayNumberClassName(day)}
           >
             <span className="text-sm font-semibold">{day.num}</span>
           </div>

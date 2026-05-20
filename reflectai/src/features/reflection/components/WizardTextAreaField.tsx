@@ -18,6 +18,22 @@ interface WizardTextAreaFieldProps {
   marginTopClassName?: string;
 }
 
+function buildTextAreaClassName(
+  minHeightClassName: string,
+  marginTopClassName: string,
+  borderClassName: string,
+  className: string,
+) {
+  return [
+    'w-full resize-none rounded-2xl bg-white/30 p-4 text-slate-700',
+    'outline-none backdrop-blur-sm transition-all placeholder:text-slate-400',
+    minHeightClassName,
+    marginTopClassName,
+    borderClassName,
+    className,
+  ].join(' ').trim();
+}
+
 export function WizardTextAreaField({
   control,
   name,
@@ -45,7 +61,12 @@ export function WizardTextAreaField({
             value={field.value ?? ''}
             maxLength={maxLength}
             placeholder={placeholder}
-            className={`w-full ${minHeightClassName} ${marginTopClassName} resize-none rounded-2xl bg-white/30 p-4 text-slate-700 outline-none backdrop-blur-sm transition-all placeholder:text-slate-400 ${borderClassName} ${className}`.trim()}
+            className={buildTextAreaClassName(
+              minHeightClassName,
+              marginTopClassName,
+              borderClassName,
+              className,
+            )}
           />
         )}
       />

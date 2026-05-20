@@ -16,7 +16,8 @@ interface StepProps {
 }
 
 const DEFAULT_QUESTION =
-  'Knowing what you know now, how could you interpret this situation in a more useful or compassionate way?';
+  'Knowing what you know now, how could you interpret this situation ' +
+  'in a more useful or compassionate way?';
 
 export const Step4Reframing = ({
   onPrev,

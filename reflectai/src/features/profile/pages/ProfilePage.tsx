@@ -5,9 +5,16 @@ import { ProfileAccountFooter } from '@/features/profile/components/ProfileAccou
 import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
 import { ProfileMessageState } from '@/features/profile/components/ProfilePageStates';
 import { ProfileNavigation } from '@/features/profile/components/ProfileNavigation';
-import { ProfilePersonalInfoSection } from '@/features/profile/components/ProfilePersonalInfoSection';
+import {
+  ProfilePersonalInfoSection,
+} from '@/features/profile/components/ProfilePersonalInfoSection';
 import { ProfilePreferencesSection } from '@/features/profile/components/ProfilePreferencesSection';
 import { useProfilePage } from '@/features/profile/hooks/useProfilePage';
+
+const profileCardClassName = [
+  'animate-in mx-auto flex w-full max-w-md flex-col gap-8 p-6',
+  'fade-in slide-in-from-bottom-4 delay-100 duration-500 md:p-8',
+].join(' ');
 
 export function ProfilePage() {
   const {
@@ -48,7 +55,7 @@ export function ProfilePage() {
     <main className="flex min-h-screen flex-col items-center bg-slate-50/50 p-4 py-8 md:p-6">
       <ProfileNavigation />
 
-      <GlassCard className="mx-auto flex w-full max-w-md flex-col gap-8 p-6 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+      <GlassCard className={profileCardClassName}>
         <ProfileHeader
           profile={profile}
           isUploadingAvatar={isUploadingAvatar}

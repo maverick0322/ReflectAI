@@ -9,6 +9,11 @@ interface ProfileAccountFooterProps {
   onLogout: () => Promise<void>;
 }
 
+const deleteAccountLinkClassName = [
+  'flex items-center justify-center gap-2 py-2 text-xs font-bold',
+  'text-red-400 transition-colors hover:text-red-500',
+].join(' ');
+
 export function ProfileAccountFooter({
   onLogout,
 }: ProfileAccountFooterProps) {
@@ -24,7 +29,7 @@ export function ProfileAccountFooter({
       </Button>
       <Link
         href={APP_ROUTES.deleteAccount}
-        className="flex items-center justify-center gap-2 py-2 text-xs font-bold text-red-400 transition-colors hover:text-red-500"
+        className={deleteAccountLinkClassName}
       >
         <TrashIcon className="h-4 w-4" /> Delete account permanently
       </Link>

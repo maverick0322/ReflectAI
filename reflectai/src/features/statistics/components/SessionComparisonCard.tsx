@@ -15,6 +15,27 @@ interface SessionComparisonCardProps {
   comparisonResult: StatisticsComparisonResult;
 }
 
+const selectClassName = [
+  'rounded-2xl border border-white/60 bg-white/60 px-4 py-3',
+  'text-sm font-medium text-slate-700 outline-none transition',
+  'focus:ring-2 focus:ring-violet-300',
+].join(' ');
+
+const compareButtonClassName = [
+  'rounded-2xl border border-violet-200 bg-violet-500/10 px-4 py-3',
+  'text-sm font-semibold text-violet-700 transition hover:bg-violet-500/20',
+].join(' ');
+
+const emptyComparisonClassName = [
+  'flex h-24 items-center justify-center rounded-2xl border',
+  'border-dashed border-white/60 bg-white/20 px-4',
+].join(' ');
+
+const comparisonHeaderClassName = [
+  'flex items-center justify-between gap-4 text-xs font-semibold',
+  'text-slate-600',
+].join(' ');
+
 export function SessionComparisonCard({
   sessionOptions,
   defaultSelection,
@@ -41,9 +62,12 @@ export function SessionComparisonCard({
   return (
     <GlassCard className="p-5 gap-5 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-slate-900">Compare sessions</h2>
+        <h2 className="text-lg font-semibold text-slate-900">
+          Compare sessions
+        </h2>
         <p className="text-sm text-slate-500">
-          The current logic is visual and uses placeholders to simplify future integration.
+          The current logic is visual and uses placeholders to simplify future
+          integration.
         </p>
       </div>
 
@@ -52,9 +76,11 @@ export function SessionComparisonCard({
           <span>Session A</span>
           <select
             aria-label="Session A"
-            className="rounded-2xl border border-white/60 bg-white/60 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:ring-2 focus:ring-violet-300"
+            className={selectClassName}
             value={selection.sessionA}
-            onChange={(event) => handleSelectionChange('sessionA', event.target.value)}
+            onChange={(event) =>
+              handleSelectionChange('sessionA', event.target.value)
+            }
           >
             {sessionOptions.map((option) => (
               <option key={option.id} value={option.id}>
@@ -68,9 +94,11 @@ export function SessionComparisonCard({
           <span>Session B</span>
           <select
             aria-label="Session B"
-            className="rounded-2xl border border-white/60 bg-white/60 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:ring-2 focus:ring-violet-300"
+            className={selectClassName}
             value={selection.sessionB}
-            onChange={(event) => handleSelectionChange('sessionB', event.target.value)}
+            onChange={(event) =>
+              handleSelectionChange('sessionB', event.target.value)
+            }
           >
             {sessionOptions.map((option) => (
               <option key={option.id} value={option.id}>
@@ -83,7 +111,7 @@ export function SessionComparisonCard({
 
       <button
         type="button"
-        className="rounded-2xl border border-violet-200 bg-violet-500/10 px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/20"
+        className={compareButtonClassName}
         onClick={handleCompare}
       >
         Show comparison
@@ -92,7 +120,7 @@ export function SessionComparisonCard({
       {isComparing ? (
         <div className="space-y-4 rounded-2xl border border-white/60 bg-white/45 p-4">
           <div className="space-y-2">
-            <div className="flex items-center justify-between gap-4 text-xs font-semibold text-slate-600">
+            <div className={comparisonHeaderClassName}>
               <span>{comparisonResult.sessionALabel}</span>
               <span>{comparisonResult.sessionAIntensity}%</span>
             </div>
@@ -105,7 +133,7 @@ export function SessionComparisonCard({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between gap-4 text-xs font-semibold text-slate-600">
+            <div className={comparisonHeaderClassName}>
               <span>{comparisonResult.sessionBLabel}</span>
               <span>{comparisonResult.sessionBIntensity}%</span>
             </div>
@@ -120,7 +148,7 @@ export function SessionComparisonCard({
           <p className="text-sm text-slate-600">{comparisonResult.insight}</p>
         </div>
       ) : (
-        <div className="flex h-24 items-center justify-center rounded-2xl border border-dashed border-white/60 bg-white/20 px-4">
+        <div className={emptyComparisonClassName}>
           <p className="text-center text-sm font-medium text-slate-400">
             Select two sessions and press compare to view the placeholder result.
           </p>
