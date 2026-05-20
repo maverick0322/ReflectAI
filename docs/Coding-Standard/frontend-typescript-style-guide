@@ -405,7 +405,7 @@ Usar **Husky** + **lint-staged**.
 Máximo **10** por función.
 
 ### 16.4. SonarQube
-Quality Gate: cobertura global >= 80%, duplicación <= 3%, sin vulnerabilidades críticas. El gate de coverage aplica al resultado global del proyecto, no a cada archivo individual.
+Quality Gate: cobertura global >= 80%, duplicación <= 3%, sin vulnerabilidades críticas. El gate de cobertura aplica al resultado global del proyecto, no a cada archivo individual.
 
 ---
 
