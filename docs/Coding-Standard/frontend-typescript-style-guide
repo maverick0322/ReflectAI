@@ -391,6 +391,8 @@ Mínimo **80% global** de cobertura en líneas, funciones y ramas. Este umbral s
 ### 16.1. Pre-commit Hooks
 Usar **Husky** + **lint-staged**.
 
+Esta regla pertenece a proceso/tooling del repositorio. En reportes de revision orientados a personas que mueven codigo frontend, la ausencia de `Husky`, `lint-staged`, `Prettier` o configuracion equivalente no debe reportarse como hallazgo de codigo productivo, salvo que el alcance de la revision incluya explicitamente tooling, CI/CD o governance del repositorio.
+
 ### 16.2. Scripts obligatorios
 ```json
 {
@@ -406,6 +408,8 @@ Máximo **10** por función.
 
 ### 16.4. SonarQube
 Quality Gate: cobertura global >= 80%, duplicación <= 3%, sin vulnerabilidades críticas. El gate de coverage aplica al resultado global del proyecto, no a cada archivo individual.
+
+En revisiones futuras, las metricas de coverage por archivo pueden usarse como apoyo tecnico para priorizar pruebas, pero no deben tratarse como incumplimiento del estandar si la cobertura global cumple el umbral definido.
 
 ---
 
