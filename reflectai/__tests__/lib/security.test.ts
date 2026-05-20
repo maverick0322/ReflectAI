@@ -4,13 +4,26 @@ import { assertTrustedMutationOrigin, getTrustedSiteOrigin } from '@/lib/securit
 import { checkRateLimit } from '@/lib/security/rateLimit';
 import { rateLimitResponse } from '@/lib/security/responses';
 
+function setEnv(name: string, value: string | undefined) {
+  if (value === undefined) {
+    unsetEnv(name);
+    return;
+  }
+
+  Reflect.set(process.env, name, value);
+}
+
+function unsetEnv(name: string) {
+  Reflect.deleteProperty(process.env, name);
+}
+
 describe('security/origin', () => {
   const resetEnv = () => {
     vi.unstubAllEnvs();
   };
 
   it('uses configured site origin when present', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://reflectai.example/app';
+    setEnv('NEXT_PUBLIC_SITE_URL', 'https://reflectai.example/app');
     expect(getTrustedSiteOrigin('https://ignored.example')).toBe('https://reflectai.example');
     resetEnv();
   });
@@ -24,7 +37,7 @@ describe('security/origin', () => {
   });
 
   it('throws if configured site url is not http/https', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'ftp://reflectai.example';
+    setEnv('NEXT_PUBLIC_SITE_URL', 'ftp://reflectai.example');
 
     expect(() => getTrustedSiteOrigin('https://ignored.example')).toThrow('Configured site URL must use http or https');
     resetEnv();
@@ -39,7 +52,7 @@ describe('security/origin', () => {
   });
 
   it('accepts trusted origin header and referer', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://reflectai.example';
+    setEnv('NEXT_PUBLIC_SITE_URL', 'https://reflectai.example');
 
     const request = new Request('https://reflectai.example/api/auth/login', {
       headers: {
@@ -74,7 +87,7 @@ describe('security/origin', () => {
   });
 
   it('rejects untrusted origin', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://reflectai.example';
+    setEnv('NEXT_PUBLIC_SITE_URL', 'https://reflectai.example');
 
     const request = new Request('https://reflectai.example/api/auth/login', {
       headers: {
