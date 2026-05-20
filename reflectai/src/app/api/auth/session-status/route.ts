@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
 
-import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import { RouteError, requireAuthenticatedUser } from '@/lib/api/route';
+import { logServerError } from '@/lib/monitoring/logger';
 
 export async function GET() {
   try {
-    const { user, error } = await getAuthenticatedUser();
+    await requireAuthenticatedUser();
 
-    if (error || !user) {
+    return NextResponse.json({
+      authenticated: true,
+    });
+  } catch (error: unknown) {
+    if (error instanceof RouteError && error.status === 401) {
       return NextResponse.json(
         {
           authenticated: false,
@@ -15,10 +20,7 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({
-      authenticated: true,
-    });
-  } catch {
+    logServerError('auth session status failed', error);
     return NextResponse.json(
       {
         authenticated: false,

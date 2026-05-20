@@ -30,6 +30,20 @@ describe('next question helpers', () => {
     expect(result).toBe('texto {');
   });
 
+  it('returns fallback for empty content or invalid JSON payloads with braces', () => {
+    expect(parseNextQuestionContent('', 'fallback')).toBe('fallback');
+    expect(parseNextQuestionContent('prefijo {"question_text": } sufijo', 'fallback')).toBe(
+      'fallback',
+    );
+  });
+
+  it('extracts embedded JSON and falls back when question_text is not a string', () => {
+    expect(
+      parseNextQuestionContent('antes {"question_text":"Pregunta embebida"} despues', 'fallback'),
+    ).toBe('Pregunta embebida');
+    expect(parseNextQuestionContent('{"question_text":42}', 'fallback')).toBe('fallback');
+  });
+
   it('builds messages with payload context', () => {
     const messages = buildNextQuestionMessages(payload, 'Q1_SIT');
     expect(messages).toHaveLength(2);

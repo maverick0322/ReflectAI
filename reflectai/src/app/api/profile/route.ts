@@ -1,24 +1,31 @@
-import { NextResponse } from 'next/server';
-
-import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import {
+  buildSuccessResponse,
+  enforceTrustedMutationOrigin,
+  parseJsonBody,
+  requireAuthenticatedUser,
+  throwRouteError,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { apiMessages } from '@/lib/copy/api';
 import { resolveAvatarUrl } from '@/lib/profile/avatar';
-import { assertTrustedMutationOrigin } from '@/lib/security/origin';
 import { profileSchema } from '@/lib/validations/profile';
 
 function buildFullName(firstName: string, lastName?: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ');
 }
 
+type ProfileRecord = {
+  id: string;
+  first_name: string;
+  last_name: string | null;
+  full_name: string;
+  birth_date: string | null;
+  avatar_url: string | null;
+};
+
 async function buildProfileResponse(
-  supabase: Awaited<ReturnType<typeof getAuthenticatedUser>>['supabase'],
-  profile: {
-    id: string;
-    first_name: string;
-    last_name: string | null;
-    full_name: string;
-    birth_date: string | null;
-    avatar_url: string | null;
-  },
+  supabase: Awaited<ReturnType<typeof requireAuthenticatedUser>>['supabase'],
+  profile: ProfileRecord,
   email: string | null | undefined,
 ) {
   return {
@@ -28,145 +35,126 @@ async function buildProfileResponse(
   };
 }
 
+function buildProfileSeed(
+  user: Awaited<ReturnType<typeof requireAuthenticatedUser>>['user'],
+) {
+  const metadata = user.user_metadata ?? {};
+  const firstName =
+    typeof metadata.first_name === 'string' && metadata.first_name.trim()
+      ? metadata.first_name
+      : 'Usuario';
+  const lastName =
+    typeof metadata.last_name === 'string' && metadata.last_name.trim()
+      ? metadata.last_name
+      : null;
+  const birthDate =
+    typeof metadata.birth_date === 'string' && metadata.birth_date.trim()
+      ? metadata.birth_date
+      : null;
+
+  return {
+    first_name: firstName,
+    last_name: lastName,
+    full_name: buildFullName(firstName, lastName),
+    birth_date: birthDate,
+  };
+}
+
+async function createProfileFromMetadata(
+  supabase: Awaited<ReturnType<typeof requireAuthenticatedUser>>['supabase'],
+  user: Awaited<ReturnType<typeof requireAuthenticatedUser>>['user'],
+) {
+  const profileSeed = buildProfileSeed(user);
+  const { data, error } = await supabase
+    .from('profiles')
+    .insert({
+      id: user.id,
+      ...profileSeed,
+    })
+    .select('id, first_name, last_name, full_name, birth_date, avatar_url')
+    .single();
+
+  if (error || !data) {
+    throwRouteError(500, apiMessages.profile.createFailed);
+  }
+
+  return data;
+}
+
+async function loadProfile(
+  supabase: Awaited<ReturnType<typeof requireAuthenticatedUser>>['supabase'],
+  user: Awaited<ReturnType<typeof requireAuthenticatedUser>>['user'],
+) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name, full_name, birth_date, avatar_url')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (error) {
+    throwRouteError(500, apiMessages.profile.fetchFailed);
+  }
+
+  if (data) {
+    return data;
+  }
+
+  return createProfileFromMetadata(supabase, user);
+}
+
 export async function GET() {
   try {
-    const { supabase, user, error: authError } = await getAuthenticatedUser();
+    const { supabase, user } = await requireAuthenticatedUser();
+    const profile = await loadProfile(supabase, user);
 
-    if (authError || !user) {
-      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
-    }
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, first_name, last_name, full_name, birth_date, avatar_url')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (!data && !error) {
-      const metadata = user.user_metadata ?? {};
-      const firstName =
-        typeof metadata.first_name === 'string' && metadata.first_name.trim()
-          ? metadata.first_name
-          : 'Usuario';
-      const lastName =
-        typeof metadata.last_name === 'string' && metadata.last_name.trim()
-          ? metadata.last_name
-          : null;
-      const birthDate =
-        typeof metadata.birth_date === 'string' && metadata.birth_date.trim()
-          ? metadata.birth_date
-          : null;
-      const fullName = buildFullName(firstName, lastName);
-
-      const { data: created, error: createError } = await supabase
-        .from('profiles')
-        .insert({
-          id: user.id,
-          first_name: firstName,
-          last_name: lastName,
-          full_name: fullName,
-          birth_date: birthDate,
-        })
-        .select('id, first_name, last_name, full_name, birth_date, avatar_url')
-        .single();
-
-      if (createError || !created) {
-        return NextResponse.json(
-          { error: { message: 'No se pudo crear el perfil' } },
-          { status: 500 },
-        );
-      }
-
-      return NextResponse.json({
-        data: await buildProfileResponse(supabase, created, user.email),
-        message: 'Perfil obtenido correctamente',
-      });
-    }
-
-    if (error) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo obtener el perfil' } },
-        { status: 500 },
-      );
-    }
-
-    if (!data) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo obtener el perfil' } },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json({
-      data: await buildProfileResponse(supabase, data, user.email),
-      message: 'Perfil obtenido correctamente',
+    return buildSuccessResponse({
+      data: await buildProfileResponse(supabase, profile, user.email),
+      message: apiMessages.profile.fetchSucceeded,
     });
-  } catch {
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al obtener perfil' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.profile.fetchUnexpected,
+      'profile get failed',
     );
   }
 }
 
 export async function PATCH(request: Request) {
   try {
-    assertTrustedMutationOrigin(request);
-
-    const { supabase, user, error: authError } = await getAuthenticatedUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
-    }
-
-    const body = await request.json().catch(() => null);
-    const validation = profileSchema.safeParse(body ?? {});
-
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: {
-            message: 'Datos invalidos',
-            details: validation.error.flatten(),
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    const fullName = buildFullName(validation.data.firstName, validation.data.lastName);
+    enforceTrustedMutationOrigin(request);
+    const { supabase, user } = await requireAuthenticatedUser();
+    const profileUpdate = await parseJsonBody({
+      request,
+      schema: profileSchema,
+    });
+    const fullName = buildFullName(profileUpdate.firstName, profileUpdate.lastName);
 
     const { data, error } = await supabase
       .from('profiles')
       .update({
-        first_name: validation.data.firstName,
-        last_name: validation.data.lastName ?? null,
+        first_name: profileUpdate.firstName,
+        last_name: profileUpdate.lastName ?? null,
         full_name: fullName,
-        birth_date: validation.data.birthDate,
+        birth_date: profileUpdate.birthDate,
       })
       .eq('id', user.id)
       .select('id, first_name, last_name, full_name, birth_date, avatar_url')
       .single();
 
     if (error || !data) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo actualizar el perfil' } },
-        { status: 500 },
-      );
+      throwRouteError(500, apiMessages.profile.updateFailed);
     }
 
-    return NextResponse.json({
+    return buildSuccessResponse({
       data: await buildProfileResponse(supabase, data, user.email),
-      message: 'Perfil actualizado correctamente',
+      message: apiMessages.profile.updateSucceeded,
     });
-  } catch (error) {
-    if (error instanceof Error && error.message === 'Untrusted origin') {
-      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
-    }
-
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al actualizar perfil' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.profile.updateUnexpected,
+      'profile patch failed',
     );
   }
 }

@@ -61,6 +61,39 @@ describe('reflection analysis', () => {
     expect(parseAnalysisResult('respuesta { "summary": } con llaves')).toBeNull();
   });
 
+  it('accepts embedded JSON and normalizes unsupported field types', () => {
+    const content = [
+      'Texto previo',
+      JSON.stringify({
+        primary_emotions: ['calma', 4],
+        average_intensity: 'high',
+        key_themes: ['trabajo', null],
+        cognitive_distortion_detected: 9,
+        session_title: 'Resumen',
+        summary: 'Resumen breve',
+        recommendation: 'Recomendacion breve',
+        encouraging_message: 'Mensaje breve',
+        professional_support_reminder: 'Consulta soporte profesional si el malestar persiste.',
+      }),
+      'Texto posterior',
+    ].join(' ');
+
+    const result = parseAnalysisResult(content);
+
+    expect(result).toEqual({
+      primary_emotions: ['calma'],
+      average_intensity: null,
+      key_themes: ['trabajo'],
+      cognitive_distortion_detected: null,
+      session_title: 'Resumen',
+      summary: 'Resumen breve',
+      recommendation: 'Recomendacion breve',
+      encouraging_message: 'Mensaje breve',
+      professional_support_reminder:
+        'Consulta soporte profesional si el malestar persiste.',
+    });
+  });
+
   it('builds fallback analysis from captured responses', () => {
     const filledPayload: ReflectionSessionPayload = {
       ...payload,
@@ -81,6 +114,25 @@ describe('reflection analysis', () => {
     expect(fallback.recommendation).toBeNull();
     expect(fallback.encouraging_message).toBeNull();
     expect(fallback.professional_support_reminder).toBeNull();
+  });
+
+  it('truncates long fallback titles and tolerates empty payload values', () => {
+    const longAlternative =
+      'Una alternativa extensa que supera ampliamente los sesenta y cuatro caracteres disponibles';
+    const fallback = buildFallbackAnalysis({
+      ...payload,
+      responses: [
+        { id: 'Q1_SIT', text: '' },
+        { id: 'Q4_INT' },
+        { id: 'Q7_ALT', text: longAlternative },
+      ],
+    });
+
+    expect(fallback.primary_emotions).toEqual([]);
+    expect(fallback.average_intensity).toBeNull();
+    expect(fallback.session_title).toBe(
+      `${longAlternative.slice(0, 61).trim()}...`,
+    );
   });
 
   it('runs analysis using Groq client', async () => {

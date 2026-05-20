@@ -1,8 +1,13 @@
-import { NextResponse } from 'next/server';
-
-import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import {
+  buildSuccessResponse,
+  enforceTrustedMutationOrigin,
+  parseJsonBody,
+  requireAuthenticatedUser,
+  throwRouteError,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { apiMessages } from '@/lib/copy/api';
 import { appendResponse, applyMetadataPatch, normalizePayload } from '@/lib/reflection/payload';
-import { assertTrustedMutationOrigin } from '@/lib/security/origin';
 import { addReflectionResponseSchema } from '@/lib/validations/reflection';
 
 type RouteParams = {
@@ -13,29 +18,13 @@ type RouteParams = {
 
 export async function POST(request: Request, { params }: RouteParams) {
   try {
-    assertTrustedMutationOrigin(request);
-
+    enforceTrustedMutationOrigin(request);
     const { id } = await params;
-    const { supabase, user, error: authError } = await getAuthenticatedUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
-    }
-
-    const body = await request.json().catch(() => null);
-    const validation = addReflectionResponseSchema.safeParse(body);
-
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: {
-            message: 'Datos invalidos',
-            details: validation.error.flatten(),
-          },
-        },
-        { status: 400 },
-      );
-    }
+    const { supabase, user } = await requireAuthenticatedUser();
+    const responseRequest = await parseJsonBody({
+      request,
+      schema: addReflectionResponseSchema,
+    });
 
     const { data: session, error: sessionError } = await supabase
       .from('reflection_sessions')
@@ -45,21 +34,11 @@ export async function POST(request: Request, { params }: RouteParams) {
       .single();
 
     if (sessionError || !session) {
-      return NextResponse.json(
-        { error: { message: 'Sesion no encontrada' } },
-        { status: 404 },
-      );
+      throwRouteError(404, apiMessages.reflection.detailFailed);
     }
 
     if (session.status === 'completed') {
-      return NextResponse.json(
-        {
-          error: {
-            message: 'No se pueden agregar respuestas a una sesion completada',
-          },
-        },
-        { status: 409 },
-      );
+      throwRouteError(409, apiMessages.reflection.responseAlreadyCompleted);
     }
 
     const currentPayload = normalizePayload(
@@ -68,8 +47,8 @@ export async function POST(request: Request, { params }: RouteParams) {
     );
 
     const updatedPayload = applyMetadataPatch(
-      appendResponse(currentPayload, validation.data.response),
-      validation.data.metadataPatch,
+      appendResponse(currentPayload, responseRequest.response),
+      responseRequest.metadataPatch,
     );
 
     const { data, error } = await supabase
@@ -83,27 +62,21 @@ export async function POST(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo guardar la respuesta' } },
-        { status: 500 },
-      );
+      throwRouteError(500, apiMessages.reflection.responseFailed);
     }
 
-    return NextResponse.json(
+    return buildSuccessResponse(
       {
         data,
-        message: 'Respuesta guardada correctamente',
+        message: apiMessages.reflection.responseSucceeded,
       },
       { status: 201 },
     );
-  } catch (error) {
-    if (error instanceof Error && error.message === 'Untrusted origin') {
-      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
-    }
-
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al guardar la respuesta' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.reflection.responseUnexpected,
+      'reflection response create failed',
     );
   }
 }

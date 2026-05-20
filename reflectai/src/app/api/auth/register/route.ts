@@ -1,8 +1,13 @@
-import { NextResponse } from 'next/server';
-
-import { assertTrustedMutationOrigin } from '@/lib/security/origin';
-import { checkRateLimit } from '@/lib/security/rateLimit';
-import { rateLimitResponse } from '@/lib/security/responses';
+import {
+  buildSuccessResponse,
+  enforceRateLimit,
+  enforceTrustedMutationOrigin,
+  parseJsonBody,
+  throwRouteError,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { apiMessages } from '@/lib/copy/api';
+import { logServerError } from '@/lib/monitoring/logger';
 import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { registerSchema } from '@/lib/validations/auth';
 
@@ -14,137 +19,125 @@ function getRegisterErrorMessage(message: string) {
     normalizedMessage.includes('already exists') ||
     normalizedMessage.includes('already been registered')
   ) {
-    return 'Ya existe una cuenta con ese correo.';
+    return apiMessages.auth.registerDuplicateEmail;
   }
 
   if (normalizedMessage.includes('rate limit')) {
-    return 'Se hicieron demasiados intentos. Espera unos minutos antes de crear otra cuenta.';
+    return apiMessages.auth.registerRateLimited;
   }
 
-  if (normalizedMessage.includes('redirect') || normalizedMessage.includes('not allowed')) {
-    return 'La URL de confirmacion no esta permitida en Supabase.';
-  }
-
-  return 'No se pudo registrar el usuario';
+  return apiMessages.auth.registerFailed;
 }
 
 function getRegisterErrorField(message: string) {
-  return getRegisterErrorMessage(message).includes('correo') ? 'email' : undefined;
+  return getRegisterErrorMessage(message) === apiMessages.auth.registerDuplicateEmail
+    ? 'email'
+    : undefined;
+}
+
+async function createAuthUser(input: {
+  firstName: string;
+  lastName?: string | null;
+  email: string;
+  password: string;
+  birthDate: string;
+}) {
+  const fullName = [input.firstName, input.lastName].filter(Boolean).join(' ');
+  const supabase = createAdminSupabaseClient();
+  const { data, error } = await supabase.auth.admin.createUser({
+    email: input.email,
+    password: input.password,
+    email_confirm:
+      process.env.NODE_ENV !== 'production' &&
+      process.env.SUPABASE_AUTO_CONFIRM_EMAIL !== 'false',
+    user_metadata: {
+      first_name: input.firstName,
+      last_name: input.lastName ?? '',
+      full_name: fullName,
+      birth_date: input.birthDate,
+    },
+  });
+
+  if (error) {
+    logServerError('Supabase register failed', error);
+    const normalizedMessage = error.message.toLowerCase();
+    const isRateLimited = normalizedMessage.includes('rate limit');
+    const isDuplicateEmail =
+      normalizedMessage.includes('already registered') ||
+      normalizedMessage.includes('already exists') ||
+      normalizedMessage.includes('already been registered');
+
+    throwRouteError(
+      isRateLimited ? 429 : 400,
+      isRateLimited || isDuplicateEmail
+        ? getRegisterErrorMessage(error.message)
+        : apiMessages.auth.registerFailed,
+      {
+        field:
+          isRateLimited || isDuplicateEmail
+            ? getRegisterErrorField(error.message)
+            : undefined,
+      },
+    );
+  }
+
+  return {
+    fullName,
+    user: data.user,
+  };
 }
 
 export async function POST(request: Request) {
   try {
-    assertTrustedMutationOrigin(request);
-
-    const rateLimit = checkRateLimit(request, {
+    enforceTrustedMutationOrigin(request);
+    enforceRateLimit(request, {
       key: 'auth:register',
       maxRequests: 5,
       windowMs: 60 * 60 * 1000,
     });
 
-    if (rateLimit.limited) {
-      return rateLimitResponse(rateLimit.retryAfterSeconds);
-    }
-
-    const body = await request.json().catch(() => null);
-
-    const validation = registerSchema.safeParse({
-      ...body,
-      confirmEmail: body?.email,
-      confirmPassword: body?.password,
+    const registration = await parseJsonBody({
+      request,
+      schema: registerSchema,
+      invalidMessage: apiMessages.auth.invalidRegisterData,
+      mapInput: (body) => ({
+        ...(typeof body === 'object' && body !== null ? body : {}),
+        confirmEmail:
+          typeof body === 'object' && body !== null
+            ? (body as { email?: unknown }).email
+            : undefined,
+        confirmPassword:
+          typeof body === 'object' && body !== null
+            ? (body as { password?: unknown }).password
+            : undefined,
+      }),
     });
 
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: {
-            message: 'Datos de registro invalidos',
-            details: validation.error.flatten(),
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    const { firstName, lastName, email, password, birthDate } = validation.data;
-    const fullName = [firstName, lastName].filter(Boolean).join(' ');
-
-    const accountRateLimit = checkRateLimit(request, {
+    enforceRateLimit(request, {
       key: 'auth:register:account',
-      identifier: email,
+      identifier: registration.email,
       maxRequests: 3,
       windowMs: 60 * 60 * 1000,
     });
 
-    if (accountRateLimit.limited) {
-      return rateLimitResponse(accountRateLimit.retryAfterSeconds);
-    }
+    const result = await createAuthUser(registration);
 
-    const supabase = createAdminSupabaseClient();
-    const { data, error } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm:
-        process.env.NODE_ENV !== 'production' &&
-        process.env.SUPABASE_AUTO_CONFIRM_EMAIL !== 'false',
-      user_metadata: {
-        first_name: firstName,
-        last_name: lastName ?? '',
-        full_name: fullName,
-        birth_date: birthDate,
-      },
-    });
-
-    if (error) {
-      console.error('Supabase register failed', error.message);
-      const normalizedMessage = error.message.toLowerCase();
-      const isRateLimited = normalizedMessage.includes('rate limit');
-      const isDuplicateEmail =
-        normalizedMessage.includes('already registered') ||
-        normalizedMessage.includes('already exists') ||
-        normalizedMessage.includes('already been registered');
-
-      return NextResponse.json(
-        {
-          error: {
-            message: isRateLimited
-              ? getRegisterErrorMessage(error.message)
-              : isDuplicateEmail
-                ? getRegisterErrorMessage(error.message)
-                : 'No se pudo completar el registro.',
-            field:
-              isRateLimited || isDuplicateEmail
-                ? getRegisterErrorField(error.message)
-                : undefined,
-          },
-        },
-        { status: isRateLimited ? 429 : 400 },
-      );
-    }
-
-    return NextResponse.json(
+    return buildSuccessResponse(
       {
         data: {
-          id: data.user?.id,
-          email: data.user?.email,
-          fullName,
+          id: result.user?.id,
+          email: result.user?.email,
+          fullName: result.fullName,
         },
-        message: 'Usuario registrado correctamente',
+        message: apiMessages.auth.registerSucceeded,
       },
       { status: 201 },
     );
-  } catch (error) {
-    if (error instanceof Error && error.message === 'Untrusted origin') {
-      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
-    }
-
-    return NextResponse.json(
-      {
-        error: {
-          message: 'Error inesperado al registrar usuario',
-        },
-      },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.auth.registerUnexpected,
+      'auth register failed',
     );
   }
 }

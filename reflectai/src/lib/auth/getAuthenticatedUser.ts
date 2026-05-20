@@ -12,7 +12,7 @@ export async function getAuthenticatedUser() {
     return {
       supabase,
       user: null,
-      error: 'No autorizado',
+      error: 'unauthorized',
     };
   }
 

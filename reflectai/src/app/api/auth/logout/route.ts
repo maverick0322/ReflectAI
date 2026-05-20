@@ -1,26 +1,26 @@
-import { NextResponse } from 'next/server';
-
-import { assertTrustedMutationOrigin } from '@/lib/security/origin';
+import {
+  buildSuccessResponse,
+  enforceTrustedMutationOrigin,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { apiMessages } from '@/lib/copy/api';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    assertTrustedMutationOrigin(request);
+    enforceTrustedMutationOrigin(request);
 
     const supabase = await createServerSupabaseClient();
     await supabase.auth.signOut();
 
-    return NextResponse.json({
-      message: 'Sesion cerrada correctamente',
+    return buildSuccessResponse({
+      message: apiMessages.auth.logoutSucceeded,
     });
-  } catch (error) {
-    if (error instanceof Error && error.message === 'Untrusted origin') {
-      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
-    }
-
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al cerrar sesion' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.auth.logoutUnexpected,
+      'auth logout failed',
     );
   }
 }

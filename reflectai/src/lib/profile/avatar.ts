@@ -20,7 +20,8 @@ function isHttpUrl(value: string) {
   try {
     const parsed = new URL(value);
     return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  } catch {
+  } catch (error: unknown) {
+    void error;
     return false;
   }
 }
