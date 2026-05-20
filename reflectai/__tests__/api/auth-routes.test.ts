@@ -199,6 +199,76 @@ describe('rutas API de autenticacion', () => {
     );
   });
 
+  it('registra usuario y clasifica errores conocidos de Supabase', async () => {
+    const createUser = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: {
+          user: {
+            id: 'user-2',
+            email: 'ana@reflectai.com',
+          },
+        },
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: { user: null },
+        error: { message: 'already registered' },
+      })
+      .mockResolvedValueOnce({
+        data: { user: null },
+        error: { message: 'rate limit exceeded' },
+      });
+    vi.mocked(createAdminSupabaseClient).mockReturnValue({
+      auth: { admin: { createUser } },
+    } as never);
+
+    const successResponse = await registerPost(
+      mutationRequest('/api/auth/register', {
+        firstName: 'Ana',
+        lastName: 'Lopez',
+        email: 'ana@reflectai.com',
+        password: 'PasswordFuerte123!',
+        birthDate: '2000-01-01',
+      }),
+    );
+    expect(successResponse.status).toBe(201);
+    expect((await readJson(successResponse)).data).toEqual({
+      id: 'user-2',
+      email: 'ana@reflectai.com',
+      fullName: 'Ana Lopez',
+    });
+
+    const duplicateResponse = await registerPost(
+      mutationRequest('/api/auth/register', {
+        firstName: 'Ana',
+        lastName: 'Lopez',
+        email: 'ana@reflectai.com',
+        password: 'PasswordFuerte123!',
+        birthDate: '2000-01-01',
+      }),
+    );
+    expect(duplicateResponse.status).toBe(400);
+    expect((await readJson(duplicateResponse)).error).toEqual({
+      message: 'Ya existe una cuenta con ese correo.',
+      field: 'email',
+    });
+
+    const rateLimitedResponse = await registerPost(
+      mutationRequest('/api/auth/register', {
+        firstName: 'Ana',
+        lastName: 'Lopez',
+        email: 'ana@reflectai.com',
+        password: 'PasswordFuerte123!',
+        birthDate: '2000-01-01',
+      }),
+    );
+    expect(rateLimitedResponse.status).toBe(429);
+    expect((await readJson(rateLimitedResponse)).error?.message).toBe(
+      'Se hicieron demasiados intentos. Espera unos minutos antes de crear otra cuenta.',
+    );
+  });
+
   it('envia recuperacion de password con callback seguro', async () => {
     const resetPasswordForEmail = vi.fn(async () => ({ error: null }));
     vi.mocked(createServerSupabaseClient).mockResolvedValue({
@@ -259,7 +329,10 @@ describe('rutas API de autenticacion', () => {
     );
     expect(emailErrorResponse.status).toBe(500);
     expect((await readJson(emailErrorResponse)).error?.message).toBe(
-      'Supabase no pudo enviar el correo de recuperacion. Revisa la configuracion SMTP o intenta con otro correo.',
+      [
+        'Supabase no pudo enviar el correo de recuperacion.',
+        'Revisa la configuracion SMTP o intenta con otro correo.',
+      ].join(' '),
     );
   });
 
@@ -546,7 +619,10 @@ describe('rutas API de autenticacion', () => {
 
     expect(response.status).toBe(500);
     expect((await readJson(response)).error?.message).toBe(
-      'No se pudo eliminar la cuenta. Revisa las relaciones en cascada de profiles y reflection_sessions.',
+      [
+        'No se pudo eliminar la cuenta.',
+        'Revisa las relaciones en cascada de profiles y reflection_sessions.',
+      ].join(' '),
     );
   });
 
@@ -632,6 +708,12 @@ describe('rutas API de autenticacion', () => {
     const unauthorizedResponse = await sessionStatusGet();
     expect(unauthorizedResponse.status).toBe(401);
     expect((await readJson(unauthorizedResponse)).authenticated).toBe(false);
+
+    vi.mocked(getAuthenticatedUser).mockRejectedValueOnce(new Error('boom'));
+
+    const failedResponse = await sessionStatusGet();
+    expect(failedResponse.status).toBe(500);
+    expect((await readJson(failedResponse)).authenticated).toBe(false);
   });
 });
 
@@ -659,6 +741,51 @@ describe('callback de autenticacion', () => {
     expect(invalidCodeResponse.status).toBe(307);
     expect(invalidCodeResponse.headers.get('location')).toBe(
       'http://localhost/login?auth_error=invalid_code',
+    );
+  });
+
+  it('redirige errores de recuperacion y permite callback exitoso con next seguro', async () => {
+    const recoveryErrorResponse = await authCallbackGet(
+      new Request(
+        'http://localhost/auth/callback?error_code=otp_expired&next=/cambiar-contrasena',
+      ),
+    );
+
+    expect(recoveryErrorResponse.status).toBe(307);
+    expect(recoveryErrorResponse.headers.get('location')).toBe(
+      'http://localhost/recuperar?recovery_error=otp_expired',
+    );
+
+    vi.mocked(createServerSupabaseClient).mockResolvedValueOnce({
+      auth: {
+        exchangeCodeForSession: vi.fn(async () => ({ error: { message: 'bad' } })),
+      },
+    } as never);
+
+    const invalidRecoveryResponse = await authCallbackGet(
+      new Request(
+        'http://localhost/auth/callback?code=bad&next=/cambiar-contrasena?mode=recovery',
+      ),
+    );
+
+    expect(invalidRecoveryResponse.status).toBe(307);
+    expect(invalidRecoveryResponse.headers.get('location')).toBe(
+      'http://localhost/recuperar?recovery_error=invalid_code',
+    );
+
+    vi.mocked(createServerSupabaseClient).mockResolvedValueOnce({
+      auth: {
+        exchangeCodeForSession: vi.fn(async () => ({ error: null })),
+      },
+    } as never);
+
+    const successResponse = await authCallbackGet(
+      new Request('http://localhost/auth/callback?code=ok&next=/perfil'),
+    );
+
+    expect(successResponse.status).toBe(307);
+    expect(successResponse.headers.get('location')).toBe(
+      'http://localhost/perfil',
     );
   });
 });

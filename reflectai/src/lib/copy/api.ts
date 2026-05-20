@@ -22,8 +22,10 @@ export const apiMessages = {
     recoverFailed: 'No se pudo enviar el enlace de recuperacion',
     recoverRateLimited:
       'Se hicieron demasiados intentos. Espera unos minutos antes de pedir otro enlace.',
-    recoverEmailDeliveryFailed:
-      'Supabase no pudo enviar el correo de recuperacion. Revisa la configuracion SMTP o intenta con otro correo.',
+    recoverEmailDeliveryFailed: [
+      'Supabase no pudo enviar el correo de recuperacion.',
+      'Revisa la configuracion SMTP o intenta con otro correo.',
+    ].join(' '),
     recoverUnexpected: 'Error inesperado al recuperar contrasena',
     confirmRecoverySucceeded: 'Recuperacion confirmada',
     confirmRecoveryFailed: 'No se pudo confirmar la recuperacion',
@@ -38,8 +40,10 @@ export const apiMessages = {
     passwordUpdateUnexpected: 'Error inesperado al actualizar contrasena',
     passwordVerified: 'Contrasena actual validada correctamente',
     passwordVerifyUnexpected: 'Error inesperado al validar la contrasena actual',
-    deleteAccountFailed:
-      'No se pudo eliminar la cuenta. Revisa las relaciones en cascada de profiles y reflection_sessions.',
+    deleteAccountFailed: [
+      'No se pudo eliminar la cuenta.',
+      'Revisa las relaciones en cascada de profiles y reflection_sessions.',
+    ].join(' '),
     deleteAccountSucceeded: 'Cuenta eliminada correctamente',
     deleteAccountUnexpected: 'Error inesperado al eliminar cuenta',
     logoutSucceeded: 'Sesion cerrada correctamente',
@@ -58,8 +62,10 @@ export const apiMessages = {
     avatarTooLarge: 'La imagen debe pesar menos de 2MB',
     avatarInvalidSignature:
       'El contenido de la imagen no coincide con el formato permitido',
-    avatarUploadFailed:
-      'No se pudo subir la foto. Verifica que exista el bucket profile-avatars en Supabase Storage.',
+    avatarUploadFailed: [
+      'No se pudo subir la foto.',
+      'Verifica que exista el bucket profile-avatars en Supabase Storage.',
+    ].join(' '),
     avatarUpdateFailed: 'No se pudo actualizar la foto de perfil',
     avatarUpdateSucceeded: 'Foto de perfil actualizada correctamente',
     avatarUnexpected: 'Error inesperado al subir la foto de perfil',

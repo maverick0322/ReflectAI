@@ -46,17 +46,28 @@ function buildRedactedPayload(payload: ReflectionSessionPayload) {
   };
 }
 
+const ANALYSIS_SYSTEM_PROMPT = [
+  'You are an assistant that summarizes reflection sessions in Spanish.',
+  'This is not clinical care.',
+  'Return JSON only with keys:',
+  'primary_emotions (array of strings),',
+  'average_intensity (number or null),',
+  'key_themes (array of strings),',
+  'cognitive_distortion_detected (string or null),',
+  'session_title (string or null),',
+  'summary (string),',
+  'recommendation (string),',
+  'encouraging_message (string),',
+  'professional_support_reminder (string).',
+  'The reminder must always say that the best option is to consult a professional',
+  'when discomfort is intense, persistent, or affects daily life.',
+].join(' ');
+
 export function buildAnalysisMessages(payload: ReflectionSessionPayload): GroqChatMessage[] {
   return [
     {
       role: 'system',
-      content:
-        'You are an assistant that summarizes reflection sessions in Spanish. This is not clinical care. Return JSON only with keys: ' +
-        'primary_emotions (array of strings), average_intensity (number or null), ' +
-        'key_themes (array of strings), cognitive_distortion_detected (string or null), ' +
-        'session_title (string or null), summary (string), recommendation (string), ' +
-        'encouraging_message (string), professional_support_reminder (string). ' +
-        'The reminder must always say that the best option is to consult a professional when discomfort is intense, persistent, or affects daily life.',
+      content: ANALYSIS_SYSTEM_PROMPT,
     },
     {
       role: 'user',

@@ -305,6 +305,24 @@ describe('ruta API de avatar', () => {
     });
   });
 
+  it('acepta firmas JPEG y WEBP validas', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(1700000000000);
+
+    const jpegEnv = createAvatarSupabase();
+    mockAuthenticatedUser({ supabase: jpegEnv.supabase });
+    const jpegResponse = await avatarPost(
+      avatarRequest(imageFile('image/jpeg', 'avatar.jpg')),
+    );
+    expect(jpegResponse.status).toBe(200);
+
+    const webpEnv = createAvatarSupabase();
+    mockAuthenticatedUser({ supabase: webpEnv.supabase });
+    const webpResponse = await avatarPost(
+      avatarRequest(imageFile('image/webp', 'avatar.webp')),
+    );
+    expect(webpResponse.status).toBe(200);
+  });
+
   it('rechaza origen no confiable para upload de avatar', async () => {
     mockAuthenticatedUser();
     const response = await avatarPost(
@@ -312,6 +330,17 @@ describe('ruta API de avatar', () => {
     );
 
     expect(response.status).toBe(403);
+  });
+
+  it('rechaza upload de avatar sin sesion autenticada', async () => {
+    mockAuthenticatedUser({ user: null, error: { message: 'missing' } });
+
+    const response = await avatarPost(
+      avatarRequest(imageFile('image/png', 'avatar.png')),
+    );
+
+    expect(response.status).toBe(401);
+    expect((await readJson(response)).error?.message).toBe('No autorizado');
   });
 
   it('rechaza avatar faltante o con tipo invalido', async () => {
@@ -369,7 +398,10 @@ describe('ruta API de avatar', () => {
     );
     expect(uploadResponse.status).toBe(500);
     expect((await readJson(uploadResponse)).error?.message).toBe(
-      'No se pudo subir la foto. Verifica que exista el bucket profile-avatars en Supabase Storage.',
+      [
+        'No se pudo subir la foto.',
+        'Verifica que exista el bucket profile-avatars en Supabase Storage.',
+      ].join(' '),
     );
 
     const updateBuilder = createBuilder({

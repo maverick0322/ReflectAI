@@ -35,6 +35,32 @@ describe('reflection analysis', () => {
     expect(messages[0].role).toBe('system');
   });
 
+  it('redacts free text while preserving structured metadata in analysis messages', () => {
+    const messages = buildAnalysisMessages({
+      ...payload,
+      responses: [
+        {
+          id: 'Q1_SIT',
+          text: 'Contenido sensible',
+          value: 7,
+          category: 'situation',
+          status: 'answered',
+          method: 'manual',
+        },
+      ],
+    });
+    const userMessage = JSON.parse(messages[1].content);
+
+    expect(userMessage.payload.responses[0]).toMatchObject({
+      id: 'Q1_SIT',
+      value: 7,
+      category: 'situation',
+      status: 'answered',
+      method: 'manual',
+      text: '[REDACTED_SENSITIVE_TEXT]',
+    });
+  });
+
   it('parses analysis JSON content', () => {
     const content = JSON.stringify({
       primary_emotions: ['calma'],
@@ -59,6 +85,10 @@ describe('reflection analysis', () => {
 
   it('returns null instead of throwing for malformed JSON', () => {
     expect(parseAnalysisResult('respuesta { "summary": } con llaves')).toBeNull();
+  });
+
+  it('returns null when the parsed payload is not an object', () => {
+    expect(parseAnalysisResult(JSON.stringify(['unexpected']))).toBeNull();
   });
 
   it('accepts embedded JSON and normalizes unsupported field types', () => {
@@ -133,6 +163,20 @@ describe('reflection analysis', () => {
     expect(fallback.session_title).toBe(
       `${longAlternative.slice(0, 61).trim()}...`,
     );
+  });
+
+  it('uses situation as fallback title and allows missing title sources', () => {
+    const fromSituation = buildFallbackAnalysis({
+      ...payload,
+      responses: [{ id: 'Q1_SIT', text: 'Situacion breve' }],
+    });
+    const withoutTitle = buildFallbackAnalysis({
+      ...payload,
+      responses: [{ id: 'Q4_INT', value: 3 }],
+    });
+
+    expect(fromSituation.session_title).toBe('Situacion breve');
+    expect(withoutTitle.session_title).toBeNull();
   });
 
   it('runs analysis using Groq client', async () => {
