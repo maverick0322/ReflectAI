@@ -4,7 +4,12 @@ import { assertTrustedMutationOrigin, getTrustedSiteOrigin } from '@/lib/securit
 import { checkRateLimit } from '@/lib/security/rateLimit';
 import { rateLimitResponse } from '@/lib/security/responses';
 
-function setEnv(name: string, value: string) {
+function setEnv(name: string, value: string | undefined) {
+  if (value === undefined) {
+    unsetEnv(name);
+    return;
+  }
+
   Reflect.set(process.env, name, value);
 }
 
