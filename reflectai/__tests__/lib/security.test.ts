@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { assertTrustedMutationOrigin, getTrustedSiteOrigin } from '@/lib/security/origin';
 import { checkRateLimit } from '@/lib/security/rateLimit';
@@ -18,16 +18,8 @@ function unsetEnv(name: string) {
 }
 
 describe('security/origin', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
-  const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-
   const resetEnv = () => {
-    setEnv('NODE_ENV', originalNodeEnv);
-    if (originalSiteUrl === undefined) {
-      unsetEnv('NEXT_PUBLIC_SITE_URL');
-    } else {
-      setEnv('NEXT_PUBLIC_SITE_URL', originalSiteUrl);
-    }
+    vi.unstubAllEnvs();
   };
 
   it('uses configured site origin when present', () => {
@@ -37,8 +29,8 @@ describe('security/origin', () => {
   });
 
   it('allows local origin in non-production', () => {
-    setEnv('NODE_ENV', 'development');
-    unsetEnv('NEXT_PUBLIC_SITE_URL');
+    vi.stubEnv('NODE_ENV', 'development');
+    delete process.env.NEXT_PUBLIC_SITE_URL;
 
     expect(getTrustedSiteOrigin('http://localhost:3000/test')).toBe('http://localhost:3000');
     resetEnv();
@@ -52,8 +44,8 @@ describe('security/origin', () => {
   });
 
   it('rejects missing trusted origin in production', () => {
-    setEnv('NODE_ENV', 'production');
-    unsetEnv('NEXT_PUBLIC_SITE_URL');
+    vi.stubEnv('NODE_ENV', 'production');
+    delete process.env.NEXT_PUBLIC_SITE_URL;
 
     expect(() => getTrustedSiteOrigin('https://reflectai.example')).toThrow('Missing trusted site URL');
     resetEnv();
@@ -81,8 +73,8 @@ describe('security/origin', () => {
   });
 
   it('accepts local origin in non-production even when configured', () => {
-    setEnv('NODE_ENV', 'development');
-    setEnv('NEXT_PUBLIC_SITE_URL', 'https://reflectai.example');
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://reflectai.example');
 
     const request = new Request('https://reflectai.example/api/auth/login', {
       headers: {
@@ -109,14 +101,12 @@ describe('security/origin', () => {
 });
 
 describe('security/rateLimit', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
-
   const resetEnv = () => {
-    setEnv('NODE_ENV', originalNodeEnv);
+    vi.unstubAllEnvs();
   };
 
   it('skips limiting in test environment', () => {
-    setEnv('NODE_ENV', 'test');
+    vi.stubEnv('NODE_ENV', 'test');
 
     const result = checkRateLimit(undefined, {
       key: 'test:skip',
@@ -129,7 +119,7 @@ describe('security/rateLimit', () => {
   });
 
   it('uses proxy headers when available', () => {
-    setEnv('NODE_ENV', 'development');
+    vi.stubEnv('NODE_ENV', 'development');
 
     const request = new Request('http://localhost/api', {
       headers: {
@@ -152,7 +142,7 @@ describe('security/rateLimit', () => {
   });
 
   it('falls back to x-forwarded-for and enforces limit', () => {
-    setEnv('NODE_ENV', 'development');
+    vi.stubEnv('NODE_ENV', 'development');
 
     const request = new Request('http://localhost/api', {
       headers: {
@@ -183,7 +173,7 @@ describe('security/rateLimit', () => {
   });
 
   it('resets bucket after window', () => {
-    setEnv('NODE_ENV', 'development');
+    vi.stubEnv('NODE_ENV', 'development');
 
     const request = new Request('http://localhost/api');
     const now = Date.now();
@@ -219,4 +209,8 @@ describe('security/responses', () => {
       error: { message: 'Demasiados intentos. Espera unos minutos antes de continuar.' },
     });
   });
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
 });

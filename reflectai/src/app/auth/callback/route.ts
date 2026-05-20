@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { logServerError } from '@/lib/monitoring/logger';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 function getSafeNextPath(value: string | null) {
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    console.error('Supabase auth callback failed', error.message);
+    logServerError('Supabase auth callback failed', error);
     const isRecoveryRedirect = next.startsWith('/cambiar-contrasena');
     redirectUrl.pathname = isRecoveryRedirect ? '/recuperar' : '/login';
     redirectUrl.search = isRecoveryRedirect

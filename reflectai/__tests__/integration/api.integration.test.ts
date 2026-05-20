@@ -424,11 +424,12 @@ describe('Critical API integration - version 2026-05-19', () => {
     expect(updateUser).toHaveBeenCalledWith({ password: 'PasswordNueva123!' });
   });
 
-  it('TC-01-06 deletes the account and cleans history, profile, Auth and local session', async () => {
+  it('TC-01-04 deletes the account and cleans history, profile, Auth and local session', async () => {
+    const signInWithPassword = vi.fn(async () => ({ error: null }));
     const signOut = vi.fn(async () => ({ error: null }));
     const supabaseMock = createSupabaseMock({
       user: { id: 'user-a', email: 'ana@reflectai.com' },
-      auth: { signOut },
+      auth: { signInWithPassword, signOut },
     });
     const deleteUser = vi.fn(async () => ({ error: null }));
 
@@ -448,6 +449,10 @@ describe('Critical API integration - version 2026-05-19', () => {
 
     expect(response.status).toBe(200);
     expect(body.message).toBe('Cuenta eliminada correctamente');
+    expect(signInWithPassword).toHaveBeenCalledWith({
+      email: 'ana@reflectai.com',
+      password: 'PasswordActual123!',
+    });
     expect(deleteUser).toHaveBeenCalledWith('user-a');
     expect(signOut).toHaveBeenCalled();
   });

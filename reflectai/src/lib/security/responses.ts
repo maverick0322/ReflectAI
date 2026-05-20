@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 
+import { apiMessages } from '@/lib/copy/api';
+
 export function rateLimitResponse(retryAfterSeconds: number) {
   return NextResponse.json(
     {
       error: {
-        message: 'Demasiados intentos. Espera unos minutos antes de continuar.',
+        message: apiMessages.common.tooManyRequests,
       },
     },
     {

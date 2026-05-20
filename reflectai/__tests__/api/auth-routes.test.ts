@@ -571,6 +571,40 @@ describe('rutas API de autenticacion', () => {
     expect(untrustedResponse.status).toBe(403);
   });
 
+  it('rechaza eliminacion si falta el email o falla la reautenticacion', async () => {
+    mockAuthenticatedUser({
+      user: { id: 'user-1' },
+    });
+
+    const missingEmailResponse = await deleteAccountDelete(
+      mutationRequest(
+        '/api/auth/delete-account',
+        { currentPassword: 'PasswordActual123!' },
+        'DELETE',
+      ),
+    );
+    expect(missingEmailResponse.status).toBe(400);
+    expect((await readJson(missingEmailResponse)).error?.message).toBe(
+      'No se pudo validar la contrasena actual',
+    );
+
+    const signInWithPassword = vi.fn(async () => ({ error: { message: 'bad' } }));
+    mockAuthenticatedUser({
+      supabase: { auth: { signInWithPassword } },
+    });
+
+    const invalidPasswordResponse = await deleteAccountDelete(
+      mutationRequest(
+        '/api/auth/delete-account',
+        { currentPassword: 'PasswordActual123!' },
+        'DELETE',
+      ),
+    );
+    expect(invalidPasswordResponse.status).toBe(400);
+    expect((await readJson(invalidPasswordResponse)).error?.message).toBe(
+      'La contrasena actual es incorrecta',
+    );
+  });
   it('cierra sesion y maneja errores inesperados', async () => {
     const signOut = vi.fn();
     vi.mocked(createServerSupabaseClient).mockResolvedValueOnce({

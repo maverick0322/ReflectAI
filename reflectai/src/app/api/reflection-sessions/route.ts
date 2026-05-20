@@ -1,35 +1,23 @@
-import { NextResponse } from 'next/server';
-
-import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import {
+  buildSuccessResponse,
+  enforceTrustedMutationOrigin,
+  parseJsonBody,
+  requireAuthenticatedUser,
+  throwRouteError,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { apiMessages } from '@/lib/copy/api';
 import { buildInitialPayload } from '@/lib/reflection/payload';
-import { assertTrustedMutationOrigin } from '@/lib/security/origin';
 import { createReflectionSessionSchema } from '@/lib/validations/reflection';
 
 export async function POST(request: Request) {
   try {
-    assertTrustedMutationOrigin(request);
-
-    const { supabase, user, error: authError } = await getAuthenticatedUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
-    }
-
-    const body = await request.json().catch(() => null);
-    const validation = createReflectionSessionSchema.safeParse(body ?? {});
-
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: {
-            message: 'Datos invalidos',
-            details: validation.error.flatten(),
-          },
-        },
-        { status: 400 },
-      );
-    }
-
+    enforceTrustedMutationOrigin(request);
+    const { supabase, user } = await requireAuthenticatedUser();
+    const sessionRequest = await parseJsonBody({
+      request,
+      schema: createReflectionSessionSchema,
+    });
     const startedAt = new Date().toISOString();
     const payload = buildInitialPayload(startedAt);
 
@@ -37,7 +25,7 @@ export async function POST(request: Request) {
       .from('reflection_sessions')
       .insert({
         user_id: user.id,
-        title: validation.data.title ?? null,
+        title: sessionRequest.title ?? null,
         status: 'draft',
         started_at: startedAt,
         payload,
@@ -47,38 +35,28 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo crear la sesion' } },
-        { status: 500 },
-      );
+      throwRouteError(500, apiMessages.reflection.createFailed);
     }
 
-    return NextResponse.json(
+    return buildSuccessResponse(
       {
         data,
-        message: 'Sesion creada correctamente',
+        message: apiMessages.reflection.createSucceeded,
       },
       { status: 201 },
     );
-  } catch (error) {
-    if (error instanceof Error && error.message === 'Untrusted origin') {
-      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
-    }
-
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al crear sesion' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.reflection.createUnexpected,
+      'reflection session create failed',
     );
   }
 }
 
 export async function GET() {
   try {
-    const { supabase, user, error: authError } = await getAuthenticatedUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
-    }
+    const { supabase, user } = await requireAuthenticatedUser();
 
     const { data, error } = await supabase
       .from('reflection_sessions')
@@ -87,20 +65,18 @@ export async function GET() {
       .order('started_at', { ascending: false });
 
     if (error) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo obtener el historial' } },
-        { status: 500 },
-      );
+      throwRouteError(500, apiMessages.reflection.listFailed);
     }
 
-    return NextResponse.json({
+    return buildSuccessResponse({
       data,
-      message: 'Sesiones obtenidas correctamente',
+      message: apiMessages.reflection.listSucceeded,
     });
-  } catch {
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al obtener sesiones' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.reflection.listUnexpected,
+      'reflection session list failed',
     );
   }
 }

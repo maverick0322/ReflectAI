@@ -37,7 +37,8 @@ function extractErrorPayload(payload: unknown): ApiErrorPayload | undefined {
 async function readJsonPayload(response: Response): Promise<unknown> {
   try {
     return await response.json();
-  } catch {
+  } catch (error: unknown) {
+    void error;
     return null;
   }
 }

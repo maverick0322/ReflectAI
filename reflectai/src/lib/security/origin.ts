@@ -39,7 +39,8 @@ function getOriginFromHeader(value: string | null) {
   try {
     const parsed = new URL(value);
     return parsed.origin;
-  } catch {
+  } catch (error: unknown) {
+    void error;
     return null;
   }
 }
@@ -52,7 +53,8 @@ function isLocalOrigin(origin: string | null) {
   try {
     const { hostname } = new URL(origin);
     return LOCAL_HOSTNAMES.has(hostname);
-  } catch {
+  } catch (error: unknown) {
+    void error;
     return false;
   }
 }

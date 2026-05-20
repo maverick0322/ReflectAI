@@ -1,6 +1,7 @@
 import type { ReflectionSessionPayload } from '@/types/reflection';
 
 import { createGroqChatCompletion, type GroqChatMessage } from './groqClient';
+import { extractEmbeddedJsonObject, isRecord } from './json';
 
 export interface ReflectionAnalysisResult {
   primary_emotions: string[];
@@ -14,34 +15,12 @@ export interface ReflectionAnalysisResult {
   professional_support_reminder: string | null;
 }
 
-function findResponse(
-  payload: ReflectionSessionPayload,
-  id: string,
-) {
+function findResponse(payload: ReflectionSessionPayload, id: string) {
   return payload.responses.find((response) => response.id === id);
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
 function parseJsonContent(content: string): unknown {
-  const trimmed = content.trim();
-  try {
-    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-      return JSON.parse(trimmed) as unknown;
-    }
-
-    const start = trimmed.indexOf('{');
-    const end = trimmed.lastIndexOf('}');
-    if (start !== -1 && end !== -1 && end > start) {
-      return JSON.parse(trimmed.slice(start, end + 1)) as unknown;
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
+  return extractEmbeddedJsonObject(content);
 }
 
 function toStringArray(value: unknown): string[] {
@@ -128,9 +107,7 @@ export function buildFallbackAnalysis(
   const situation = findResponse(payload, 'Q1_SIT')?.text;
   const alternative = findResponse(payload, 'Q7_ALT')?.text;
   const titleSource = alternative || situation || null;
-  const normalizedTitle = titleSource && titleSource.length > 64
-    ? `${titleSource.slice(0, 61).trim()}...`
-    : titleSource;
+  const normalizedTitle = getNormalizedSessionTitle(titleSource);
 
   return {
     primary_emotions: emotion ? [emotion] : [],
@@ -143,6 +120,18 @@ export function buildFallbackAnalysis(
     encouraging_message: null,
     professional_support_reminder: null,
   };
+}
+
+function getNormalizedSessionTitle(titleSource: string | null) {
+  if (!titleSource) {
+    return null;
+  }
+
+  if (titleSource.length <= 64) {
+    return titleSource;
+  }
+
+  return `${titleSource.slice(0, 61).trim()}...`;
 }
 
 export async function analyzeReflectionSession(

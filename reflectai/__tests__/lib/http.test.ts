@@ -30,4 +30,21 @@ describe('requestJson', () => {
 
     await expect(requestJson('/api/test')).rejects.toThrow(ApiError);
   });
+
+  it('throws a generic ApiError when the error response body is not JSON', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: false,
+      status: 500,
+      json: async () => {
+        throw new Error('invalid json');
+      },
+    })) as unknown as typeof fetch;
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(requestJson('/api/test')).rejects.toMatchObject({
+      message: 'Request failed',
+      status: 500,
+    });
+  });
 });

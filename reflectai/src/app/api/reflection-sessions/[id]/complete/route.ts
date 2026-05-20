@@ -1,12 +1,17 @@
-import { NextResponse } from 'next/server';
-
-import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import {
+  buildSuccessResponse,
+  enforceTrustedMutationOrigin,
+  parseJsonBody,
+  requireAuthenticatedUser,
+  throwRouteError,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
 import {
   analyzeReflectionSession,
   buildFallbackAnalysis,
 } from '@/lib/ai/reflectionAnalysis';
+import { apiMessages } from '@/lib/copy/api';
 import { applyMetadataPatch, normalizePayload } from '@/lib/reflection/payload';
-import { assertTrustedMutationOrigin } from '@/lib/security/origin';
 import { completeReflectionSessionSchema } from '@/lib/validations/reflection';
 
 type RouteParams = {
@@ -15,31 +20,27 @@ type RouteParams = {
   }>;
 };
 
+async function resolveCompletionAnalysis(
+  payload: ReturnType<typeof normalizePayload>,
+) {
+  try {
+    return (await analyzeReflectionSession(payload)) ?? buildFallbackAnalysis(payload);
+  } catch (error: unknown) {
+    void error;
+    return buildFallbackAnalysis(payload);
+  }
+}
+
 export async function PATCH(request: Request, { params }: RouteParams) {
   try {
-    assertTrustedMutationOrigin(request);
-
+    enforceTrustedMutationOrigin(request);
     const { id } = await params;
-    const { supabase, user, error: authError } = await getAuthenticatedUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
-    }
-
-    const body = await request.json().catch(() => ({}));
-    const validation = completeReflectionSessionSchema.safeParse(body);
-
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: {
-            message: 'Datos invalidos',
-            details: validation.error.flatten(),
-          },
-        },
-        { status: 400 },
-      );
-    }
+    const { supabase, user } = await requireAuthenticatedUser();
+    const completionRequest = await parseJsonBody({
+      request,
+      schema: completeReflectionSessionSchema,
+      fallback: {},
+    });
 
     const { data: session, error: sessionError } = await supabase
       .from('reflection_sessions')
@@ -49,17 +50,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single();
 
     if (sessionError || !session) {
-      return NextResponse.json(
-        { error: { message: 'Sesion no encontrada' } },
-        { status: 404 },
-      );
+      throwRouteError(404, apiMessages.reflection.detailFailed);
     }
 
     if (session.status === 'completed') {
-      return NextResponse.json(
-        { error: { message: 'La sesion ya esta completada' } },
-        { status: 409 },
-      );
+      throwRouteError(409, apiMessages.reflection.completeAlreadyCompleted);
     }
 
     const payload = normalizePayload(
@@ -68,36 +63,17 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     );
 
     if (payload.responses.length === 0) {
-      return NextResponse.json(
-        { error: { message: 'No se puede completar una sesion sin respuestas' } },
-        { status: 409 },
-      );
+      throwRouteError(409, apiMessages.reflection.completeMissingResponses);
     }
 
     const completedAt = new Date().toISOString();
     const payloadWithCompletion = applyMetadataPatch(payload, {
-      ...validation.data.metadataPatch,
+      ...completionRequest.metadataPatch,
       completed_at: completedAt,
     });
-
-    let analysis: Record<string, unknown> = {};
-    let suggestedTitle: string | null = null;
-
-    try {
-      const result = await analyzeReflectionSession(payloadWithCompletion);
-      if (result) {
-        analysis = result as unknown as Record<string, unknown>;
-        suggestedTitle = result.session_title;
-      } else {
-        const fallback = buildFallbackAnalysis(payloadWithCompletion);
-        analysis = fallback as unknown as Record<string, unknown>;
-        suggestedTitle = fallback.session_title;
-      }
-    } catch {
-      const fallback = buildFallbackAnalysis(payloadWithCompletion);
-      analysis = fallback as unknown as Record<string, unknown>;
-      suggestedTitle = fallback.session_title;
-    }
+    const analysis = await resolveCompletionAnalysis(payloadWithCompletion);
+    const serializedAnalysis: Record<string, unknown> = { ...analysis };
+    const suggestedTitle = analysis.session_title;
 
     const updateData: {
       status: 'completed';
@@ -109,11 +85,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       status: 'completed',
       completed_at: completedAt,
       payload: payloadWithCompletion,
-      ai_analysis: analysis,
+      ai_analysis: serializedAnalysis,
     };
 
-    if (validation.data.title) {
-      updateData.title = validation.data.title;
+    if (completionRequest.title) {
+      updateData.title = completionRequest.title;
     } else if (suggestedTitle) {
       updateData.title = suggestedTitle;
     }
@@ -127,24 +103,18 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo completar la sesion' } },
-        { status: 500 },
-      );
+      throwRouteError(500, apiMessages.reflection.completeFailed);
     }
 
-    return NextResponse.json({
+    return buildSuccessResponse({
       data,
-      message: 'Sesion completada correctamente',
+      message: apiMessages.reflection.completeSucceeded,
     });
-  } catch (error) {
-    if (error instanceof Error && error.message === 'Untrusted origin') {
-      return NextResponse.json({ error: { message: 'Origen no permitido' } }, { status: 403 });
-    }
-
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al completar la sesion' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.reflection.completeUnexpected,
+      'reflection session complete failed',
     );
   }
 }

@@ -1,27 +1,21 @@
-import { NextResponse } from 'next/server';
-
 import { generateDailyQuote, getFallbackQuote } from '@/lib/ai/dailyQuote';
-import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
-import { checkRateLimit } from '@/lib/security/rateLimit';
-import { rateLimitResponse } from '@/lib/security/responses';
+import {
+  buildSuccessResponse,
+  enforceRateLimit,
+  requireAuthenticatedUser,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { apiMessages } from '@/lib/copy/api';
 
 export async function GET(request?: Request) {
   try {
-    const rateLimit = checkRateLimit(request, {
+    enforceRateLimit(request, {
       key: 'ai:daily-quote',
       maxRequests: 30,
       windowMs: 60 * 60 * 1000,
     });
 
-    if (rateLimit.limited) {
-      return rateLimitResponse(rateLimit.retryAfterSeconds);
-    }
-
-    const { user, error: authError } = await getAuthenticatedUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
-    }
+    const { user } = await requireAuthenticatedUser();
 
     const metadata = user.user_metadata ?? {};
     const userName =
@@ -29,23 +23,25 @@ export async function GET(request?: Request) {
 
     try {
       const quote = await generateDailyQuote(userName);
-      return NextResponse.json({
+      return buildSuccessResponse({
         data: quote,
-        message: 'Cita generada correctamente',
+        message: apiMessages.ai.dailyQuoteSucceeded,
       });
-    } catch {
-      return NextResponse.json({
+    } catch (error: unknown) {
+      void error;
+      return buildSuccessResponse({
         data: {
           ...getFallbackQuote(),
           aiGenerated: false,
         },
-        message: 'Cita local generada correctamente',
+        message: apiMessages.ai.dailyQuoteFallbackSucceeded,
       });
     }
-  } catch {
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al generar cita' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.ai.dailyQuoteUnexpected,
+      'ai daily quote failed',
     );
   }
 }
