@@ -4,50 +4,58 @@ import { assertTrustedMutationOrigin, getTrustedSiteOrigin } from '@/lib/securit
 import { checkRateLimit } from '@/lib/security/rateLimit';
 import { rateLimitResponse } from '@/lib/security/responses';
 
+function setEnv(name: string, value: string) {
+  Reflect.set(process.env, name, value);
+}
+
+function unsetEnv(name: string) {
+  Reflect.deleteProperty(process.env, name);
+}
+
 describe('security/origin', () => {
   const originalNodeEnv = process.env.NODE_ENV;
   const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
   const resetEnv = () => {
-    process.env.NODE_ENV = originalNodeEnv;
+    setEnv('NODE_ENV', originalNodeEnv);
     if (originalSiteUrl === undefined) {
-      delete process.env.NEXT_PUBLIC_SITE_URL;
+      unsetEnv('NEXT_PUBLIC_SITE_URL');
     } else {
-      process.env.NEXT_PUBLIC_SITE_URL = originalSiteUrl;
+      setEnv('NEXT_PUBLIC_SITE_URL', originalSiteUrl);
     }
   };
 
   it('uses configured site origin when present', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://reflectai.example/app';
+    setEnv('NEXT_PUBLIC_SITE_URL', 'https://reflectai.example/app');
     expect(getTrustedSiteOrigin('https://ignored.example')).toBe('https://reflectai.example');
     resetEnv();
   });
 
   it('allows local origin in non-production', () => {
-    process.env.NODE_ENV = 'development';
-    delete process.env.NEXT_PUBLIC_SITE_URL;
+    setEnv('NODE_ENV', 'development');
+    unsetEnv('NEXT_PUBLIC_SITE_URL');
 
     expect(getTrustedSiteOrigin('http://localhost:3000/test')).toBe('http://localhost:3000');
     resetEnv();
   });
 
   it('throws if configured site url is not http/https', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'ftp://reflectai.example';
+    setEnv('NEXT_PUBLIC_SITE_URL', 'ftp://reflectai.example');
 
     expect(() => getTrustedSiteOrigin('https://ignored.example')).toThrow('Configured site URL must use http or https');
     resetEnv();
   });
 
   it('rejects missing trusted origin in production', () => {
-    process.env.NODE_ENV = 'production';
-    delete process.env.NEXT_PUBLIC_SITE_URL;
+    setEnv('NODE_ENV', 'production');
+    unsetEnv('NEXT_PUBLIC_SITE_URL');
 
     expect(() => getTrustedSiteOrigin('https://reflectai.example')).toThrow('Missing trusted site URL');
     resetEnv();
   });
 
   it('accepts trusted origin header and referer', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://reflectai.example';
+    setEnv('NEXT_PUBLIC_SITE_URL', 'https://reflectai.example');
 
     const request = new Request('https://reflectai.example/api/auth/login', {
       headers: {
@@ -68,8 +76,8 @@ describe('security/origin', () => {
   });
 
   it('accepts local origin in non-production even when configured', () => {
-    process.env.NODE_ENV = 'development';
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://reflectai.example';
+    setEnv('NODE_ENV', 'development');
+    setEnv('NEXT_PUBLIC_SITE_URL', 'https://reflectai.example');
 
     const request = new Request('https://reflectai.example/api/auth/login', {
       headers: {
@@ -82,7 +90,7 @@ describe('security/origin', () => {
   });
 
   it('rejects untrusted origin', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://reflectai.example';
+    setEnv('NEXT_PUBLIC_SITE_URL', 'https://reflectai.example');
 
     const request = new Request('https://reflectai.example/api/auth/login', {
       headers: {
@@ -99,11 +107,11 @@ describe('security/rateLimit', () => {
   const originalNodeEnv = process.env.NODE_ENV;
 
   const resetEnv = () => {
-    process.env.NODE_ENV = originalNodeEnv;
+    setEnv('NODE_ENV', originalNodeEnv);
   };
 
   it('skips limiting in test environment', () => {
-    process.env.NODE_ENV = 'test';
+    setEnv('NODE_ENV', 'test');
 
     const result = checkRateLimit(undefined, {
       key: 'test:skip',
@@ -116,7 +124,7 @@ describe('security/rateLimit', () => {
   });
 
   it('uses proxy headers when available', () => {
-    process.env.NODE_ENV = 'development';
+    setEnv('NODE_ENV', 'development');
 
     const request = new Request('http://localhost/api', {
       headers: {
@@ -139,7 +147,7 @@ describe('security/rateLimit', () => {
   });
 
   it('falls back to x-forwarded-for and enforces limit', () => {
-    process.env.NODE_ENV = 'development';
+    setEnv('NODE_ENV', 'development');
 
     const request = new Request('http://localhost/api', {
       headers: {
@@ -170,7 +178,7 @@ describe('security/rateLimit', () => {
   });
 
   it('resets bucket after window', () => {
-    process.env.NODE_ENV = 'development';
+    setEnv('NODE_ENV', 'development');
 
     const request = new Request('http://localhost/api');
     const now = Date.now();

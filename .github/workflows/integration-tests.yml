@@ -75,6 +75,7 @@ jobs:
             "src/app/api/auth/register/route.ts"
             "src/app/api/auth/login/route.ts"
             "src/app/api/auth/logout/route.ts"
+            "src/app/api/auth/session-status/route.ts"
             "src/app/api/auth/recover/route.ts"
             "src/app/api/auth/confirm-recovery/route.ts"
             "src/app/api/auth/verify-password/route.ts"
