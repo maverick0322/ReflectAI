@@ -4,11 +4,10 @@ import {
   enforceTrustedMutationOrigin,
   parseJsonBody,
   requireAuthenticatedUser,
-  throwRouteError,
   toRouteErrorResponse,
 } from '@/lib/api/route';
+import { deleteAuthenticatedAccount } from '@/lib/auth/session';
 import { apiMessages } from '@/lib/copy/api';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { deleteAccountSchema } from '@/lib/validations/auth';
 
 export async function DELETE(request: Request) {
@@ -33,27 +32,11 @@ export async function DELETE(request: Request) {
       windowMs: 15 * 60 * 1000,
     });
 
-    if (!user.email) {
-      throwRouteError(400, apiMessages.auth.passwordCurrentValidationFailed);
-    }
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: accountDeletion.currentPassword,
-    });
-
-    if (signInError) {
-      throwRouteError(400, apiMessages.auth.passwordCurrentIncorrect);
-    }
-
-    const adminClient = createAdminSupabaseClient();
-    const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
-
-    if (deleteError) {
-      throwRouteError(500, apiMessages.auth.deleteAccountFailed);
-    }
-
-    await supabase.auth.signOut();
+    await deleteAuthenticatedAccount(
+      supabase,
+      user,
+      accountDeletion.currentPassword,
+    );
 
     return buildSuccessResponse({
       message: apiMessages.auth.deleteAccountSucceeded,

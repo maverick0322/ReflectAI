@@ -3,32 +3,11 @@ import {
   enforceRateLimit,
   enforceTrustedMutationOrigin,
   parseJsonBody,
-  throwRouteError,
   toRouteErrorResponse,
 } from '@/lib/api/route';
+import { authenticateUser } from '@/lib/auth/session';
 import { apiMessages } from '@/lib/copy/api';
-import { logServerError } from '@/lib/monitoring/logger';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { loginSchema } from '@/lib/validations/auth';
-
-async function authenticateUser(email: string, password: string) {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  const authenticatedUser = data.user;
-
-  if (error || !authenticatedUser) {
-    if (error) {
-      logServerError('Supabase login failed', error);
-    }
-
-    throwRouteError(401, apiMessages.auth.loginFailed);
-  }
-
-  return authenticatedUser;
-}
 
 export async function POST(request: Request) {
   try {

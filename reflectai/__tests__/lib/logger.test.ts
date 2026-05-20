@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { channel } from 'node:diagnostics_channel';
 
 import {
   buildServerErrorLogEntry,
   logServerError,
+  SERVER_ERROR_LOG_CHANNEL,
+  type ServerErrorLogEntry,
 } from '@/lib/monitoring/logger';
 
 afterEach(() => {
@@ -12,22 +15,34 @@ afterEach(() => {
 
 describe('logServerError', () => {
   it('does not log in test environment', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const entries: ServerErrorLogEntry[] = [];
+    const subscriber = (entry: unknown) => {
+      entries.push(entry as ServerErrorLogEntry);
+    };
+    const logChannel = channel(SERVER_ERROR_LOG_CHANNEL);
 
+    logChannel.subscribe(subscriber);
     vi.stubEnv('NODE_ENV', 'test');
     logServerError('scope', 'boom');
+    logChannel.unsubscribe(subscriber);
 
-    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    expect(entries).toEqual([]);
   });
 
-  it('logs in production and preserves error objects when available', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('publishes in production and preserves error objects when available', () => {
+    const entries: ServerErrorLogEntry[] = [];
+    const subscriber = (entry: unknown) => {
+      entries.push(entry as ServerErrorLogEntry);
+    };
+    const logChannel = channel(SERVER_ERROR_LOG_CHANNEL);
     const error = new Error('boom');
 
+    logChannel.subscribe(subscriber);
     vi.stubEnv('NODE_ENV', 'production');
     logServerError('scope:error', error);
+    logChannel.unsubscribe(subscriber);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
+    expect(entries[0]).toEqual(
       expect.objectContaining({
         level: 'error',
         scope: 'scope:error',
@@ -37,33 +52,37 @@ describe('logServerError', () => {
     );
   });
 
-  it('logs normalized messages in development-like environments', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('publishes normalized messages in development-like environments', () => {
+    const entries: ServerErrorLogEntry[] = [];
+    const subscriber = (entry: unknown) => {
+      entries.push(entry as ServerErrorLogEntry);
+    };
+    const logChannel = channel(SERVER_ERROR_LOG_CHANNEL);
+
+    logChannel.subscribe(subscriber);
     vi.stubEnv('NODE_ENV', 'development');
     const error = new Error('boom');
 
     logServerError('scope:error', error);
     logServerError('scope:string', 'plain message');
     logServerError('scope:unknown', { code: 123 });
+    logChannel.unsubscribe(subscriber);
 
-    expect(consoleErrorSpy).toHaveBeenNthCalledWith(
-      1,
+    expect(entries[0]).toEqual(
       expect.objectContaining({
         level: 'error',
         scope: 'scope:error',
         message: 'boom',
       }),
     );
-    expect(consoleErrorSpy).toHaveBeenNthCalledWith(
-      2,
+    expect(entries[1]).toEqual(
       expect.objectContaining({
         level: 'error',
         scope: 'scope:string',
         message: 'plain message',
       }),
     );
-    expect(consoleErrorSpy).toHaveBeenNthCalledWith(
-      3,
+    expect(entries[2]).toEqual(
       expect.objectContaining({
         level: 'error',
         scope: 'scope:unknown',
