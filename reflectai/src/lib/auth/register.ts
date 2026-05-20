@@ -14,7 +14,7 @@ export interface RegisterAuthUserInput {
 type RegisterErrorKind = 'duplicate_email' | 'rate_limited' | 'unexpected';
 
 type RegisterFailure = {
-  status: 400 | 429;
+  status: 400 | 429 | 500;
   message: string;
   field?: 'email';
 };
@@ -63,7 +63,7 @@ function buildRegisterFailure(kind: RegisterErrorKind): RegisterFailure {
       };
     default:
       return {
-        status: 400,
+        status: 500,
         message: apiMessages.auth.registerFailed,
       };
   }
@@ -97,6 +97,10 @@ export async function registerAuthUser(input: RegisterAuthUserInput) {
       failure.message,
       failure.field ? { field: failure.field } : undefined,
     );
+  }
+
+  if (!data.user) {
+    throwRouteError(500, apiMessages.auth.registerFailed);
   }
 
   return {

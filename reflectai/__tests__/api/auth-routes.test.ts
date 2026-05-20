@@ -193,7 +193,7 @@ describe('rutas API de autenticacion', () => {
         birthDate: '2000-01-01',
       }),
     );
-    expect(redirectResponse.status).toBe(400);
+    expect(redirectResponse.status).toBe(500);
     expect((await readJson(redirectResponse)).error?.message).toBe(
       'No se pudo completar el registro.',
     );
@@ -218,6 +218,10 @@ describe('rutas API de autenticacion', () => {
       .mockResolvedValueOnce({
         data: { user: null },
         error: { message: 'rate limit exceeded' },
+      })
+      .mockResolvedValueOnce({
+        data: { user: null },
+        error: null,
       });
     vi.mocked(createAdminSupabaseClient).mockReturnValue({
       auth: { admin: { createUser } },
@@ -266,6 +270,20 @@ describe('rutas API de autenticacion', () => {
     expect(rateLimitedResponse.status).toBe(429);
     expect((await readJson(rateLimitedResponse)).error?.message).toBe(
       'Se hicieron demasiados intentos. Espera unos minutos antes de crear otra cuenta.',
+    );
+
+    const missingUserResponse = await registerPost(
+      mutationRequest('/api/auth/register', {
+        firstName: 'Ana',
+        lastName: 'Lopez',
+        email: 'ana@reflectai.com',
+        password: 'PasswordFuerte123!',
+        birthDate: '2000-01-01',
+      }),
+    );
+    expect(missingUserResponse.status).toBe(500);
+    expect((await readJson(missingUserResponse)).error?.message).toBe(
+      'No se pudo completar el registro.',
     );
   });
 
