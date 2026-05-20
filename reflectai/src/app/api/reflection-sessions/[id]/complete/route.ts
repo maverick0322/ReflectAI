@@ -6,7 +6,7 @@ import {
   buildFallbackAnalysis,
 } from '@/lib/ai/reflectionAnalysis';
 import { applyMetadataPatch, normalizePayload } from '@/lib/reflection/payload';
-import { completeReflectionSessionSchema } from '@/lib/validations/reflection';
+import { completeReflectionSessionSchema } from '@/features/reflection/schemas/reflection';
 
 type RouteParams = {
   params: Promise<{

@@ -1,7 +1,7 @@
-import { HistoryMonthGroup } from '@/components/history/HistoryMonthGroup';
-import { HistorySearchBar } from '@/components/history/HistorySearchBar';
-import { historySummaryMock } from '@/components/history/historyMocks';
-import GlassCard from '@/components/ui/GlassCard';
+import { HistoryMonthGroup } from '@/features/history/components/HistoryMonthGroup';
+import { HistorySearchBar } from '@/features/history/components/HistorySearchBar';
+import { historySummaryMock } from '@/features/history/data/historyMocks';
+import GlassCard from '@/shared/ui/GlassCard';
 
 export function HistoryPage() {
   return (
@@ -10,10 +10,10 @@ export function HistoryPage() {
         <header className="flex flex-col gap-3">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-              Mi Historial
+              My history
             </h1>
             <p className="mt-2 text-sm text-slate-500">
-              Has completado {historySummaryMock.completedSessions} sesiones de reflexion
+              You have completed {historySummaryMock.completedSessions} reflection sessions
             </p>
           </div>
 
@@ -25,8 +25,8 @@ export function HistoryPage() {
               Frontend placeholder
             </p>
             <p className="mt-1 text-sm text-slate-500">
-              Esta vista usa datos dummy para maquetar correctamente el historial. Backend
-              solo tendra que conectar la consulta real y mantener este contrato.
+              This view uses placeholder data to validate the history layout. Backend
+              only needs to connect the real query and preserve this contract.
             </p>
           </div>
         </header>

@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server';
 
-import { recoverPasswordSchema } from '@/lib/validations/auth';
+import { APP_ROUTES } from '@/core/routing/routes';
+import { recoverPasswordSchema } from '@/features/auth/schemas/auth';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 function buildRedirectUrl(requestUrl: string) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   const baseUrl = siteUrl ?? new URL(requestUrl).origin;
   const callbackUrl = new URL('/auth/callback', baseUrl);
-  callbackUrl.searchParams.set('next', '/cambiar-contrasena?mode=recovery');
+  callbackUrl.searchParams.set(
+    'next',
+    `${APP_ROUTES.changePassword}?mode=recovery`,
+  );
   return callbackUrl.toString();
 }
 
@@ -49,7 +53,7 @@ export async function POST(request: Request) {
     });
   } catch {
     return NextResponse.json(
-      { error: { message: 'Error inesperado al recuperar contraseña' } },
+      { error: { message: 'Error inesperado al recuperar contraseÃ±a' } },
       { status: 500 },
     );
   }

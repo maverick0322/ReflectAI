@@ -7,9 +7,9 @@ import {
   ChangePasswordRecoveryPending,
   IdentityVerificationStep,
   NewPasswordStep,
-} from '@/components/auth/ChangePasswordPageSections';
-import { useChangePasswordPage } from '@/components/auth/useChangePasswordPage';
-import GlassCard from '@/components/ui/GlassCard';
+} from '@/features/auth/components/ChangePasswordPageSections';
+import { useChangePasswordPage } from '@/features/auth/hooks/useChangePasswordPage';
+import GlassCard from '@/shared/ui/GlassCard';
 
 function ChangePasswordContent() {
   const page = useChangePasswordPage();
@@ -17,12 +17,12 @@ function ChangePasswordContent() {
   return (
     <ChangePasswordCardFrame>
       <GlassCard className="max-w-lg w-full">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-reflect-dark">Cambiar Contraseña</h1>
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold text-reflect-dark">Change password</h1>
         </div>
 
         {page.isRecoveryFlow && !page.recoveryReady ? (
-          <ChangePasswordRecoveryPending />
+          <ChangePasswordRecoveryPending formError={page.formError} />
         ) : page.step === 1 && !page.isRecoveryFlow ? (
           <IdentityVerificationStep
             form={page.form1}
@@ -50,7 +50,7 @@ function ChangePasswordPageFallback() {
     <ChangePasswordCardFrame>
       <GlassCard className="max-w-lg w-full">
         <div className="flex flex-col items-center justify-center py-8">
-          <p className="text-sm text-reflect-dark/70">Cargando...</p>
+          <p className="text-sm text-reflect-dark/70">Loading...</p>
         </div>
       </GlassCard>
     </ChangePasswordCardFrame>

@@ -1,4 +1,4 @@
-import BottomNav from '@/components/ui/BottomNav';
+import BottomNav from '@/shared/ui/BottomNav';
 
 interface MainLayoutProps {
   children: React.ReactNode;

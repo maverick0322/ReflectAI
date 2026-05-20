@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
-import { profileSchema } from '@/lib/validations/profile';
+import { profileSchema } from '@/features/profile/schemas/profile';
 
 function buildFullName(firstName: string, lastName?: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ');

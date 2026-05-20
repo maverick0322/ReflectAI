@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 import { buildInitialPayload } from '@/lib/reflection/payload';
-import { createReflectionSessionSchema } from '@/lib/validations/reflection';
+import { createReflectionSessionSchema } from '@/features/reflection/schemas/reflection';
 
 export async function POST(request: Request) {
   try {

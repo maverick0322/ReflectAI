@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 import { appendResponse, applyMetadataPatch, normalizePayload } from '@/lib/reflection/payload';
-import { addReflectionResponseSchema } from '@/lib/validations/reflection';
+import { addReflectionResponseSchema } from '@/features/reflection/schemas/reflection';
 
 type RouteParams = {
   params: Promise<{

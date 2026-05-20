@@ -1,0 +1,183 @@
+'use client';
+
+import type { UseFormReturn } from 'react-hook-form';
+
+import type { RegisterFormValues } from '@/features/auth/schemas/auth';
+import { FacebookIcon } from '@/shared/icons/FacebookIcon';
+import { GoogleIcon } from '@/shared/icons/GoogleIcon';
+import Button from '@/shared/ui/Button';
+import CustomLink from '@/shared/ui/CustomLink';
+import Input from '@/shared/ui/Input';
+import PasswordInput from '@/shared/ui/PasswordInput';
+import SocialButton from '@/shared/ui/SocialButton';
+
+interface RegisterFormSectionProps {
+  form: UseFormReturn<RegisterFormValues>;
+  isSubmitting: boolean;
+  formError: string | null;
+  onSubmit: (data: RegisterFormValues) => Promise<void>;
+}
+
+function RegisterNameFields({
+  form,
+}: Readonly<{ form: UseFormReturn<RegisterFormValues> }>) {
+  const {
+    register,
+    formState: { errors },
+  } = form;
+
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <Input
+        {...register('firstName')}
+        placeholder="First name"
+        maxLength={120}
+        error={errors.firstName?.message}
+      />
+      <Input
+        {...register('lastName')}
+        placeholder="Last name (optional)"
+        maxLength={120}
+        error={errors.lastName?.message}
+      />
+    </div>
+  );
+}
+
+function RegisterEmailFields({
+  form,
+}: Readonly<{ form: UseFormReturn<RegisterFormValues> }>) {
+  const {
+    register,
+    formState: { errors },
+  } = form;
+
+  return (
+    <>
+      <Input
+        {...register('email')}
+        type="email"
+        placeholder="Email address"
+        maxLength={254}
+        error={errors.email?.message}
+      />
+      <Input
+        {...register('confirmEmail')}
+        type="email"
+        placeholder="Confirm email address"
+        maxLength={254}
+        error={errors.confirmEmail?.message}
+      />
+    </>
+  );
+}
+
+function RegisterPasswordFields({
+  form,
+}: Readonly<{ form: UseFormReturn<RegisterFormValues> }>) {
+  const {
+    register,
+    formState: { errors },
+  } = form;
+
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <PasswordInput
+        {...register('password')}
+        placeholder="Password"
+        maxLength={64}
+        error={errors.password?.message}
+      />
+      <PasswordInput
+        {...register('confirmPassword')}
+        placeholder="Confirm password"
+        maxLength={64}
+        error={errors.confirmPassword?.message}
+      />
+    </div>
+  );
+}
+
+export function RegisterHeader() {
+  return (
+    <header className="space-y-2 text-center">
+      <h1 className="text-4xl font-bold tracking-tight text-reflect-dark">Create account</h1>
+      <p className="text-sm font-medium text-reflect-dark/70">Start your reflection journey</p>
+    </header>
+  );
+}
+
+export function RegisterFormSection({
+  form,
+  isSubmitting,
+  formError,
+  onSubmit,
+}: RegisterFormSectionProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = form;
+
+  return (
+    <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <RegisterNameFields form={form} />
+      <RegisterEmailFields form={form} />
+      <RegisterPasswordFields form={form} />
+
+      <Input
+        {...register('birthDate')}
+        type="date"
+        placeholder="Birth date"
+        className="text-reflect-dark/70"
+        error={errors.birthDate?.message}
+      />
+
+      {formError && (
+        <p className="text-sm text-red-500 font-semibold" role="alert">
+          {formError}
+        </p>
+      )}
+
+      <div className="mt-2">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className={isSubmitting ? 'opacity-60' : ''}
+        >
+          {isSubmitting ? 'Creating account...' : 'Register'}
+        </Button>
+      </div>
+
+      <p className="text-[11px] text-reflect-dark/60 text-center">
+        ReflectAI is not a clinical tool, does not diagnose, and does not replace
+        professional psychological care.
+      </p>
+    </form>
+  );
+}
+
+export function RegisterSocialSection() {
+  return (
+    <>
+      <div className="relative flex items-center py-2 text-sm font-medium text-reflect-dark/50">
+        <div className="flex-grow border-t border-reflect-dark/10" />
+        <span className="mx-4">or sign up with</span>
+        <div className="flex-grow border-t border-reflect-dark/10" />
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <SocialButton provider="Google" icon={<GoogleIcon />} disabled />
+        <SocialButton provider="Facebook" icon={<FacebookIcon />} disabled />
+      </div>
+
+      <p className="text-xs text-reflect-dark/50 text-center">
+        Google and Facebook sign-up will be available soon.
+      </p>
+
+      <footer className="text-center text-sm text-reflect-dark/70">
+        Already have an account? <CustomLink href="/login">Sign in here</CustomLink>
+      </footer>
+    </>
+  );
+}

@@ -6,12 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint src __tests__",
+    "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
-    "test:unit": "vitest run --exclude __tests__/integration/** --exclude __tests__/regression/**",
-    "test:integration": "vitest run __tests__/integration",
-    "test:regression": "vitest run __tests__/regression",
+    "test:unit": "vitest run --exclude src/**/*.integration.test.ts --exclude src/**/*.regression.test.tsx",
+    "test:integration": "vitest run src/app/api/api.integration.test.ts",
+    "test:regression": "vitest run src/features/reflection/pages/NewSessionPage.regression.test.tsx",
     "test:coverage": "vitest run --coverage"
   },
   "lint-staged": {

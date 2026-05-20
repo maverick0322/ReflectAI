@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-import { registerSchema } from '@/lib/validations/auth';
+import { registerSchema } from '@/features/auth/schemas/auth';
 
 function buildAuthCallbackUrl(requestUrl: string, nextPath: string) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;

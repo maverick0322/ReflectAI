@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { confirmRecoverySchema } from '@/lib/validations/auth';
+import { confirmRecoverySchema } from '@/features/auth/schemas/auth';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {

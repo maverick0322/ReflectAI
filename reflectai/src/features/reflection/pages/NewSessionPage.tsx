@@ -3,17 +3,17 @@
 import { Suspense } from 'react';
 import { FormProvider } from 'react-hook-form';
 
-import { ValidationContextProvider } from '@/contexts/ValidationContext';
-import { WizardLayout } from '@/components/wizard/WizardLayout';
-import { WizardLoadingState } from '@/components/wizard/WizardLoadingState';
-import { WizardStatusMessages } from '@/components/wizard/WizardStatusMessages';
-import { WizardSuccessState } from '@/components/wizard/WizardSuccessState';
-import { Step2Evaluacion } from '@/components/wizard/steps/Step2Evaluacion';
-import { Step3PropositoControl } from '@/components/wizard/steps/Step3PropositoControl';
-import { Step4Reestructuracion } from '@/components/wizard/steps/Step4Reestructuracion';
-import { StepContexto } from '@/components/wizard/steps/StepContexto';
-import { StepGrounding } from '@/components/wizard/steps/StepGrounding';
-import { useReflectionWizard } from '@/components/wizard/useReflectionWizard';
+import { ValidationContextProvider } from '@/features/reflection/contexts/ValidationContext';
+import { Step2Evaluation } from '@/features/reflection/components/steps/Step2Evaluation';
+import { Step3PurposeControl } from '@/features/reflection/components/steps/Step3PurposeControl';
+import { Step4Reframing } from '@/features/reflection/components/steps/Step4Reframing';
+import { StepContext } from '@/features/reflection/components/steps/StepContext';
+import { StepGrounding } from '@/features/reflection/components/steps/StepGrounding';
+import { WizardLayout } from '@/features/reflection/components/WizardLayout';
+import { WizardLoadingState } from '@/features/reflection/components/WizardLoadingState';
+import { WizardStatusMessages } from '@/features/reflection/components/WizardStatusMessages';
+import { WizardSuccessState } from '@/features/reflection/components/WizardSuccessState';
+import { useReflectionWizard } from '@/features/reflection/hooks/useReflectionWizard';
 
 function WizardStepContent() {
   const wizard = useReflectionWizard();
@@ -47,14 +47,14 @@ function WizardStepContent() {
 
           <form onSubmit={(event) => event.preventDefault()}>
             {wizard.step === 1 && (
-              <StepContexto
+              <StepContext
                 onNext={wizard.nextStep}
                 questionText={wizard.questionPrompts.Q1_SIT}
               />
             )}
 
             {wizard.step === 2 && (
-              <Step2Evaluacion
+              <Step2Evaluation
                 onNext={wizard.nextStep}
                 onPrev={wizard.prevStep}
                 thoughtQuestion={wizard.questionPrompts.Q2_THO}
@@ -71,7 +71,7 @@ function WizardStepContent() {
             )}
 
             {wizard.step === 4 && (
-              <Step3PropositoControl
+              <Step3PurposeControl
                 onNext={wizard.nextStep}
                 onPrev={wizard.prevStep}
                 purposeQuestion={wizard.questionPrompts.Q5_TEL}
@@ -81,7 +81,7 @@ function WizardStepContent() {
             )}
 
             {wizard.step === 5 && (
-              <Step4Reestructuracion
+              <Step4Reframing
                 onPrev={wizard.prevStep}
                 onSubmit={wizard.handleFinalSubmit}
                 questionText={wizard.questionPrompts.Q7_ALT}

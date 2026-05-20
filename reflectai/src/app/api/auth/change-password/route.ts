@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
+import { changePasswordSchema } from '@/features/auth/schemas/auth';
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
-import { changePasswordSchema } from '@/lib/validations/auth';
 
 export async function POST(request: Request) {
   try {
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     if (validation.data.currentPassword) {
       if (!user.email) {
         return NextResponse.json(
-          { error: { message: 'No se pudo validar la contraseña actual' } },
+          { error: { message: 'Unable to validate the current password' } },
           { status: 400 },
         );
       }
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
       if (signInError) {
         return NextResponse.json(
-          { error: { message: 'La contraseña actual es incorrecta' } },
+          { error: { message: 'The current password is incorrect' } },
           { status: 400 },
         );
       }
@@ -53,17 +53,17 @@ export async function POST(request: Request) {
 
     if (error) {
       return NextResponse.json(
-        { error: { message: 'No se pudo actualizar la contraseña' } },
+        { error: { message: 'Unable to update the password' } },
         { status: 500 },
       );
     }
 
     return NextResponse.json({
-      message: 'Contraseña actualizada correctamente',
+      message: 'Password updated successfully',
     });
   } catch {
     return NextResponse.json(
-      { error: { message: 'Error inesperado al actualizar contraseña' } },
+      { error: { message: 'Unexpected error while updating the password' } },
       { status: 500 },
     );
   }

@@ -1,4 +1,4 @@
-import type { ReflectionSessionPayload } from '@/types/reflection';
+import type { ReflectionSessionPayload } from '@/features/reflection/types/reflection';
 
 import { createGroqChatCompletion, type GroqChatMessage } from './groqClient';
 

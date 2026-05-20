@@ -1,10 +1,10 @@
-import { EmotionalEvolutionCard } from '@/components/statistics/EmotionalEvolutionCard';
-import { EmotionDistributionCard } from '@/components/statistics/EmotionDistributionCard';
-import { SessionComparisonCard } from '@/components/statistics/SessionComparisonCard';
-import { ThoughtPatternCard } from '@/components/statistics/ThoughtPatternCard';
-import { TopicHighlightsCard } from '@/components/statistics/TopicHighlightsCard';
-import { statisticsDashboardMock } from '@/components/statistics/statisticsMocks';
-import GlassCard from '@/components/ui/GlassCard';
+import { EmotionalEvolutionCard } from '@/features/statistics/components/EmotionalEvolutionCard';
+import { EmotionDistributionCard } from '@/features/statistics/components/EmotionDistributionCard';
+import { SessionComparisonCard } from '@/features/statistics/components/SessionComparisonCard';
+import { ThoughtPatternCard } from '@/features/statistics/components/ThoughtPatternCard';
+import { TopicHighlightsCard } from '@/features/statistics/components/TopicHighlightsCard';
+import { statisticsDashboardMock } from '@/features/statistics/data/statisticsMocks';
+import GlassCard from '@/shared/ui/GlassCard';
 
 export function StatisticsPage() {
   return (
@@ -13,15 +13,15 @@ export function StatisticsPage() {
         <header className="flex flex-col gap-2">
           <div>
             <span className="text-sm font-medium text-slate-500 uppercase tracking-widest">
-              Dashboard personal
+              Personal dashboard
             </span>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              Mis estadisticas
+              My statistics
             </h1>
           </div>
           <p className="text-sm text-slate-500">
-            Explora tus tendencias emocionales recientes desde una vista compacta y
-            preparada para conectar el backend despues.
+            Explore your recent emotional trends in a compact view that is ready
+            to connect to the backend.
           </p>
           <div
             className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/60 px-4 py-3"
@@ -31,8 +31,8 @@ export function StatisticsPage() {
               Frontend placeholder
             </p>
             <p className="mt-1 text-sm text-slate-600">
-              Esta pantalla usa datos dummy. La estructura y los contratos ya quedaron
-              listos para que backend conecte la informacion real.
+              This screen uses placeholder data. The structure and contracts are
+              already prepared for backend integration.
             </p>
           </div>
         </header>

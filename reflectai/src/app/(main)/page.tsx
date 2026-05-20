@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
 
+import { APP_ROUTES } from '@/core/routing/routes';
+
 export default function Home() {
-  redirect('/registro');
+  redirect(APP_ROUTES.register);
 }
