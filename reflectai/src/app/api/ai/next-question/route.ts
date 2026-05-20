@@ -1,4 +1,4 @@
-import { buildNextQuestionsResult } from '@/lib/ai/session';
+import { buildOwnedNextQuestionsResult } from '@/lib/ai/session';
 import {
   buildSuccessResponse,
   enforceRateLimit,
@@ -8,7 +8,6 @@ import {
   toRouteErrorResponse,
 } from '@/lib/api/route';
 import { apiMessages } from '@/lib/copy/api';
-import { loadReflectionSessionPayload } from '@/lib/reflection/sessionService';
 import { nextQuestionSchema } from '@/lib/validations/ai';
 
 export async function POST(request: Request) {
@@ -26,13 +25,10 @@ export async function POST(request: Request) {
       invalidMessage: apiMessages.ai.invalidNextQuestionData,
     });
     const { supabase, user } = await requireAuthenticatedUser();
-    const { payload } = await loadReflectionSessionPayload(
+    const data = await buildOwnedNextQuestionsResult(
       supabase,
       user,
       nextQuestionRequest.sessionId,
-    );
-    const data = await buildNextQuestionsResult(
-      payload,
       nextQuestionRequest.questionIds,
     );
 

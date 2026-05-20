@@ -3,15 +3,14 @@ import {
   enforceTrustedMutationOrigin,
   toRouteErrorResponse,
 } from '@/lib/api/route';
+import { signOutCurrentSession } from '@/lib/auth/session';
 import { apiMessages } from '@/lib/copy/api';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
     enforceTrustedMutationOrigin(request);
 
-    const supabase = await createServerSupabaseClient();
-    await supabase.auth.signOut();
+    await signOutCurrentSession();
 
     return buildSuccessResponse({
       message: apiMessages.auth.logoutSucceeded,

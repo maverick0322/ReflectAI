@@ -1,3 +1,7 @@
+import { channel } from 'node:diagnostics_channel';
+
+export const SERVER_ERROR_LOG_CHANNEL = 'reflectai.server.error';
+
 export type ServerErrorLogEntry = {
   level: 'error';
   scope: string;
@@ -6,6 +10,8 @@ export type ServerErrorLogEntry = {
   errorName?: string;
   stack?: string;
 };
+
+const serverErrorLogChannel = channel(SERVER_ERROR_LOG_CHANNEL);
 
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
@@ -38,5 +44,5 @@ export function logServerError(scope: string, error: unknown) {
     return;
   }
 
-  console.error(buildServerErrorLogEntry(scope, error));
+  serverErrorLogChannel.publish(buildServerErrorLogEntry(scope, error));
 }

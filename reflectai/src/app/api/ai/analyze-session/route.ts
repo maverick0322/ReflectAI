@@ -6,12 +6,8 @@ import {
   requireAuthenticatedUser,
   toRouteErrorResponse,
 } from '@/lib/api/route';
-import { generateSessionAnalysis } from '@/lib/ai/session';
+import { analyzeOwnedReflectionSession } from '@/lib/ai/session';
 import { apiMessages } from '@/lib/copy/api';
-import {
-  loadReflectionSessionPayload,
-  saveReflectionSessionAnalysis,
-} from '@/lib/reflection/sessionService';
 import { analyzeSessionSchema } from '@/lib/validations/ai';
 
 export async function POST(request: Request) {
@@ -29,17 +25,10 @@ export async function POST(request: Request) {
       invalidMessage: apiMessages.ai.invalidAnalyzeSessionData,
     });
     const { supabase, user } = await requireAuthenticatedUser();
-    const { payload } = await loadReflectionSessionPayload(
+    const data = await analyzeOwnedReflectionSession(
       supabase,
       user,
       analyzeRequest.sessionId,
-    );
-    const analysis = await generateSessionAnalysis(payload);
-    const data = await saveReflectionSessionAnalysis(
-      supabase,
-      user,
-      analyzeRequest.sessionId,
-      analysis,
     );
 
     return buildSuccessResponse({

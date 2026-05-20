@@ -5,9 +5,9 @@ import {
   enforceTrustedMutationOrigin,
   parseJsonBody,
   requireAuthenticatedUser,
-  throwRouteError,
   toRouteErrorResponse,
 } from '@/lib/api/route';
+import { verifyAuthenticatedPassword } from '@/lib/auth/session';
 import { apiMessages } from '@/lib/copy/api';
 
 export async function POST(request: Request) {
@@ -32,18 +32,11 @@ export async function POST(request: Request) {
       windowMs: 15 * 60 * 1000,
     });
 
-    if (!user.email) {
-      throwRouteError(400, apiMessages.auth.passwordCurrentValidationFailed);
-    }
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: verificationRequest.currentPassword,
-    });
-
-    if (signInError) {
-      throwRouteError(400, apiMessages.auth.passwordCurrentIncorrect);
-    }
+    await verifyAuthenticatedPassword(
+      supabase,
+      user,
+      verificationRequest.currentPassword,
+    );
 
     return buildSuccessResponse({
       message: apiMessages.auth.passwordVerified,

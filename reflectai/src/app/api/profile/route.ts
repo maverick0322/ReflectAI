@@ -7,19 +7,17 @@ import {
 } from '@/lib/api/route';
 import { apiMessages } from '@/lib/copy/api';
 import {
-  buildProfileResponse,
-  loadUserProfile,
-  updateUserProfile,
+  getUserProfileResponse,
+  updateUserProfileResponse,
 } from '@/lib/profile/service';
 import { profileSchema } from '@/lib/validations/profile';
 
 export async function GET() {
   try {
     const { supabase, user } = await requireAuthenticatedUser();
-    const profile = await loadUserProfile(supabase, user);
 
     return buildSuccessResponse({
-      data: await buildProfileResponse(supabase, profile, user.email),
+      data: await getUserProfileResponse(supabase, user),
       message: apiMessages.profile.fetchSucceeded,
     });
   } catch (error: unknown) {
@@ -39,10 +37,9 @@ export async function PATCH(request: Request) {
       request,
       schema: profileSchema,
     });
-    const profile = await updateUserProfile(supabase, user, profileUpdate);
 
     return buildSuccessResponse({
-      data: await buildProfileResponse(supabase, profile, user.email),
+      data: await updateUserProfileResponse(supabase, user, profileUpdate),
       message: apiMessages.profile.updateSucceeded,
     });
   } catch (error: unknown) {
