@@ -3,11 +3,10 @@ import {
   enforceRateLimit,
   enforceTrustedMutationOrigin,
   parseJsonBody,
-  throwRouteError,
   toRouteErrorResponse,
 } from '@/lib/api/route';
+import { confirmPasswordRecovery } from '@/lib/auth/session';
 import { apiMessages } from '@/lib/copy/api';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { confirmRecoverySchema } from '@/lib/validations/auth';
 
 export async function POST(request: Request) {
@@ -24,14 +23,7 @@ export async function POST(request: Request) {
       schema: confirmRecoverySchema,
     });
 
-    const supabase = await createServerSupabaseClient();
-    const { data, error } = await supabase.auth.exchangeCodeForSession(
-      recoveryConfirmation.code,
-    );
-
-    if (error || !data.session) {
-      throwRouteError(400, apiMessages.auth.confirmRecoveryFailed);
-    }
+    await confirmPasswordRecovery(recoveryConfirmation.code);
 
     return buildSuccessResponse({
       message: apiMessages.auth.confirmRecoverySucceeded,

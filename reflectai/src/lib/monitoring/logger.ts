@@ -1,3 +1,7 @@
+import { channel } from 'node:diagnostics_channel';
+
+export const SERVER_ERROR_LOG_CHANNEL = 'reflectai.server.error';
+
 export type ServerErrorLogEntry = {
   level: 'error';
   scope: string;
@@ -24,6 +28,7 @@ export function setServerErrorLogFallbackTransport(
 export function resetServerErrorLogFallbackTransport() {
   fallbackTransport = writeServerErrorLogToStderr;
 }
+const serverErrorLogChannel = channel(SERVER_ERROR_LOG_CHANNEL);
 
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
@@ -56,5 +61,12 @@ export function logServerError(scope: string, error: unknown) {
     return;
   }
 
-  fallbackTransport(buildServerErrorLogEntry(scope, error));
+  const entry = buildServerErrorLogEntry(scope, error);
+  const hasSubscribers = serverErrorLogChannel.hasSubscribers;
+
+  serverErrorLogChannel.publish(entry);
+
+  if (!hasSubscribers) {
+    fallbackTransport(entry);
+  }
 }

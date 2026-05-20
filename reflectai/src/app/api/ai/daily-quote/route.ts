@@ -1,10 +1,10 @@
-import { generateDailyQuote, getFallbackQuote } from '@/lib/ai/dailyQuote';
 import {
   buildSuccessResponse,
   enforceRateLimit,
   requireAuthenticatedUser,
   toRouteErrorResponse,
 } from '@/lib/api/route';
+import { buildDailyQuoteForUser } from '@/lib/ai/session';
 import { apiMessages } from '@/lib/copy/api';
 
 export async function GET(request?: Request) {
@@ -17,28 +17,14 @@ export async function GET(request?: Request) {
 
     const { user } = await requireAuthenticatedUser();
 
-    const metadata = user.user_metadata ?? {};
-    const userName =
-      typeof metadata.full_name === 'string' ? metadata.full_name : undefined;
+    const quote = await buildDailyQuoteForUser(user);
 
-    try {
-      const quote = await generateDailyQuote(userName);
-      return buildSuccessResponse({
-        data: quote,
-        message: quote.aiGenerated
-          ? apiMessages.ai.dailyQuoteSucceeded
-          : apiMessages.ai.dailyQuoteFallbackSucceeded,
-      });
-    } catch (error: unknown) {
-      void error;
-      return buildSuccessResponse({
-        data: {
-          ...getFallbackQuote(),
-          aiGenerated: false,
-        },
-        message: apiMessages.ai.dailyQuoteFallbackSucceeded,
-      });
-    }
+    return buildSuccessResponse({
+      data: quote.data,
+      message: quote.aiGenerated
+        ? apiMessages.ai.dailyQuoteSucceeded
+        : apiMessages.ai.dailyQuoteFallbackSucceeded,
+    });
   } catch (error: unknown) {
     return toRouteErrorResponse(
       error,

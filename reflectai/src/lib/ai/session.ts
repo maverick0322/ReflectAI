@@ -1,11 +1,21 @@
 import type { QuestionId, ReflectionSessionPayload } from '@/types/reflection';
+import type { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 
+import { getFallbackQuote, generateDailyQuote } from '@/lib/ai/dailyQuote';
 import { generateNextQuestion } from '@/lib/ai/nextQuestion';
 import {
   analyzeReflectionSession,
   buildFallbackAnalysis,
 } from '@/lib/ai/reflectionAnalysis';
+import {
+  loadReflectionSessionPayload,
+  saveReflectionSessionAnalysis,
+} from '@/lib/reflection/sessionService';
 import { getNextQuestionId, getQuestionText } from '@/lib/reflection/questionFlow';
+
+type AuthenticatedContext = Awaited<ReturnType<typeof getAuthenticatedUser>>;
+type AuthenticatedSupabaseClient = AuthenticatedContext['supabase'];
+type AuthenticatedUser = NonNullable<AuthenticatedContext['user']>;
 
 type QuestionResult = {
   questionId: QuestionId;
@@ -71,4 +81,48 @@ export async function generateSessionAnalysis(payload: ReflectionSessionPayload)
     void error;
     return buildFallbackAnalysis(payload);
   }
+}
+
+export async function buildDailyQuoteForUser(user: AuthenticatedUser) {
+  const metadata = user.user_metadata ?? {};
+  const userName =
+    typeof metadata.full_name === 'string' ? metadata.full_name : undefined;
+
+  try {
+    const quote = await generateDailyQuote(userName);
+
+    return {
+      data: quote,
+      aiGenerated: quote.aiGenerated,
+    };
+  } catch (error: unknown) {
+    void error;
+    return {
+      data: {
+        ...getFallbackQuote(),
+        aiGenerated: false,
+      },
+      aiGenerated: false,
+    };
+  }
+}
+
+export async function buildOwnedNextQuestionsResult(
+  supabase: AuthenticatedSupabaseClient,
+  user: AuthenticatedUser,
+  sessionId: string,
+  questionIds?: QuestionId[],
+) {
+  const { payload } = await loadReflectionSessionPayload(supabase, user, sessionId);
+  return buildNextQuestionsResult(payload, questionIds);
+}
+
+export async function analyzeOwnedReflectionSession(
+  supabase: AuthenticatedSupabaseClient,
+  user: AuthenticatedUser,
+  sessionId: string,
+) {
+  const { payload } = await loadReflectionSessionPayload(supabase, user, sessionId);
+  const analysis = await generateSessionAnalysis(payload);
+  return saveReflectionSessionAnalysis(supabase, user, sessionId, analysis);
 }
