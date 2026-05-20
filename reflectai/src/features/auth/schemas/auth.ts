@@ -54,8 +54,13 @@ export const changePasswordSchema = z
     path: ['confirmNewPassword'],
   });
 
+export const deleteAccountSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+});
+
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 export type RecoverPasswordFormValues = z.infer<typeof recoverPasswordSchema>;
 export type ConfirmRecoveryValues = z.infer<typeof confirmRecoverySchema>;
 export type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
+export type DeleteAccountValues = z.infer<typeof deleteAccountSchema>;

@@ -1,4 +1,5 @@
 import { createGroqChatCompletion, type GroqChatMessage } from './groqClient';
+import { extractEmbeddedJsonObject, isRecord } from './json';
 
 export interface DailyQuoteResult {
   text: string;
@@ -25,40 +26,23 @@ const FALLBACK_QUOTES: DailyQuoteResult[] = [
 ];
 
 function parseQuoteContent(content: string): DailyQuoteResult | null {
-  const trimmed = content.trim();
-  const start = trimmed.indexOf('{');
-  const end = trimmed.lastIndexOf('}');
+  const parsed = extractEmbeddedJsonObject(content);
 
-  if (start === -1 || end === -1 || end <= start) {
+  if (!isRecord(parsed)) {
     return null;
   }
 
-  try {
-    const parsed = JSON.parse(trimmed.slice(start, end + 1)) as unknown;
+  const text = typeof parsed.text === 'string' ? parsed.text.trim() : '';
+  const author = typeof parsed.author === 'string' ? parsed.author.trim() : '';
 
-    if (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      'text' in parsed &&
-      'author' in parsed &&
-      typeof (parsed as { text: unknown }).text === 'string' &&
-      typeof (parsed as { author: unknown }).author === 'string'
-    ) {
-      const text = (parsed as { text: string }).text.trim();
-      const author = (parsed as { author: string }).author.trim();
-
-      if (text && author) {
-        return {
-          text,
-          author,
-        };
-      }
-    }
-  } catch {
+  if (!text || !author) {
     return null;
   }
 
-  return null;
+  return {
+    text,
+    author,
+  };
 }
 
 export function getFallbackQuote(seed = Date.now()): DailyQuoteResult {

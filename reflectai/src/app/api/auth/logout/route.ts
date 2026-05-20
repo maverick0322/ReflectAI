@@ -1,19 +1,25 @@
-import { NextResponse } from 'next/server';
+import {
+  buildSuccessResponse,
+  enforceTrustedMutationOrigin,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { signOutCurrentSession } from '@/lib/auth/session';
+import { apiMessages } from '@/lib/copy/api';
 
-import { createServerSupabaseClient } from '@/lib/supabase/server';
-
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const supabase = await createServerSupabaseClient();
-    await supabase.auth.signOut();
+    enforceTrustedMutationOrigin(request);
 
-    return NextResponse.json({
-      message: 'Sesion cerrada correctamente',
+    await signOutCurrentSession();
+
+    return buildSuccessResponse({
+      message: apiMessages.auth.logoutSucceeded,
     });
-  } catch {
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al cerrar sesion' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.auth.logoutUnexpected,
+      'auth logout failed',
     );
   }
 }

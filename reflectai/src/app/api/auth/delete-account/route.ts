@@ -1,60 +1,51 @@
-import { NextResponse } from 'next/server';
+import {
+  buildSuccessResponse,
+  enforceRateLimit,
+  enforceTrustedMutationOrigin,
+  parseJsonBody,
+  requireAuthenticatedUser,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { deleteAuthenticatedAccount } from '@/lib/auth/session';
+import { apiMessages } from '@/lib/copy/api';
+import { deleteAccountSchema } from '@/features/auth/schemas/auth';
 
-import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
-import { createAdminSupabaseClient } from '@/lib/supabase/admin';
-
-export async function DELETE() {
+export async function DELETE(request: Request) {
   try {
-    const { supabase, user, error: authError } = await getAuthenticatedUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
-    }
-
-    const adminClient = createAdminSupabaseClient();
-
-    const { error: sessionsError } = await adminClient
-      .from('reflection_sessions')
-      .delete()
-      .eq('user_id', user.id);
-
-    if (sessionsError) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo eliminar el historial' } },
-        { status: 500 },
-      );
-    }
-
-    const { error: profileError } = await adminClient
-      .from('profiles')
-      .delete()
-      .eq('id', user.id);
-
-    if (profileError) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo eliminar el perfil' } },
-        { status: 500 },
-      );
-    }
-
-    const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
-
-    if (deleteError) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo eliminar la cuenta' } },
-        { status: 500 },
-      );
-    }
-
-    await supabase.auth.signOut();
-
-    return NextResponse.json({
-      message: 'Cuenta eliminada correctamente',
+    enforceTrustedMutationOrigin(request);
+    enforceRateLimit(request, {
+      key: 'auth:delete-account',
+      maxRequests: 3,
+      windowMs: 15 * 60 * 1000,
     });
-  } catch {
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al eliminar cuenta' } },
-      { status: 500 },
+
+    const accountDeletion = await parseJsonBody({
+      request,
+      schema: deleteAccountSchema,
+    });
+
+    const { supabase, user } = await requireAuthenticatedUser();
+    enforceRateLimit(request, {
+      key: 'auth:delete-account:user',
+      identifier: user.id,
+      maxRequests: 2,
+      windowMs: 15 * 60 * 1000,
+    });
+
+    await deleteAuthenticatedAccount(
+      supabase,
+      user,
+      accountDeletion.currentPassword,
+    );
+
+    return buildSuccessResponse({
+      message: apiMessages.auth.deleteAccountSucceeded,
+    });
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.auth.deleteAccountUnexpected,
+      'auth delete account failed',
     );
   }
 }

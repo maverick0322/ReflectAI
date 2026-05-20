@@ -59,14 +59,6 @@ function mockAuthenticatedUser({
   } as never);
 }
 
-function createDeleteTableMock(error: unknown = null) {
-  const eq = vi.fn(async () => ({ error }));
-  return {
-    delete: vi.fn(() => ({ eq })),
-    eq,
-  };
-}
-
 beforeEach(() => {
   vi.clearAllMocks();
   delete process.env.NEXT_PUBLIC_SITE_URL;
@@ -254,68 +246,86 @@ describe('rutas API de autenticacion', () => {
   });
 
   it('elimina cuenta limpiando sesiones, perfil y usuario auth', async () => {
+    const signInWithPassword = vi.fn(async () => ({ error: null }));
     const signOut = vi.fn();
     mockAuthenticatedUser({
-      supabase: { auth: { signOut } },
+      supabase: { auth: { signInWithPassword, signOut } },
     });
-
-    const sessionsTable = createDeleteTableMock();
-    const profilesTable = createDeleteTableMock();
     const deleteUser = vi.fn(async () => ({ error: null }));
-    const from = vi.fn().mockReturnValueOnce(sessionsTable).mockReturnValueOnce(profilesTable);
     vi.mocked(createAdminSupabaseClient).mockReturnValue({
-      from,
       auth: { admin: { deleteUser } },
     } as never);
 
-    const response = await deleteAccountDelete();
+    const response = await deleteAccountDelete(
+      new Request('http://localhost/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'http://localhost',
+        },
+        body: JSON.stringify({
+          currentPassword: 'PasswordActual123',
+        }),
+      }),
+    );
     const body = await readJson(response);
 
     expect(response.status).toBe(200);
     expect(body.message).toBe('Cuenta eliminada correctamente');
-    expect(from).toHaveBeenCalledWith('reflection_sessions');
-    expect(from).toHaveBeenCalledWith('profiles');
+    expect(signInWithPassword).toHaveBeenCalledWith({
+      email: 'ana@reflectai.com',
+      password: 'PasswordActual123',
+    });
     expect(deleteUser).toHaveBeenCalledWith('user-1');
     expect(signOut).toHaveBeenCalled();
   });
 
   it('reporta errores por etapa al eliminar cuenta', async () => {
-    mockAuthenticatedUser();
+    const signInWithPassword = vi.fn(async () => ({ error: { message: 'bad' } }));
+    mockAuthenticatedUser({
+      supabase: { auth: { signInWithPassword, signOut: vi.fn() } },
+    });
 
-    vi.mocked(createAdminSupabaseClient).mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce(createDeleteTableMock({ message: 'db' })),
-      auth: { admin: { deleteUser: vi.fn() } },
-    } as never);
-
-    const sessionsResponse = await deleteAccountDelete();
-    expect(sessionsResponse.status).toBe(500);
-    expect((await readJson(sessionsResponse)).error?.message).toBe(
-      'No se pudo eliminar el historial',
+    const invalidPasswordResponse = await deleteAccountDelete(
+      new Request('http://localhost/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'http://localhost',
+        },
+        body: JSON.stringify({
+          currentPassword: 'PasswordActual123',
+        }),
+      }),
+    );
+    expect(invalidPasswordResponse.status).toBe(400);
+    expect((await readJson(invalidPasswordResponse)).error?.message).toBe(
+      'La contrasena actual es incorrecta',
     );
 
+    const validSignIn = vi.fn(async () => ({ error: null }));
+    mockAuthenticatedUser({
+      supabase: { auth: { signInWithPassword: validSignIn, signOut: vi.fn() } },
+    });
     vi.mocked(createAdminSupabaseClient).mockReturnValueOnce({
-      from: vi
-        .fn()
-        .mockReturnValueOnce(createDeleteTableMock())
-        .mockReturnValueOnce(createDeleteTableMock({ message: 'db' })),
-      auth: { admin: { deleteUser: vi.fn() } },
-    } as never);
-
-    const profileResponse = await deleteAccountDelete();
-    expect(profileResponse.status).toBe(500);
-    expect((await readJson(profileResponse)).error?.message).toBe(
-      'No se pudo eliminar el perfil',
-    );
-
-    vi.mocked(createAdminSupabaseClient).mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce(createDeleteTableMock()).mockReturnValueOnce(createDeleteTableMock()),
       auth: { admin: { deleteUser: vi.fn(async () => ({ error: { message: 'db' } })) } },
     } as never);
 
-    const authResponse = await deleteAccountDelete();
+    const authResponse = await deleteAccountDelete(
+      new Request('http://localhost/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'http://localhost',
+        },
+        body: JSON.stringify({
+          currentPassword: 'PasswordActual123',
+        }),
+      }),
+    );
     expect(authResponse.status).toBe(500);
     expect((await readJson(authResponse)).error?.message).toBe(
-      'No se pudo eliminar la cuenta',
+      'No se pudo eliminar la cuenta. Revisa las relaciones en cascada de profiles y reflection_sessions.',
     );
   });
 
@@ -325,14 +335,28 @@ describe('rutas API de autenticacion', () => {
       auth: { signOut },
     } as never);
 
-    const response = await logoutPost();
+    const response = await logoutPost(
+      new Request('http://localhost/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          Origin: 'http://localhost',
+        },
+      }),
+    );
     expect(response.status).toBe(200);
     expect((await readJson(response)).message).toBe('Sesion cerrada correctamente');
     expect(signOut).toHaveBeenCalled();
 
     vi.mocked(createServerSupabaseClient).mockRejectedValueOnce(new Error('boom'));
 
-    const failedResponse = await logoutPost();
+    const failedResponse = await logoutPost(
+      new Request('http://localhost/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          Origin: 'http://localhost',
+        },
+      }),
+    );
     expect(failedResponse.status).toBe(500);
     expect((await readJson(failedResponse)).error?.message).toBe(
       'Error inesperado al cerrar sesion',

@@ -1,88 +1,45 @@
-import { NextResponse } from 'next/server';
-
 import {
-  analyzeReflectionSession,
-  buildFallbackAnalysis,
-} from '@/lib/ai/reflectionAnalysis';
-import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
-import { normalizePayload } from '@/lib/reflection/payload';
+  buildSuccessResponse,
+  enforceRateLimit,
+  enforceTrustedMutationOrigin,
+  parseJsonBody,
+  requireAuthenticatedUser,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { analyzeOwnedReflectionSession } from '@/lib/ai/session';
+import { apiMessages } from '@/lib/copy/api';
 import { analyzeSessionSchema } from '@/lib/validations/ai';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => null);
-    const validation = analyzeSessionSchema.safeParse(body ?? {});
+    enforceTrustedMutationOrigin(request);
+    enforceRateLimit(request, {
+      key: 'ai:analyze-session',
+      maxRequests: 20,
+      windowMs: 60 * 60 * 1000,
+    });
 
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: {
-            message: 'Datos invalidos',
-            details: validation.error.flatten(),
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    const { supabase, user, error: authError } = await getAuthenticatedUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
-    }
-
-    const { data: session, error } = await supabase
-      .from('reflection_sessions')
-      .select('id, payload, started_at')
-      .eq('id', validation.data.sessionId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (error || !session) {
-      return NextResponse.json(
-        { error: { message: 'Sesion no encontrada' } },
-        { status: 404 },
-      );
-    }
-
-    const payload = normalizePayload(
-      session.payload,
-      session.started_at ?? new Date().toISOString(),
+    const analyzeRequest = await parseJsonBody({
+      request,
+      schema: analyzeSessionSchema,
+      invalidMessage: apiMessages.ai.invalidAnalyzeSessionData,
+    });
+    const { supabase, user } = await requireAuthenticatedUser();
+    const data = await analyzeOwnedReflectionSession(
+      supabase,
+      user,
+      analyzeRequest.sessionId,
     );
 
-    let analysis = buildFallbackAnalysis(payload);
-
-    try {
-      analysis = (await analyzeReflectionSession(payload)) ?? analysis;
-    } catch {
-      analysis = buildFallbackAnalysis(payload);
-    }
-
-    const { data, error: updateError } = await supabase
-      .from('reflection_sessions')
-      .update({
-        ai_analysis: analysis,
-      })
-      .eq('id', validation.data.sessionId)
-      .eq('user_id', user.id)
-      .select('id, ai_analysis')
-      .single();
-
-    if (updateError || !data) {
-      return NextResponse.json(
-        { error: { message: 'No se pudo guardar el analisis' } },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json({
+    return buildSuccessResponse({
       data,
-      message: 'Analisis generado correctamente',
+      message: apiMessages.ai.analyzeSucceeded,
     });
-  } catch {
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al generar analisis' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.ai.analyzeUnexpected,
+      'ai analyze session failed',
     );
   }
 }

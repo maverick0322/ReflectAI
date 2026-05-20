@@ -27,6 +27,14 @@ jobs:
         working-directory: ./reflectai
         run: npm ci
 
+      - name: Ejecutar lint
+        working-directory: ./reflectai
+        run: npm run lint
+
+      - name: Ejecutar typecheck
+        working-directory: ./reflectai
+        run: npm run typecheck
+
       - name: Ejecutar pruebas unitarias
         working-directory: ./reflectai
         run: npm run test:unit
@@ -50,10 +58,14 @@ jobs:
         run: |
           echo "**Validacion de Pruebas ReflectAI**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint: ejecutado con \`npm run lint\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Typecheck: ejecutado con \`npm run typecheck\`" >> $GITHUB_STEP_SUMMARY
           echo "- Unitarias: ejecutadas con \`npm run test:unit\`" >> $GITHUB_STEP_SUMMARY
           echo "- Integracion: \`__tests__/integration/api.integration.test.ts\`" >> $GITHUB_STEP_SUMMARY
           echo "- Regresion: \`__tests__/regression/newFeature.regression.test.tsx\`" >> $GITHUB_STEP_SUMMARY
           echo "- Cobertura: validada contra thresholds de \`vitest.config.ts\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Estandar backend de referencia: \`docs/Coding-Standard/backend-typescript-style-guide.md\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Registros: [Integracion](reflectai/__tests__/integration/Registro-Ejecucion-Integracion.md) y [Regresion](reflectai/__tests__/regression/Registro-Ejecucion-Regresion.md)" >> $GITHUB_STEP_SUMMARY
 
@@ -75,8 +87,10 @@ jobs:
             "src/app/api/auth/register/route.ts"
             "src/app/api/auth/login/route.ts"
             "src/app/api/auth/logout/route.ts"
+            "src/app/api/auth/session-status/route.ts"
             "src/app/api/auth/recover/route.ts"
             "src/app/api/auth/confirm-recovery/route.ts"
+            "src/app/api/auth/verify-password/route.ts"
             "src/app/api/auth/change-password/route.ts"
             "src/app/api/auth/delete-account/route.ts"
             "src/app/api/profile/route.ts"

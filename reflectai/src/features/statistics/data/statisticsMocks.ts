@@ -27,9 +27,24 @@ export const statisticsDashboardMock: StatisticsDashboardData = {
       "It often appears when you interpret other people's reactions without confirming them.",
   },
   sessionOptions: [
-    { id: 'latest', label: 'Latest session (Yesterday)' },
-    { id: 'work-conflict', label: 'Session: Work conflict' },
-    { id: 'family-discussion', label: 'Session: Family discussion' },
+    {
+      id: 'latest',
+      label: 'Latest session (Yesterday)',
+      intensity: 80,
+      emotion: 'Anxiety',
+    },
+    {
+      id: 'work-conflict',
+      label: 'Session: Work conflict',
+      intensity: 45,
+      emotion: 'Frustration',
+    },
+    {
+      id: 'family-discussion',
+      label: 'Session: Family discussion',
+      intensity: 35,
+      emotion: 'Sadness',
+    },
   ],
   defaultSelection: {
     sessionA: 'latest',

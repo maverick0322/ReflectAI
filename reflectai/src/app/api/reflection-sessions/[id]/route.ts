@@ -1,6 +1,10 @@
-import { NextResponse } from 'next/server';
-
-import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import {
+  buildSuccessResponse,
+  requireAuthenticatedUser,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { apiMessages } from '@/lib/copy/api';
+import { getReflectionSessionRecord } from '@/lib/reflection/sessionService';
 
 type RouteParams = {
   params: Promise<{
@@ -11,34 +15,18 @@ type RouteParams = {
 export async function GET(_request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const { supabase, user, error: authError } = await getAuthenticatedUser();
+    const { supabase, user } = await requireAuthenticatedUser();
+    const data = await getReflectionSessionRecord(supabase, user, id);
 
-    if (authError || !user) {
-      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
-    }
-
-    const { data, error } = await supabase
-      .from('reflection_sessions')
-      .select('id, title, status, started_at, completed_at, payload, ai_analysis')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (error || !data) {
-      return NextResponse.json(
-        { error: { message: 'Sesion no encontrada' } },
-        { status: 404 },
-      );
-    }
-
-    return NextResponse.json({
+    return buildSuccessResponse({
       data,
-      message: 'Sesion obtenida correctamente',
+      message: apiMessages.reflection.detailSucceeded,
     });
-  } catch {
-    return NextResponse.json(
-      { error: { message: 'Error inesperado al obtener la sesion' } },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.reflection.detailUnexpected,
+      'reflection session detail failed',
     );
   }
 }

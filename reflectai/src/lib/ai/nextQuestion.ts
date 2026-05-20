@@ -1,11 +1,29 @@
 import type { QuestionId, ReflectionSessionPayload } from '@/features/reflection/types/reflection';
 
 import { createGroqChatCompletion, type GroqChatMessage } from './groqClient';
+import { extractEmbeddedJsonObject, isRecord } from './json';
 import { getQuestionText } from '@/lib/reflection/questionFlow';
 
 export interface NextQuestionResult {
   questionId: QuestionId;
   questionText: string;
+}
+
+function buildContextPayload(payload: ReflectionSessionPayload) {
+  return {
+    metadata: {
+      version: payload.metadata.version,
+      completed_at: payload.metadata.completed_at ?? null,
+    },
+    responses: payload.responses.map((response) => ({
+      id: response.id,
+      value: response.value ?? null,
+      category: response.category ?? null,
+      status: response.status ?? null,
+      method: response.method ?? null,
+      text: response.text ? response.text.slice(0, 120) : null,
+    })),
+  };
 }
 
 export function buildNextQuestionMessages(
@@ -28,7 +46,7 @@ export function buildNextQuestionMessages(
       content: JSON.stringify({
         next_question_id: questionId,
         base_question: baseQuestion,
-        payload,
+        payload: buildContextPayload(payload),
       }),
     },
   ];
@@ -42,25 +60,17 @@ export function parseNextQuestionContent(content: string, fallback: string): str
 
   const start = trimmed.indexOf('{');
   const end = trimmed.lastIndexOf('}');
-  if (start === -1 || end === -1 || end <= start) {
-    return trimmed;
+  const parsed = extractEmbeddedJsonObject(trimmed);
+
+  if (!parsed) {
+    return start === -1 || end === -1 || end <= start ? trimmed : fallback;
   }
 
-  try {
-    const parsed = JSON.parse(trimmed.slice(start, end + 1)) as unknown;
-    if (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      'question_text' in parsed &&
-      typeof (parsed as { question_text: unknown }).question_text === 'string'
-    ) {
-      return (parsed as { question_text: string }).question_text;
-    }
-  } catch {
+  if (!isRecord(parsed) || typeof parsed.question_text !== 'string') {
     return fallback;
   }
 
-  return fallback;
+  return parsed.question_text;
 }
 
 export async function generateNextQuestion(

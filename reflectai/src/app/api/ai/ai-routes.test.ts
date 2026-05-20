@@ -10,6 +10,7 @@ import {
 } from '@/lib/ai/reflectionAnalysis';
 import { generateNextQuestion } from '@/lib/ai/nextQuestion';
 import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import { checkRateLimit } from '@/lib/security/rateLimit';
 
 vi.mock('@/lib/auth/getAuthenticatedUser', () => ({
   getAuthenticatedUser: vi.fn(),
@@ -27,6 +28,10 @@ vi.mock('@/lib/ai/nextQuestion', () => ({
 vi.mock('@/lib/ai/reflectionAnalysis', () => ({
   analyzeReflectionSession: vi.fn(),
   buildFallbackAnalysis: vi.fn(),
+}));
+
+vi.mock('@/lib/security/rateLimit', () => ({
+  checkRateLimit: vi.fn(),
 }));
 
 type MockFn = ReturnType<typeof vi.fn>;
@@ -120,7 +125,33 @@ function mockAuthenticatedUser({
 function jsonRequest(path: string, body: unknown) {
   return new Request(`http://localhost${path}`, {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost',
+    },
     body: JSON.stringify(body),
+  });
+}
+
+function jsonRequestWithIp(path: string, body: unknown, ip: string) {
+  return new Request(`http://localhost${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost',
+      'x-forwarded-for': ip,
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+function getRequestWithIp(path: string, ip: string) {
+  return new Request(`http://localhost${path}`, {
+    method: 'GET',
+    headers: {
+      Origin: 'http://localhost',
+      'x-forwarded-for': ip,
+    },
   });
 }
 
@@ -134,6 +165,10 @@ async function readJson(response: Response) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(checkRateLimit).mockReturnValue({
+    limited: false,
+    retryAfterSeconds: 0,
+  });
   vi.mocked(getFallbackQuote).mockReturnValue({
     quote: 'Respira y vuelve al presente.',
     author: 'ReflectAI',
@@ -163,6 +198,26 @@ describe('ruta API de cita diaria', () => {
     expect(generateDailyQuote).toHaveBeenCalledWith('Ana Lopez');
   });
 
+  it('omite el nombre cuando el perfil autenticado no lo expone', async () => {
+    mockAuthenticatedUser({
+      user: {
+        id: 'user-1',
+        email: 'ana@reflectai.com',
+        user_metadata: null,
+      },
+    });
+    vi.mocked(generateDailyQuote).mockResolvedValue({
+      quote: 'Haz una pausa.',
+      author: 'ReflectAI',
+      aiGenerated: true,
+    } as never);
+
+    const response = await dailyQuoteGet();
+
+    expect(response.status).toBe(200);
+    expect(generateDailyQuote).toHaveBeenCalledWith(undefined);
+  });
+
   it('usa fallback local si la IA falla y bloquea usuarios anonimos', async () => {
     mockAuthenticatedUser();
     vi.mocked(generateDailyQuote).mockRejectedValue(new Error('groq'));
@@ -183,6 +238,33 @@ describe('ruta API de cita diaria', () => {
     const unauthorizedResponse = await dailyQuoteGet();
     expect(unauthorizedResponse.status).toBe(401);
     expect((await readJson(unauthorizedResponse)).error?.message).toBe('No autorizado');
+  });
+
+  it('responde con rate limit y errores inesperados', async () => {
+    mockAuthenticatedUser();
+    vi.mocked(generateDailyQuote).mockResolvedValue({
+      quote: 'Haz una pausa.',
+      author: 'ReflectAI',
+      aiGenerated: true,
+    } as never);
+
+    vi.mocked(checkRateLimit)
+      .mockReturnValueOnce({ limited: false, retryAfterSeconds: 0 })
+      .mockReturnValueOnce({ limited: true, retryAfterSeconds: 120 });
+
+    const request = getRequestWithIp('/api/ai/daily-quote', '203.0.113.9');
+    const first = await dailyQuoteGet(request);
+    const second = await dailyQuoteGet(request);
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(429);
+    expect((await readJson(second)).error?.message).toBe(
+      'Demasiados intentos. Espera unos minutos antes de continuar.',
+    );
+
+    vi.mocked(getAuthenticatedUser).mockRejectedValueOnce(new Error('boom'));
+    const unexpected = await dailyQuoteGet();
+    expect(unexpected.status).toBe(500);
   });
 });
 
@@ -285,6 +367,52 @@ describe('ruta API de siguiente pregunta', () => {
     expect(notFoundResponse.status).toBe(404);
     expect((await readJson(notFoundResponse)).error?.message).toBe('Sesion no encontrada');
   });
+
+  it('rechaza origen no confiable y aplica rate limit', async () => {
+    const untrustedResponse = await nextQuestionPost(
+      new Request('http://localhost/api/ai/next-question', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'https://evil.test',
+        },
+        body: JSON.stringify({
+          sessionId: SESSION_ID,
+        }),
+      }),
+    );
+    expect(untrustedResponse.status).toBe(403);
+
+    const readBuilder = createBuilder({
+      data: {
+        id: SESSION_ID,
+        payload: basePayload,
+        started_at: STARTED_AT,
+      },
+      error: null,
+    });
+    mockAuthenticatedUser({ supabase: { from: vi.fn(() => readBuilder) } });
+    vi.mocked(generateNextQuestion).mockResolvedValue('Pregunta generada por IA');
+
+    vi.mocked(checkRateLimit)
+      .mockReturnValueOnce({ limited: false, retryAfterSeconds: 0 })
+      .mockReturnValueOnce({ limited: true, retryAfterSeconds: 120 });
+
+    const request = jsonRequestWithIp(
+      '/api/ai/next-question',
+      { sessionId: SESSION_ID },
+      '198.51.100.10',
+    );
+    const first = await nextQuestionPost(request);
+    const second = await nextQuestionPost(request);
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(429);
+    expect((await readJson(second)).error?.message).toBe(
+      'Demasiados intentos. Espera unos minutos antes de continuar.',
+    );
+
+  });
 });
 
 describe('ruta API de analisis de sesion', () => {
@@ -359,7 +487,9 @@ describe('ruta API de analisis de sesion', () => {
     expect(updateBuilder.update).toHaveBeenCalledWith({ ai_analysis: fallbackAnalysis });
   });
 
-  it('rechaza payload invalido, usuario anonimo, sesion inexistente y fallo al guardar', async () => {
+  it(
+    'rechaza payload invalido, usuario anonimo, sesion inexistente y fallo al guardar',
+    async () => {
     const invalidResponse = await analyzeSessionPost(
       jsonRequest('/api/ai/analyze-session', {
         sessionId: 'bad',
@@ -412,5 +542,60 @@ describe('ruta API de analisis de sesion', () => {
     expect((await readJson(updateFailureResponse)).error?.message).toBe(
       'No se pudo guardar el analisis',
     );
+    },
+  );
+
+  it('rechaza origen no confiable y aplica rate limit', async () => {
+    const untrustedResponse = await analyzeSessionPost(
+      new Request('http://localhost/api/ai/analyze-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'https://evil.test',
+        },
+        body: JSON.stringify({
+          sessionId: SESSION_ID,
+        }),
+      }),
+    );
+    expect(untrustedResponse.status).toBe(403);
+
+    const readBuilder = createBuilder({
+      data: {
+        id: SESSION_ID,
+        payload: basePayload,
+        started_at: STARTED_AT,
+      },
+      error: null,
+    });
+    const updateBuilder = createBuilder({
+      data: {
+        id: SESSION_ID,
+        ai_analysis: fallbackAnalysis,
+      },
+      error: null,
+    });
+    const from = vi.fn().mockReturnValueOnce(readBuilder).mockReturnValueOnce(updateBuilder);
+    mockAuthenticatedUser({ supabase: { from } });
+    vi.mocked(analyzeReflectionSession).mockResolvedValue(fallbackAnalysis);
+
+    vi.mocked(checkRateLimit)
+      .mockReturnValueOnce({ limited: false, retryAfterSeconds: 0 })
+      .mockReturnValueOnce({ limited: true, retryAfterSeconds: 120 });
+
+    const request = jsonRequestWithIp(
+      '/api/ai/analyze-session',
+      { sessionId: SESSION_ID },
+      '203.0.113.11',
+    );
+    const first = await analyzeSessionPost(request);
+    const second = await analyzeSessionPost(request);
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(429);
+    expect((await readJson(second)).error?.message).toBe(
+      'Demasiados intentos. Espera unos minutos antes de continuar.',
+    );
+
   });
 });

@@ -140,7 +140,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe('New feature regression - version 2026-05-12', () => {
+describe('New feature regression - version 2026-05-19', () => {
   it('RG-01 preserves the grounding flow for high intensity and completes the session', async () => {
     const user = userEvent.setup();
     await renderWizard();
@@ -306,5 +306,65 @@ describe('New feature regression - version 2026-05-12', () => {
 
     expect(await screen.findByText(/recent completed session/i)).toBeInTheDocument();
     expect(screen.queryByText(/you have a paused reflection/i)).not.toBeInTheDocument();
+  });
+
+  it('RG-05 resumes an in-progress draft and continues with the original sessionId', async () => {
+    const user = userEvent.setup();
+    useSearchParamsMock.mockReturnValue(new URLSearchParams(`sessionId=${SESSION_ID}`));
+    getReflectionSessionMock.mockResolvedValueOnce(
+      buildSessionResponse({
+        payload: {
+          metadata: {
+            version: '1.1',
+            started_at: STARTED_AT,
+            resume_step: 4,
+          },
+          responses: [
+            { id: 'Q1_SIT', text: 'A tense meeting' },
+            { id: 'Q2_THO', text: 'They do not value my work' },
+            { id: 'Q3_EMO', text: 'Anger' },
+            { id: 'Q4_INT', value: 7 },
+          ],
+        },
+      }),
+    );
+
+    render(<NewSessionPage />);
+
+    expect(
+      await screen.findByPlaceholderText(/i think this emotion was trying to/i),
+    ).toBeInTheDocument();
+    expect(createReflectionSessionMock).not.toHaveBeenCalled();
+    expect(requestNextQuestionMock).toHaveBeenCalledWith(SESSION_ID, [
+      'Q5_TEL',
+      'Q6_CON_MINE',
+      'Q6_CON_OTHERS',
+    ]);
+
+    await user.type(
+      screen.getByPlaceholderText(/i think this emotion was trying to/i),
+      'It was trying to protect my boundaries.',
+    );
+    await user.type(
+      screen.getByPlaceholderText(/my actions, my words, my boundaries/i),
+      'I can pause before responding.',
+    );
+    await user.type(
+      screen.getByPlaceholderText(/their reactions, their choices, the context/i),
+      'Their reactions do not depend on me.',
+    );
+    await user.click(screen.getByRole('button', { name: /^next$/i }));
+
+    expect(
+      await screen.findByPlaceholderText(/an alternative perspective could be/i),
+    ).toBeInTheDocument();
+    expect(addReflectionResponseMock).toHaveBeenCalledWith(
+      SESSION_ID,
+      expect.objectContaining({
+        id: 'Q5_TEL',
+        text: 'It was trying to protect my boundaries.',
+      }),
+      undefined,
+    );
   });
 });

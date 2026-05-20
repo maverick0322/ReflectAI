@@ -29,11 +29,14 @@ describe('DeleteAccountPage', () => {
     render(<DeleteAccountPage />);
 
     const input = screen.getByPlaceholderText('DELETE');
+    const passwordInput = screen.getByPlaceholderText(/current password/i);
     const deleteButton = screen.getByRole('button', { name: /^delete$/i });
 
     expect(deleteButton).toBeDisabled();
 
     await user.type(input, 'DELETE');
+    expect(deleteButton).toBeDisabled();
+    await user.type(passwordInput, 'PasswordActual123');
 
     await waitFor(() => {
       expect(deleteButton).toBeEnabled();
@@ -71,6 +74,7 @@ describe('DeleteAccountPage', () => {
     render(<DeleteAccountPage />);
 
     await user.type(screen.getByPlaceholderText('DELETE'), 'DELETE');
+    await user.type(screen.getByPlaceholderText(/current password/i), 'PasswordActual123');
     await user.click(screen.getByRole('button', { name: /^delete$/i }));
 
     await waitFor(() => {
@@ -86,6 +90,8 @@ describe('DeleteAccountPage', () => {
     expect(deleteButton).toHaveClass('cursor-not-allowed');
 
     await user.type(screen.getByPlaceholderText('DELETE'), 'DELETE');
+    expect(deleteButton).toHaveClass('cursor-not-allowed');
+    await user.type(screen.getByPlaceholderText(/current password/i), 'PasswordActual123');
 
     await waitFor(() => {
       expect(deleteButton).not.toHaveClass('cursor-not-allowed');
@@ -97,7 +103,9 @@ describe('DeleteAccountPage', () => {
     render(<DeleteAccountPage />);
 
     const input = screen.getByPlaceholderText('DELETE');
+    const passwordInput = screen.getByPlaceholderText(/current password/i);
     fireEvent.change(input, { target: { value: 'DELETE' } });
+    fireEvent.change(passwordInput, { target: { value: 'PasswordActual123' } });
     fireEvent.click(screen.getByRole('button', { name: /^delete$/i }));
 
     await Promise.resolve();

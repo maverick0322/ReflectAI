@@ -6,7 +6,9 @@ import {
 } from '@/app/api/reflection-sessions/route';
 import { GET as getReflectionSessionById } from '@/app/api/reflection-sessions/[id]/route';
 import { POST as addReflectionResponse } from '@/app/api/reflection-sessions/[id]/responses/route';
-import { PATCH as completeReflectionSession } from '@/app/api/reflection-sessions/[id]/complete/route';
+import {
+  PATCH as completeReflectionSession,
+} from '@/app/api/reflection-sessions/[id]/complete/route';
 import {
   analyzeReflectionSession,
   buildFallbackAnalysis,
@@ -97,6 +99,10 @@ function mockAuthenticatedUser({
 function jsonRequest(path: string, body: unknown, method = 'POST') {
   return new Request(`http://localhost${path}`, {
     method,
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost',
+    },
     body: JSON.stringify(body),
   });
 }
@@ -276,7 +282,9 @@ describe('rutas API de sesiones de reflexion: errores y ramas', () => {
       singleResult: { data: null, error: { message: 'db' } },
     });
     mockAuthenticatedUser({
-      supabase: { from: vi.fn().mockReturnValueOnce(readBuilder).mockReturnValueOnce(updateBuilder) },
+      supabase: {
+        from: vi.fn().mockReturnValueOnce(readBuilder).mockReturnValueOnce(updateBuilder),
+      },
     });
 
     const dbResponse = await addReflectionResponse(
@@ -299,7 +307,9 @@ describe('rutas API de sesiones de reflexion: errores y ramas', () => {
     expect(catchResponse.status).toBe(500);
   });
 
-  it('cubre validacion, no autorizado, sesion faltante y sesion ya completada al completar', async () => {
+  it(
+    'cubre validacion, no autorizado, sesion faltante y sesion ya completada al completar',
+    async () => {
     mockAuthenticatedUser();
     const invalidResponse = await completeReflectionSession(
       jsonRequest('/api/reflection-sessions/session-1/complete', {
@@ -343,9 +353,12 @@ describe('rutas API de sesiones de reflexion: errores y ramas', () => {
       routeParams,
     );
     expect(completedResponse.status).toBe(409);
-  });
+    },
+  );
 
-  it('usa analisis fallback al completar si IA no devuelve resultado y reporta fallo de update', async () => {
+  it(
+    'usa analisis fallback al completar si IA no devuelve resultado y reporta fallo de update',
+    async () => {
     vi.mocked(analyzeReflectionSession).mockResolvedValue(null);
     const readBuilder = createBuilder({
       singleResult: {
@@ -371,7 +384,9 @@ describe('rutas API de sesiones de reflexion: errores y ramas', () => {
       },
     });
     mockAuthenticatedUser({
-      supabase: { from: vi.fn().mockReturnValueOnce(readBuilder).mockReturnValueOnce(updateBuilder) },
+      supabase: {
+        from: vi.fn().mockReturnValueOnce(readBuilder).mockReturnValueOnce(updateBuilder),
+      },
     });
 
     const response = await completeReflectionSession(
@@ -403,6 +418,84 @@ describe('rutas API de sesiones de reflexion: errores y ramas', () => {
     expect(updateFailedResponse.status).toBe(500);
     expect((await readJson(updateFailedResponse)).error?.message).toBe(
       'No se pudo completar la sesion',
+    );
+    },
+  );
+
+  it('bloquea completar sesiones sin respuestas y prioriza el titulo manual', async () => {
+    const emptyPayloadBuilder = createBuilder({
+      singleResult: {
+        data: {
+          id: 'session-1',
+          status: 'draft',
+          started_at: null,
+          payload: {
+            metadata: {
+              version: '1.1',
+              started_at: startedAt,
+            },
+            responses: [],
+          },
+        },
+        error: null,
+      },
+    });
+    mockAuthenticatedUser({ supabase: { from: vi.fn(() => emptyPayloadBuilder) } });
+
+    const emptyResponse = await completeReflectionSession(
+      jsonRequest('/api/reflection-sessions/session-1/complete', {}, 'PATCH'),
+      routeParams,
+    );
+    expect(emptyResponse.status).toBe(409);
+    expect((await readJson(emptyResponse)).error?.message).toBe(
+      'No se puede completar una sesion sin respuestas',
+    );
+
+    vi.mocked(analyzeReflectionSession).mockRejectedValueOnce(new Error('groq'));
+    const readBuilder = createBuilder({
+      singleResult: {
+        data: {
+          id: 'session-1',
+          status: 'draft',
+          started_at: null,
+          payload: payloadWithResponse,
+        },
+        error: null,
+      },
+    });
+    const updateBuilder = createBuilder({
+      singleResult: {
+        data: {
+          id: 'session-1',
+          title: 'Titulo manual',
+          status: 'completed',
+          payload: payloadWithResponse,
+          ai_analysis: fallbackAnalysis,
+        },
+        error: null,
+      },
+    });
+    mockAuthenticatedUser({
+      supabase: {
+        from: vi.fn().mockReturnValueOnce(readBuilder).mockReturnValueOnce(updateBuilder),
+      },
+    });
+
+    const titledResponse = await completeReflectionSession(
+      jsonRequest(
+        '/api/reflection-sessions/session-1/complete',
+        { title: 'Titulo manual' },
+        'PATCH',
+      ),
+      routeParams,
+    );
+
+    expect(titledResponse.status).toBe(200);
+    expect(updateBuilder.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Titulo manual',
+        ai_analysis: fallbackAnalysis,
+      }),
     );
   });
 });

@@ -22,10 +22,12 @@ export function DeleteAccountPage() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [confirmText, setConfirmText] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const isConfirmed = confirmText === DELETE_CONFIRMATION_TEXT;
+  const canDelete = isConfirmed && currentPassword.trim().length > 0;
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const normalizedText = normalizeDeleteConfirmation(event.target.value);
@@ -40,7 +42,7 @@ export function DeleteAccountPage() {
   };
 
   const handleDelete = async () => {
-    if (!isConfirmed) {
+    if (!canDelete) {
       return;
     }
 
@@ -48,11 +50,11 @@ export function DeleteAccountPage() {
     setFormError(null);
 
     try {
-      await deleteAccount();
+      await deleteAccount(currentPassword);
       setTimeout(() => {
         router.push(APP_ROUTES.login);
       }, 2500);
-    } catch (error) {
+    } catch (error: unknown) {
       const message =
         error instanceof ApiError && error.payload?.message
           ? error.payload.message
@@ -128,6 +130,13 @@ export function DeleteAccountPage() {
                 />
               </div>
 
+              <Input
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                placeholder="Current password"
+              />
+
               {formError && (
                 <p className="text-sm font-semibold text-red-500" role="alert">
                   {formError}
@@ -145,9 +154,9 @@ export function DeleteAccountPage() {
                 <button
                   type="button"
                   onClick={handleDelete}
-                  disabled={!isConfirmed}
+                  disabled={!canDelete}
                   className={`flex-1 rounded-2xl py-4 text-lg font-bold transition-all duration-300 ${
-                    isConfirmed
+                    canDelete
                       ? '!bg-black !text-white border border-black shadow-xl hover:!bg-slate-900 hover:scale-[1.02] active:scale-95'
                       : 'cursor-not-allowed bg-slate-200 text-slate-400 shadow-none'
                   }`}

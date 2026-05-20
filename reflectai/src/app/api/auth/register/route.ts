@@ -1,90 +1,48 @@
-import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
-
 import { registerSchema } from '@/features/auth/schemas/auth';
-
-function buildAuthCallbackUrl(requestUrl: string, nextPath: string) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  const baseUrl = siteUrl ?? new URL(requestUrl).origin;
-  const callbackUrl = new URL('/auth/callback', baseUrl);
-  callbackUrl.searchParams.set('next', nextPath);
-  return callbackUrl.toString();
-}
+import {
+  buildSuccessResponse,
+  parseJsonBody,
+  toRouteErrorResponse,
+} from '@/lib/api/route';
+import { registerAuthUser } from '@/lib/auth/register';
+import { apiMessages } from '@/lib/copy/api';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => null);
-
-    const validation = registerSchema.safeParse({
-      ...body,
-      confirmEmail: body?.email,
-      confirmPassword: body?.password,
+    const registerInput = await parseJsonBody({
+      request,
+      schema: registerSchema,
+      mapInput: (body) => ({
+        ...(typeof body === 'object' && body !== null ? body : {}),
+        confirmEmail:
+          typeof body === 'object' && body !== null
+            ? (body as Record<string, unknown>).email
+            : undefined,
+        confirmPassword:
+          typeof body === 'object' && body !== null
+            ? (body as Record<string, unknown>).password
+            : undefined,
+      }),
+      invalidMessage: apiMessages.auth.invalidRegisterData,
     });
+    const { fullName, user } = await registerAuthUser(registerInput);
 
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: {
-            message: 'Datos de registro invalidos',
-            details: validation.error.flatten(),
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    const { firstName, lastName, email, password, birthDate } = validation.data;
-    const fullName = [firstName, lastName].filter(Boolean).join(' ');
-
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    );
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: buildAuthCallbackUrl(request.url, '/dashboard'),
-        data: {
-          first_name: firstName,
-          last_name: lastName ?? '',
-          full_name: fullName,
-          birth_date: birthDate,
-        },
-      },
-    });
-
-    if (error) {
-      return NextResponse.json(
-        {
-          error: {
-            message: 'No se pudo registrar el usuario',
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    return NextResponse.json(
+    return buildSuccessResponse(
       {
         data: {
-          id: data.user?.id,
-          email: data.user?.email,
+          id: user.id,
+          email: user.email,
           fullName,
         },
-        message: 'Usuario registrado correctamente',
+        message: apiMessages.auth.registerSucceeded,
       },
       { status: 201 },
     );
-  } catch {
-    return NextResponse.json(
-      {
-        error: {
-          message: 'Error inesperado al registrar usuario',
-        },
-      },
-      { status: 500 },
+  } catch (error: unknown) {
+    return toRouteErrorResponse(
+      error,
+      apiMessages.auth.registerUnexpected,
+      'auth register failed',
     );
   }
 }
