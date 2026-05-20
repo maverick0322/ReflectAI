@@ -384,7 +384,7 @@ Minimos globales:
 - Functions >= 80%.
 - Lines >= 80%.
 
-Estos umbrales se evaluan de forma global, alineados con el Quality Gate por defecto de SonarCloud. Si la cobertura global cumple, el criterio de coverage se considera cumplido aunque archivos individuales queden por debajo del umbral.
+Estos umbrales se evaluan de forma global, alineados con el Quality Gate por defecto de SonarCloud. Si la cobertura global cumple, el criterio de cobertura se considera cumplido aunque archivos individuales queden por debajo del umbral.
 
 Para rutas criticas nuevas se espera cobertura significativa de branches como criterio de revision tecnica, pero no como Quality Gate por archivo.
 
