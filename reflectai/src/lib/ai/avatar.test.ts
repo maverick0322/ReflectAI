@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   AVATAR_BUCKET,
   resolveAvatarUrl,
+  validateAvatarFile,
   uploadProfileAvatar,
 } from '@/lib/profile/avatar';
 
@@ -99,5 +100,99 @@ describe('profile avatar helpers', () => {
     ).resolves.toEqual({
       error: 'update_failed',
     });
+  });
+
+  it('validates required avatar inputs, allowed types, and size limits', () => {
+    expect(validateAvatarFile(null)).toEqual({ error: 'required' });
+    expect(
+      validateAvatarFile(new File(['bad'], 'avatar.gif', { type: 'image/gif' })),
+    ).toEqual({ error: 'invalid_type' });
+    expect(
+      validateAvatarFile(
+        new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'avatar.png', {
+          type: 'image/png',
+        }),
+      ),
+    ).toEqual({ error: 'too_large' });
+    expect(
+      validateAvatarFile(
+        new File(
+          [new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])],
+          'avatar.png',
+          { type: 'image/png' },
+        ),
+      ),
+    ).toMatchObject({ extension: 'png' });
+  });
+
+  it('returns upload and signature failures separately and persists valid avatars', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(1700000000000);
+    const invalidSignatureFile = new File(
+      [new Uint8Array([0x00, 0x01, 0x02])],
+      'avatar.png',
+      { type: 'image/png' },
+    );
+    const validFile = new File(
+      [new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])],
+      'avatar.png',
+      { type: 'image/png' },
+    );
+
+    const upload = vi.fn(async () => ({ error: { message: 'storage' } }));
+    const uploadSupabase = {
+      storage: {
+        from: () => ({
+          upload,
+          createSignedUrl: vi.fn(),
+        }),
+      },
+      from: () => ({
+        update: () => ({
+          eq: () => ({
+            select: () => ({
+              single: vi.fn(),
+            }),
+          }),
+        }),
+      }),
+    };
+
+    await expect(
+      uploadProfileAvatar(uploadSupabase as never, 'user-1', invalidSignatureFile, 'png'),
+    ).resolves.toEqual({ error: 'invalid_signature' });
+
+    await expect(
+      uploadProfileAvatar(uploadSupabase as never, 'user-1', validFile, 'png'),
+    ).resolves.toEqual({ error: 'upload_failed' });
+
+    const persistedProfile = {
+      id: 'user-1',
+      first_name: 'Ana',
+      last_name: 'Lopez',
+      full_name: 'Ana Lopez',
+      birth_date: '2000-01-01',
+      avatar_url: 'user-1/avatar-1700000000000.png',
+    };
+    const successSupabase = {
+      storage: {
+        from: () => ({
+          upload: vi.fn(async () => ({ error: null })),
+          createSignedUrl: vi.fn(),
+        }),
+      },
+      from: () => ({
+        update: () => ({
+          eq: () => ({
+            select: () => ({
+              single: async () => ({ data: persistedProfile, error: null }),
+            }),
+          }),
+        }),
+      }),
+    };
+
+    await expect(
+      uploadProfileAvatar(successSupabase as never, 'user-1', validFile, 'png'),
+    ).resolves.toEqual({ data: persistedProfile });
   });
 });
