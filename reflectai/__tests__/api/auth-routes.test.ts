@@ -605,7 +605,6 @@ describe('rutas API de autenticacion', () => {
       'La contrasena actual es incorrecta',
     );
   });
-
   it('cierra sesion y maneja errores inesperados', async () => {
     const signOut = vi.fn();
     vi.mocked(createServerSupabaseClient).mockResolvedValueOnce({
