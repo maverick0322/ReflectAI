@@ -140,7 +140,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe('New feature regression - version 2026-05-12', () => {
+describe('New feature regression - version 2026-05-19', () => {
   it('RG-01 preserves the grounding flow for high intensity and completes the session', async () => {
     const user = userEvent.setup();
     await renderWizard();
@@ -310,5 +310,61 @@ describe('New feature regression - version 2026-05-12', () => {
 
     expect(await screen.findByText(/Sesion completada reciente/i)).toBeInTheDocument();
     expect(screen.queryByText(/pendiente/i)).not.toBeInTheDocument();
+  });
+
+  it('RG-05 resumes an in-progress draft and continues with the original sessionId', async () => {
+    const user = userEvent.setup();
+    useSearchParamsMock.mockReturnValue(new URLSearchParams(`sessionId=${SESSION_ID}`));
+    getReflectionSessionMock.mockResolvedValueOnce(
+      buildSessionResponse({
+        payload: {
+          metadata: {
+            version: '1.1',
+            started_at: STARTED_AT,
+            resume_step: 4,
+          },
+          responses: [
+            { id: 'Q1_SIT', text: 'Una junta tensa' },
+            { id: 'Q2_THO', text: 'No valoran mi trabajo' },
+            { id: 'Q3_EMO', text: 'Enojo' },
+            { id: 'Q4_INT', value: 7 },
+          ],
+        },
+      }),
+    );
+
+    render(<NewSessionPage />);
+
+    expect(await screen.findByPlaceholderText(/Siento que/i)).toBeInTheDocument();
+    expect(createReflectionSessionMock).not.toHaveBeenCalled();
+    expect(requestNextQuestionMock).toHaveBeenCalledWith(SESSION_ID, [
+      'Q5_TEL',
+      'Q6_CON_MINE',
+      'Q6_CON_OTHERS',
+    ]);
+
+    await user.type(
+      screen.getByPlaceholderText(/Siento que/i),
+      'Intentaba proteger mis limites.',
+    );
+    await user.type(
+      screen.getByPlaceholderText(/Mis acciones/i),
+      'Puedo hacer una pausa.',
+    );
+    await user.type(
+      screen.getByPlaceholderText(/Sus reacciones/i),
+      'No dependen de mi.',
+    );
+    await user.click(screen.getByRole('button', { name: /Siguiente/i }));
+
+    expect(await screen.findByPlaceholderText(/Una perspectiva alternativa/i)).toBeInTheDocument();
+    expect(addReflectionResponseMock).toHaveBeenCalledWith(
+      SESSION_ID,
+      expect.objectContaining({
+        id: 'Q5_TEL',
+        text: 'Intentaba proteger mis limites.',
+      }),
+      undefined,
+    );
   });
 });
