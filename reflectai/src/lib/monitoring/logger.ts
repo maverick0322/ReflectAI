@@ -62,11 +62,14 @@ export function logServerError(scope: string, error: unknown) {
   }
 
   const entry = buildServerErrorLogEntry(scope, error);
-  const hasSubscribers = serverErrorLogChannel.hasSubscribers;
 
   serverErrorLogChannel.publish(entry);
 
-  if (!hasSubscribers) {
-    fallbackTransport(entry);
+  if (!serverErrorLogChannel.hasSubscribers) {
+    try {
+      fallbackTransport(entry);
+    } catch (fallbackError: unknown) {
+      void fallbackError;
+    }
   }
 }

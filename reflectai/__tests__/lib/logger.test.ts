@@ -111,6 +111,37 @@ describe('logServerError', () => {
     );
   });
 
+  it('does not call fallback transport when a subscriber is attached', () => {
+    const entries: ServerErrorLogEntry[] = [];
+    const subscriber = (entry: unknown) => {
+      entries.push(entry as ServerErrorLogEntry);
+    };
+    const fallbackTransport = vi.fn();
+    const logChannel = channel(SERVER_ERROR_LOG_CHANNEL);
+
+    setServerErrorLogFallbackTransport(fallbackTransport);
+    logChannel.subscribe(subscriber);
+    vi.stubEnv('NODE_ENV', 'production');
+
+    logServerError('scope:subscriber', new Error('boom'));
+    logChannel.unsubscribe(subscriber);
+
+    expect(entries).toHaveLength(1);
+    expect(fallbackTransport).not.toHaveBeenCalled();
+  });
+
+  it('swallows fallback transport errors', () => {
+    const fallbackTransport = vi.fn(() => {
+      throw new Error('transport failed');
+    });
+
+    setServerErrorLogFallbackTransport(fallbackTransport);
+    vi.stubEnv('NODE_ENV', 'production');
+
+    expect(() => logServerError('scope:fallback-error', new Error('boom'))).not.toThrow();
+    expect(fallbackTransport).toHaveBeenCalledTimes(1);
+  });
+
   it('builds structured entries that are easy to forward to a provider', () => {
     const entry = buildServerErrorLogEntry('scope:test', new Error('boom'));
 
