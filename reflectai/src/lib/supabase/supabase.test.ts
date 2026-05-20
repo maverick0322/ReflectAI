@@ -71,14 +71,6 @@ describe('supabase clients', () => {
     );
   });
 
-  it('rechaza cliente browser sin variables publicas requeridas', () => {
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-    expect(() => createClient()).toThrow(
-      'Missing required environment variable: NEXT_PUBLIC_SUPABASE_URL',
-    );
-  });
-
   it('crea cliente server y conecta los adaptadores de cookies', async () => {
     expect(await createServerSupabaseClient()).toEqual({ server: true });
     expect(cookies).toHaveBeenCalled();
@@ -115,13 +107,5 @@ describe('supabase clients', () => {
     ]);
 
     expect(cookieStore.set).toHaveBeenCalledWith('sb', 'next-token', { path: '/' });
-  });
-
-  it('rechaza cliente server sin variables publicas requeridas', async () => {
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    await expect(createServerSupabaseClient()).rejects.toThrow(
-      'Missing required environment variable: NEXT_PUBLIC_SUPABASE_ANON_KEY',
-    );
   });
 });

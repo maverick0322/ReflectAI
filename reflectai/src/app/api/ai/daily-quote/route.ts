@@ -1,35 +1,39 @@
-import {
-  buildSuccessResponse,
-  enforceRateLimit,
-  requireAuthenticatedUser,
-  toRouteErrorResponse,
-} from '@/lib/api/route';
-import { buildDailyQuoteForUser } from '@/lib/ai/session';
-import { apiMessages } from '@/lib/copy/api';
+import { NextResponse } from 'next/server';
 
-export async function GET(request?: Request) {
+import { generateDailyQuote, getFallbackQuote } from '@/lib/ai/dailyQuote';
+import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+
+export async function GET() {
   try {
-    enforceRateLimit(request, {
-      key: 'ai:daily-quote',
-      maxRequests: 30,
-      windowMs: 60 * 60 * 1000,
-    });
+    const { user, error: authError } = await getAuthenticatedUser();
 
-    const { user } = await requireAuthenticatedUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
+    }
 
-    const quote = await buildDailyQuoteForUser(user);
+    const metadata = user.user_metadata ?? {};
+    const userName =
+      typeof metadata.full_name === 'string' ? metadata.full_name : undefined;
 
-    return buildSuccessResponse({
-      data: quote.data,
-      message: quote.aiGenerated
-        ? apiMessages.ai.dailyQuoteSucceeded
-        : apiMessages.ai.dailyQuoteFallbackSucceeded,
-    });
-  } catch (error: unknown) {
-    return toRouteErrorResponse(
-      error,
-      apiMessages.ai.dailyQuoteUnexpected,
-      'ai daily quote failed',
+    try {
+      const quote = await generateDailyQuote(userName);
+      return NextResponse.json({
+        data: quote,
+        message: 'Cita generada correctamente',
+      });
+    } catch {
+      return NextResponse.json({
+        data: {
+          ...getFallbackQuote(),
+          aiGenerated: false,
+        },
+        message: 'Cita local generada correctamente',
+      });
+    }
+  } catch {
+    return NextResponse.json(
+      { error: { message: 'Error inesperado al generar cita' } },
+      { status: 500 },
     );
   }
 }

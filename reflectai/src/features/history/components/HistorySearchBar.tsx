@@ -2,12 +2,14 @@ import { SearchIcon } from '@/shared/icons/SearchIcon';
 
 interface HistorySearchBarProps {
   placeholder: string;
-  value: string;
-  onChange: (value: string) => void;
+  defaultValue?: string;
+  value?: string;
+  onChange?: (value: string) => void;
 }
 
 export function HistorySearchBar({
   placeholder,
+  defaultValue,
   value,
   onChange,
 }: Readonly<HistorySearchBarProps>) {
@@ -18,8 +20,9 @@ export function HistorySearchBar({
         type="search"
         aria-label="Search history"
         placeholder={placeholder}
+        defaultValue={defaultValue}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={onChange ? (event) => onChange(event.target.value) : undefined}
         className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
       />
     </div>

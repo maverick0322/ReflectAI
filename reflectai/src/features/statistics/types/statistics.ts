@@ -25,8 +25,8 @@ export interface StatisticsPattern {
 export interface StatisticsSessionOption {
   id: string;
   label: string;
-  intensity: number;
-  emotion: string;
+  intensity?: number;
+  emotion?: string;
 }
 
 export interface StatisticsComparisonSelection {

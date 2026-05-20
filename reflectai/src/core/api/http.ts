@@ -1,7 +1,6 @@
 export interface ApiErrorPayload {
   message: string;
   details?: unknown;
-  field?: string;
 }
 
 export class ApiError extends Error {
@@ -25,7 +24,6 @@ function extractErrorPayload(payload: unknown): ApiErrorPayload | undefined {
         return {
           message,
           details: (error as { details?: unknown }).details,
-          field: (error as { field?: string }).field,
         };
       }
     }

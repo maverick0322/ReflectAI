@@ -4,7 +4,6 @@ import {
   changePassword,
   confirmRecovery,
   deleteAccount,
-  fetchSessionStatus,
   loginUser,
   logoutUser,
   recoverPassword,
@@ -72,7 +71,6 @@ describe('api clients', () => {
 
     await recoverPassword('test@reflectai.com');
     await confirmRecovery('code-123');
-    await fetchSessionStatus();
 
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/auth/recover',
@@ -82,7 +80,6 @@ describe('api clients', () => {
       '/api/auth/confirm-recovery',
       expect.objectContaining({ method: 'POST' }),
     );
-    expect(fetchMock).toHaveBeenCalledWith('/api/auth/session-status', undefined);
   });
 
   it('calls change password endpoint', async () => {
@@ -103,13 +100,13 @@ describe('api clients', () => {
   it('calls delete account endpoint', async () => {
     const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
 
-    await deleteAccount('PasswordActual123!');
+    await deleteAccount('Password123');
 
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/auth/delete-account',
       expect.objectContaining({
         method: 'DELETE',
-        body: JSON.stringify({ currentPassword: 'PasswordActual123!' }),
+        body: JSON.stringify({ currentPassword: 'Password123' }),
       }),
     );
   });

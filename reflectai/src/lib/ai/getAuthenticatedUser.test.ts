@@ -42,7 +42,7 @@ describe('getAuthenticatedUser', () => {
     await expect(getAuthenticatedUser()).resolves.toEqual({
       supabase,
       user: null,
-      error: 'unauthorized',
+      error: 'No autorizado',
     });
   });
 });

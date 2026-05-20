@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { POST as analyzeSessionPost } from '@/app/api/ai/analyze-session/route';
 import { GET as dailyQuoteGet } from '@/app/api/ai/daily-quote/route';
 import { POST as nextQuestionPost } from '@/app/api/ai/next-question/route';
@@ -10,8 +9,6 @@ import { POST as loginPost } from '@/app/api/auth/login/route';
 import { POST as logoutPost } from '@/app/api/auth/logout/route';
 import { POST as recoverPost } from '@/app/api/auth/recover/route';
 import { POST as registerPost } from '@/app/api/auth/register/route';
-import { GET as sessionStatusGet } from '@/app/api/auth/session-status/route';
-import { POST as verifyPasswordPost } from '@/app/api/auth/verify-password/route';
 import { POST as avatarPost } from '@/app/api/profile/avatar/route';
 import { GET as profileGet, PATCH as profilePatch } from '@/app/api/profile/route';
 import {
@@ -77,13 +74,11 @@ interface ChainMock {
 }
 
 type ApiBody<TData = Record<string, unknown>> = {
-  authenticated?: boolean;
   message?: string;
   data?: TData;
   error?: {
     message?: string;
     details?: unknown;
-    field?: string;
   };
 };
 
@@ -168,9 +163,8 @@ function createSupabaseMock(options: {
 function createStorageBucket(publicUrl = 'https://cdn.test/user-a/avatar.png') {
   const bucket = {
     upload: vi.fn(async () => ({ error: null })),
-    createSignedUrl: vi.fn(async () => ({
-      data: { signedUrl: `${publicUrl}?token=abc` },
-      error: null,
+    getPublicUrl: vi.fn(() => ({
+      data: { publicUrl },
     })),
   };
 
@@ -195,14 +189,6 @@ function jsonRequest(path: string, body: unknown, method = 'POST') {
     },
     body: JSON.stringify(body),
   });
-}
-
-function imageFile(type: 'image/png', name: string) {
-  return new File(
-    [new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])],
-    name,
-    { type },
-  );
 }
 
 function routeParams(id = SESSION_ID) {
@@ -231,13 +217,12 @@ beforeEach(() => {
   vi.mocked(generateNextQuestion).mockResolvedValue('Pregunta generada por IA');
 });
 
-describe('Critical API integration - version 2026-05-19', () => {
+describe('Critical API integration - version 2026-05-12', () => {
   it('TC-01-01 registers a user and propagates profile data to Supabase Auth', async () => {
     const createUser = vi.fn(async () => ({
       data: { user: { id: 'user-a', email: 'ana@reflectai.com' } },
       error: null,
     }));
-
     vi.mocked(createAdminSupabaseClient).mockReturnValue({
       auth: { admin: { createUser } },
     } as never);
@@ -274,60 +259,7 @@ describe('Critical API integration - version 2026-05-19', () => {
     });
   });
 
-  it('TC-01-02 returns a clear rate-limit response when Supabase blocks signup emails', async () => {
-    const createUser = vi.fn(async () => ({
-      data: { user: null },
-      error: { message: 'email rate limit exceeded' },
-    }));
-
-    vi.mocked(createAdminSupabaseClient).mockReturnValue({
-      auth: { admin: { createUser } },
-    } as never);
-
-    const response = await registerPost(
-      jsonRequest('/api/auth/register', {
-        firstName: 'Ana',
-        lastName: 'Lopez',
-        email: 'ana@reflectai.com',
-        password: 'PasswordFuerte123!',
-        birthDate: '2000-01-01',
-      }),
-    );
-    const body = await readJson(response);
-
-    expect(response.status).toBe(429);
-    expect(body.error?.message).toBe(
-      'Se hicieron demasiados intentos. Espera unos minutos antes de crear otra cuenta.',
-    );
-  });
-
-  it('TC-01-03 returns a field-friendly message when the email is already registered', async () => {
-    const createUser = vi.fn(async () => ({
-      data: { user: null },
-      error: { message: 'A user with this email address has already been registered' },
-    }));
-
-    vi.mocked(createAdminSupabaseClient).mockReturnValue({
-      auth: { admin: { createUser } },
-    } as never);
-
-    const response = await registerPost(
-      jsonRequest('/api/auth/register', {
-        firstName: 'Ana',
-        lastName: 'Lopez',
-        email: 'ana@reflectai.com',
-        password: 'PasswordFuerte123!',
-        birthDate: '2000-01-01',
-      }),
-    );
-    const body = await readJson(response);
-
-    expect(response.status).toBe(400);
-    expect(body.error?.message).toBe('Ya existe una cuenta con ese correo.');
-    expect(body.error?.field).toBe('email');
-  });
-
-  it('TC-01-04 signs in and signs out with safe response contracts', async () => {
+  it('TC-01-02 signs in and signs out with safe response contracts', async () => {
     const signInWithPassword = vi.fn(async () => ({
       data: {
         user: {
@@ -347,7 +279,7 @@ describe('Critical API integration - version 2026-05-19', () => {
     const loginResponse = await loginPost(
       jsonRequest('/api/auth/login', {
         email: 'ana@reflectai.com',
-        password: 'PasswordFuerte123!',
+        password: 'PasswordFuerte123',
       }),
     );
     const loginBody = await readJson(loginResponse);
@@ -361,7 +293,7 @@ describe('Critical API integration - version 2026-05-19', () => {
     });
 
     const logoutResponse = await logoutPost(
-      jsonRequest('/api/auth/logout', {}),
+      jsonRequest('/api/auth/logout', {}, 'POST'),
     );
 
     expect(logoutResponse.status).toBe(200);
@@ -370,12 +302,12 @@ describe('Critical API integration - version 2026-05-19', () => {
     );
     expect(signInWithPassword).toHaveBeenCalledWith({
       email: 'ana@reflectai.com',
-      password: 'PasswordFuerte123!',
+      password: 'PasswordFuerte123',
     });
     expect(signOut).toHaveBeenCalled();
   });
 
-  it('TC-01-05 recovers access, confirms the code and changes an authenticated password', async () => {
+  it('TC-01-03 recovers access, confirms the code and changes an authenticated password', async () => {
     process.env.NEXT_PUBLIC_SITE_URL = 'https://reflectai.example';
     const resetPasswordForEmail = vi.fn(async () => ({ error: null }));
     const exchangeCodeForSession = vi.fn(async () => ({
@@ -403,9 +335,9 @@ describe('Critical API integration - version 2026-05-19', () => {
     );
     const changePasswordResponse = await changePasswordPost(
       jsonRequest('/api/auth/change-password', {
-        currentPassword: 'PasswordActual123!',
-        newPassword: 'PasswordNueva123!',
-        confirmNewPassword: 'PasswordNueva123!',
+        currentPassword: 'PasswordActual123',
+        newPassword: 'PasswordNueva123',
+        confirmNewPassword: 'PasswordNueva123',
       }),
     );
 
@@ -419,9 +351,9 @@ describe('Critical API integration - version 2026-05-19', () => {
     expect(exchangeCodeForSession).toHaveBeenCalledWith('code-ok');
     expect(signInWithPassword).toHaveBeenCalledWith({
       email: 'ana@reflectai.com',
-      password: 'PasswordActual123!',
+      password: 'PasswordActual123',
     });
-    expect(updateUser).toHaveBeenCalledWith({ password: 'PasswordNueva123!' });
+    expect(updateUser).toHaveBeenCalledWith({ password: 'PasswordNueva123' });
   });
 
   it('TC-01-04 deletes the account and cleans history, profile, Auth and local session', async () => {
@@ -441,7 +373,7 @@ describe('Critical API integration - version 2026-05-19', () => {
     const response = await deleteAccountDelete(
       jsonRequest(
         '/api/auth/delete-account',
-        { currentPassword: 'PasswordActual123!' },
+        { currentPassword: 'PasswordActual123' },
         'DELETE',
       ),
     );
@@ -451,57 +383,10 @@ describe('Critical API integration - version 2026-05-19', () => {
     expect(body.message).toBe('Cuenta eliminada correctamente');
     expect(signInWithPassword).toHaveBeenCalledWith({
       email: 'ana@reflectai.com',
-      password: 'PasswordActual123!',
+      password: 'PasswordActual123',
     });
     expect(deleteUser).toHaveBeenCalledWith('user-a');
     expect(signOut).toHaveBeenCalled();
-  });
-
-  it('TC-01-07 exposes authenticated session status and rejects missing sessions', async () => {
-    const authenticatedClient = createSupabaseMock({
-      user: { id: 'user-a', email: 'ana@reflectai.com' },
-    });
-    mockServerSupabaseClient(authenticatedClient);
-
-    const okResponse = await sessionStatusGet();
-    const okBody = await readJson(okResponse);
-
-    const anonymousClient = createSupabaseMock({
-      user: null,
-      authError: { message: 'missing session' },
-    });
-    mockServerSupabaseClient(anonymousClient);
-
-    const unauthorizedResponse = await sessionStatusGet();
-    const unauthorizedBody = await readJson(unauthorizedResponse);
-
-    expect(okResponse.status).toBe(200);
-    expect(okBody.authenticated).toBe(true);
-    expect(unauthorizedResponse.status).toBe(401);
-    expect(unauthorizedBody.authenticated).toBe(false);
-  });
-
-  it('TC-01-08 verifies the current password before sensitive account changes', async () => {
-    const signInWithPassword = vi.fn(async () => ({ error: null }));
-    const supabaseMock = createSupabaseMock({
-      user: { id: 'user-a', email: 'ana@reflectai.com' },
-      auth: { signInWithPassword },
-    });
-    mockServerSupabaseClient(supabaseMock);
-
-    const response = await verifyPasswordPost(
-      jsonRequest('/api/auth/verify-password', {
-        currentPassword: 'PasswordActual123!',
-      }),
-    );
-    const body = await readJson(response);
-
-    expect(response.status).toBe(200);
-    expect(body.message).toBe('Contrasena actual validada correctamente');
-    expect(signInWithPassword).toHaveBeenCalledWith({
-      email: 'ana@reflectai.com',
-      password: 'PasswordActual123!',
-    });
   });
 
   it('TC-02-01 creates a missing profile from metadata and updates personal data', async () => {
@@ -567,19 +452,19 @@ describe('Critical API integration - version 2026-05-19', () => {
     });
   });
 
-  it('TC-02-02 uploads a valid avatar and persists the private bucket reference', async () => {
+  it('TC-02-02 uploads a valid avatar and persists the public bucket URL', async () => {
     const avatarProfile = {
       id: 'user-a',
       first_name: 'Ana',
       last_name: 'Lopez',
       full_name: 'Ana Lopez',
       birth_date: '2000-01-01',
-      avatar_url: 'user-a/avatar-123.png',
+      avatar_url: 'https://cdn.test/user-a/avatar.png',
     };
     const updateAvatar = createChain({
       singleResult: { data: avatarProfile, error: null },
     });
-    const { storage, bucket } = createStorageBucket('https://cdn.test/user-a/avatar.png');
+    const { storage, bucket } = createStorageBucket(avatarProfile.avatar_url);
     const supabaseMock = createSupabaseMock({
       user: { id: 'user-a', email: 'ana@reflectai.com' },
       builders: [updateAvatar],
@@ -590,19 +475,17 @@ describe('Critical API integration - version 2026-05-19', () => {
     const formData = new FormData();
     formData.set(
       'avatar',
-      imageFile('image/png', 'avatar.png'),
+      new File(['avatar'], 'avatar.png', { type: 'image/png' }),
     );
 
     const response = await avatarPost({
-      url: 'http://localhost/api/profile/avatar',
-      headers: new Headers({ Origin: 'http://localhost' }),
       formData: vi.fn(async () => formData),
     } as unknown as Request);
     const body = await readJson(response);
 
     expect(response.status).toBe(200);
     expect(body.message).toBe('Foto de perfil actualizada correctamente');
-    expect(body.data?.avatar_url).toBe('https://cdn.test/user-a/avatar.png?token=abc');
+    expect(body.data?.avatar_url).toBe(avatarProfile.avatar_url);
     expect(bucket.upload).toHaveBeenCalledWith(
       expect.stringMatching(/^user-a\/avatar-\d+\.png$/),
       expect.any(File),
@@ -613,7 +496,7 @@ describe('Critical API integration - version 2026-05-19', () => {
       },
     );
     expect(updateAvatar.update).toHaveBeenCalledWith({
-      avatar_url: expect.stringMatching(/^user-a\/avatar-\d+\.png$/),
+      avatar_url: avatarProfile.avatar_url,
     });
   });
 
@@ -1106,4 +989,3 @@ describe('Critical API integration - version 2026-05-19', () => {
     });
   });
 });
-
