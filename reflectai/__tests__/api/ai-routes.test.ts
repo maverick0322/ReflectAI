@@ -170,7 +170,7 @@ beforeEach(() => {
     retryAfterSeconds: 0,
   });
   vi.mocked(getFallbackQuote).mockReturnValue({
-    quote: 'Respira y vuelve al presente.',
+    text: 'Respira y vuelve al presente.',
     author: 'ReflectAI',
   } as never);
   vi.mocked(buildFallbackAnalysis).mockReturnValue(fallbackAnalysis);
@@ -180,7 +180,7 @@ describe('ruta API de cita diaria', () => {
   it('genera cita personalizada para usuario autenticado', async () => {
     mockAuthenticatedUser();
     vi.mocked(generateDailyQuote).mockResolvedValue({
-      quote: 'Haz una pausa.',
+      text: 'Haz una pausa.',
       author: 'ReflectAI',
       aiGenerated: true,
     } as never);
@@ -191,7 +191,7 @@ describe('ruta API de cita diaria', () => {
     expect(response.status).toBe(200);
     expect(body.message).toBe('Cita generada correctamente');
     expect(body.data).toEqual({
-      quote: 'Haz una pausa.',
+      text: 'Haz una pausa.',
       author: 'ReflectAI',
       aiGenerated: true,
     });
@@ -207,7 +207,7 @@ describe('ruta API de cita diaria', () => {
       },
     });
     vi.mocked(generateDailyQuote).mockResolvedValue({
-      quote: 'Haz una pausa.',
+      text: 'Haz una pausa.',
       author: 'ReflectAI',
       aiGenerated: true,
     } as never);
@@ -216,6 +216,26 @@ describe('ruta API de cita diaria', () => {
 
     expect(response.status).toBe(200);
     expect(generateDailyQuote).toHaveBeenCalledWith(undefined);
+  });
+
+  it('usa mensaje de fallback si la IA devuelve una cita local sin lanzar error', async () => {
+    mockAuthenticatedUser();
+    vi.mocked(generateDailyQuote).mockResolvedValue({
+      text: 'Respira y vuelve al presente.',
+      author: 'ReflectAI',
+      aiGenerated: false,
+    } as never);
+
+    const response = await dailyQuoteGet();
+    const body = await readJson(response);
+
+    expect(response.status).toBe(200);
+    expect(body.message).toBe('Cita local generada correctamente');
+    expect(body.data).toEqual({
+      text: 'Respira y vuelve al presente.',
+      author: 'ReflectAI',
+      aiGenerated: false,
+    });
   });
 
   it('usa fallback local si la IA falla y bloquea usuarios anonimos', async () => {
@@ -228,7 +248,7 @@ describe('ruta API de cita diaria', () => {
     expect(fallbackResponse.status).toBe(200);
     expect(fallbackBody.message).toBe('Cita local generada correctamente');
     expect(fallbackBody.data).toEqual({
-      quote: 'Respira y vuelve al presente.',
+      text: 'Respira y vuelve al presente.',
       author: 'ReflectAI',
       aiGenerated: false,
     });
@@ -243,7 +263,7 @@ describe('ruta API de cita diaria', () => {
   it('responde con rate limit y errores inesperados', async () => {
     mockAuthenticatedUser();
     vi.mocked(generateDailyQuote).mockResolvedValue({
-      quote: 'Haz una pausa.',
+      text: 'Haz una pausa.',
       author: 'ReflectAI',
       aiGenerated: true,
     } as never);
