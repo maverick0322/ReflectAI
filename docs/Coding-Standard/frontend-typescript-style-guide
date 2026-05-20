@@ -407,7 +407,7 @@ Esta regla pertenece a proceso/tooling del repositorio. En reportes de revision 
 Máximo **10** por función.
 
 ### 16.4. SonarQube
-Quality Gate: cobertura global >= 80%, duplicación <= 3%, sin vulnerabilidades críticas. El gate de coverage aplica al resultado global del proyecto, no a cada archivo individual.
+Quality Gate: cobertura global >= 80%, duplicación <= 3%, sin vulnerabilidades críticas. El gate de cobertura aplica al resultado global del proyecto, no a cada archivo individual.
 
 En revisiones futuras, las metricas de coverage por archivo pueden usarse como apoyo tecnico para priorizar pruebas, pero no deben tratarse como incumplimiento del estandar si la cobertura global cumple el umbral definido.
 
