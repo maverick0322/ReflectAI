@@ -384,7 +384,9 @@ Minimos globales:
 - Functions >= 80%.
 - Lines >= 80%.
 
-Para rutas criticas nuevas se espera cobertura significativa de branches, aunque el threshold del proyecto sea global. Si una metrica individual queda bajo 80%, debe documentarse en el reporte.
+Estos umbrales se evaluan de forma global, alineados con el Quality Gate por defecto de SonarCloud. Si la cobertura global cumple, el criterio de coverage se considera cumplido aunque archivos individuales queden por debajo del umbral.
+
+Para rutas criticas nuevas se espera cobertura significativa de branches como criterio de revision tecnica, pero no como Quality Gate por archivo.
 
 ---
 
@@ -403,7 +405,7 @@ El pipeline debe ejecutar:
 
 Quality Gate esperado:
 
-- Cobertura global >= 80%.
+- Cobertura global >= 80%, alineada con el Quality Gate por defecto de SonarCloud. El gate aplica al resultado global, no a cada archivo individual.
 - Duplicacion <= 3%.
 - Sin vulnerabilidades criticas.
 - Sin secretos hardcodeados.

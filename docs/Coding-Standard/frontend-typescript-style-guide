@@ -365,7 +365,7 @@ Colocar archivos de test junto al componente: `Component.test.tsx`.
 - Usar Mock Service Worker (MSW) para APIs.
 
 ### 14.4. Cobertura
-Mínimo **80%** de cobertura en líneas, funciones y ramas.
+Mínimo **80% global** de cobertura en líneas, funciones y ramas. Este umbral se alinea con el Quality Gate por defecto de SonarCloud y se evalúa sobre el resultado global del proyecto, no por archivo individual.
 
 ---
 
@@ -405,7 +405,7 @@ Usar **Husky** + **lint-staged**.
 Máximo **10** por función.
 
 ### 16.4. SonarQube
-Quality Gate: cobertura ≥ 80%, duplicación ≤ 3%, sin vulnerabilidades críticas.
+Quality Gate: cobertura global >= 80%, duplicación <= 3%, sin vulnerabilidades críticas. El gate de coverage aplica al resultado global del proyecto, no a cada archivo individual.
 
 ---
 
