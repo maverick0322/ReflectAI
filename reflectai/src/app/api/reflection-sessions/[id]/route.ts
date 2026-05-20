@@ -1,10 +1,10 @@
 import {
   buildSuccessResponse,
   requireAuthenticatedUser,
-  throwRouteError,
   toRouteErrorResponse,
 } from '@/lib/api/route';
 import { apiMessages } from '@/lib/copy/api';
+import { getReflectionSessionRecord } from '@/lib/reflection/sessionService';
 
 type RouteParams = {
   params: Promise<{
@@ -16,17 +16,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
     const { supabase, user } = await requireAuthenticatedUser();
-
-    const { data, error } = await supabase
-      .from('reflection_sessions')
-      .select('id, title, status, started_at, completed_at, payload, ai_analysis')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (error || !data) {
-      throwRouteError(404, apiMessages.reflection.detailFailed);
-    }
+    const data = await getReflectionSessionRecord(supabase, user, id);
 
     return buildSuccessResponse({
       data,

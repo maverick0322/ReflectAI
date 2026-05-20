@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { logServerError } from '@/lib/monitoring/logger';
+import {
+  buildServerErrorLogEntry,
+  logServerError,
+} from '@/lib/monitoring/logger';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -24,7 +27,14 @@ describe('logServerError', () => {
     vi.stubEnv('NODE_ENV', 'production');
     logServerError('scope:error', error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith('scope:error', error);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        level: 'error',
+        scope: 'scope:error',
+        message: 'boom',
+        errorName: 'Error',
+      }),
+    );
   });
 
   it('logs normalized messages in development-like environments', () => {
@@ -36,16 +46,43 @@ describe('logServerError', () => {
     logServerError('scope:string', 'plain message');
     logServerError('scope:unknown', { code: 123 });
 
-    expect(consoleErrorSpy).toHaveBeenNthCalledWith(1, 'scope:error', error);
+    expect(consoleErrorSpy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        level: 'error',
+        scope: 'scope:error',
+        message: 'boom',
+      }),
+    );
     expect(consoleErrorSpy).toHaveBeenNthCalledWith(
       2,
-      'scope:string',
-      'plain message',
+      expect.objectContaining({
+        level: 'error',
+        scope: 'scope:string',
+        message: 'plain message',
+      }),
     );
     expect(consoleErrorSpy).toHaveBeenNthCalledWith(
       3,
-      'scope:unknown',
-      'Unknown error',
+      expect.objectContaining({
+        level: 'error',
+        scope: 'scope:unknown',
+        message: 'Unknown error',
+      }),
     );
+  });
+
+  it('builds structured entries that are easy to forward to a provider', () => {
+    const entry = buildServerErrorLogEntry('scope:test', new Error('boom'));
+
+    expect(entry).toEqual(
+      expect.objectContaining({
+        level: 'error',
+        scope: 'scope:test',
+        message: 'boom',
+        errorName: 'Error',
+      }),
+    );
+    expect(typeof entry.timestamp).toBe('string');
   });
 });
