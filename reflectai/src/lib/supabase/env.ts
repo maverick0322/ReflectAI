@@ -3,9 +3,7 @@ type SupabasePublicEnv = {
   supabaseAnonKey: string;
 };
 
-function getRequiredEnv(name: keyof NodeJS.ProcessEnv) {
-  const value = process.env[name];
-
+function getRequiredEnvValue(value: string | undefined, name: string) {
   if (!value) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
@@ -15,7 +13,13 @@ function getRequiredEnv(name: keyof NodeJS.ProcessEnv) {
 
 export function getSupabasePublicEnv(): SupabasePublicEnv {
   return {
-    supabaseUrl: getRequiredEnv('NEXT_PUBLIC_SUPABASE_URL'),
-    supabaseAnonKey: getRequiredEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+    supabaseUrl: getRequiredEnvValue(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      'NEXT_PUBLIC_SUPABASE_URL',
+    ),
+    supabaseAnonKey: getRequiredEnvValue(
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    ),
   };
 }
