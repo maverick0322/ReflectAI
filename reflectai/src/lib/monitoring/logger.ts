@@ -7,6 +7,24 @@ export type ServerErrorLogEntry = {
   stack?: string;
 };
 
+export type ServerErrorLogTransport = (entry: ServerErrorLogEntry) => void;
+
+function writeServerErrorLogToStderr(entry: ServerErrorLogEntry) {
+  process.stderr.write(`${JSON.stringify(entry)}\n`);
+}
+
+let fallbackTransport: ServerErrorLogTransport = writeServerErrorLogToStderr;
+
+export function setServerErrorLogFallbackTransport(
+  transport: ServerErrorLogTransport,
+) {
+  fallbackTransport = transport;
+}
+
+export function resetServerErrorLogFallbackTransport() {
+  fallbackTransport = writeServerErrorLogToStderr;
+}
+
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message;
@@ -38,5 +56,5 @@ export function logServerError(scope: string, error: unknown) {
     return;
   }
 
-  console.error(buildServerErrorLogEntry(scope, error));
+  fallbackTransport(buildServerErrorLogEntry(scope, error));
 }

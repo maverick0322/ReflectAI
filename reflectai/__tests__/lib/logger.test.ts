@@ -3,31 +3,37 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   buildServerErrorLogEntry,
   logServerError,
+  resetServerErrorLogFallbackTransport,
+  setServerErrorLogFallbackTransport,
 } from '@/lib/monitoring/logger';
 
 afterEach(() => {
+  resetServerErrorLogFallbackTransport();
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
 });
 
 describe('logServerError', () => {
   it('does not log in test environment', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fallbackTransport = vi.fn();
+
+    setServerErrorLogFallbackTransport(fallbackTransport);
 
     vi.stubEnv('NODE_ENV', 'test');
     logServerError('scope', 'boom');
 
-    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    expect(fallbackTransport).not.toHaveBeenCalled();
   });
 
   it('logs in production and preserves error objects when available', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fallbackTransport = vi.fn();
     const error = new Error('boom');
 
+    setServerErrorLogFallbackTransport(fallbackTransport);
     vi.stubEnv('NODE_ENV', 'production');
     logServerError('scope:error', error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
+    expect(fallbackTransport).toHaveBeenCalledWith(
       expect.objectContaining({
         level: 'error',
         scope: 'scope:error',
@@ -38,7 +44,9 @@ describe('logServerError', () => {
   });
 
   it('logs normalized messages in development-like environments', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fallbackTransport = vi.fn();
+
+    setServerErrorLogFallbackTransport(fallbackTransport);
     vi.stubEnv('NODE_ENV', 'development');
     const error = new Error('boom');
 
@@ -46,7 +54,7 @@ describe('logServerError', () => {
     logServerError('scope:string', 'plain message');
     logServerError('scope:unknown', { code: 123 });
 
-    expect(consoleErrorSpy).toHaveBeenNthCalledWith(
+    expect(fallbackTransport).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         level: 'error',
@@ -54,7 +62,7 @@ describe('logServerError', () => {
         message: 'boom',
       }),
     );
-    expect(consoleErrorSpy).toHaveBeenNthCalledWith(
+    expect(fallbackTransport).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         level: 'error',
@@ -62,12 +70,29 @@ describe('logServerError', () => {
         message: 'plain message',
       }),
     );
-    expect(consoleErrorSpy).toHaveBeenNthCalledWith(
+    expect(fallbackTransport).toHaveBeenNthCalledWith(
       3,
       expect.objectContaining({
         level: 'error',
         scope: 'scope:unknown',
         message: 'Unknown error',
+      }),
+    );
+  });
+
+  it('allows overriding the fallback transport for structured forwarding', () => {
+    const fallbackTransport = vi.fn();
+
+    setServerErrorLogFallbackTransport(fallbackTransport);
+    vi.stubEnv('NODE_ENV', 'production');
+
+    logServerError('scope:fallback', new Error('boom'));
+
+    expect(fallbackTransport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        level: 'error',
+        scope: 'scope:fallback',
+        message: 'boom',
       }),
     );
   });

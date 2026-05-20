@@ -25,7 +25,9 @@ export async function GET(request?: Request) {
       const quote = await generateDailyQuote(userName);
       return buildSuccessResponse({
         data: quote,
-        message: apiMessages.ai.dailyQuoteSucceeded,
+        message: quote.aiGenerated
+          ? apiMessages.ai.dailyQuoteSucceeded
+          : apiMessages.ai.dailyQuoteFallbackSucceeded,
       });
     } catch (error: unknown) {
       void error;
