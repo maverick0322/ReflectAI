@@ -2,21 +2,21 @@
 
 import { useMemo } from 'react';
 
-import { DailyQuote } from '@/components/dashboard/DailyQuote';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { EmptyReflectionState } from '@/components/dashboard/EmptyReflectionState';
-import { PausedSessionAlert } from '@/components/dashboard/PausedSessionAlert';
-import { RecentSessionCard } from '@/components/dashboard/RecentSessionCard';
-import { StreakWidget } from '@/components/dashboard/StreakWidget';
-import { WeeklyCalendar } from '@/components/dashboard/WeeklyCalendar';
+import { DailyQuote } from '@/features/dashboard/components/DailyQuote';
+import { DashboardHeader } from '@/features/dashboard/components/DashboardHeader';
+import { EmptyReflectionState } from '@/features/dashboard/components/EmptyReflectionState';
+import { PausedSessionAlert } from '@/features/dashboard/components/PausedSessionAlert';
+import { RecentSessionCard } from '@/features/dashboard/components/RecentSessionCard';
+import { StreakWidget } from '@/features/dashboard/components/StreakWidget';
+import { WeeklyCalendar } from '@/features/dashboard/components/WeeklyCalendar';
+import { useDashboardData } from '@/features/dashboard/hooks/useDashboardData';
 import {
   buildDashboardViewModel,
   getAverageIntensity,
   getPrimaryEmotion,
-} from '@/components/dashboard/dashboardPageUtils';
-import { useDashboardData } from '@/components/dashboard/useDashboardData';
-import GlassCard from '@/components/ui/GlassCard';
-import { formatDisplayDate, formatTimeAgo } from '@/lib/dashboard/metrics';
+} from '@/features/dashboard/utils/dashboardPageUtils';
+import { formatDisplayDate, formatTimeAgo } from '@/features/dashboard/utils/metrics';
+import GlassCard from '@/shared/ui/GlassCard';
 
 export function DashboardPage() {
   const { sessions, isLoading, formError, userProfile, dailyQuote } = useDashboardData();
@@ -38,7 +38,7 @@ export function DashboardPage() {
         <section className="flex flex-col gap-4">
           <div>
             <h2 className="text-sm font-medium uppercase tracking-widest text-slate-500">
-              Hoy
+              Today
             </h2>
             <p className="text-xl font-semibold text-slate-900 dark:text-white">
               {formatDisplayDate(today)}
@@ -63,12 +63,12 @@ export function DashboardPage() {
 
         <section className="flex flex-col gap-4">
           <h3 className="text-sm font-bold uppercase tracking-tighter text-slate-900/40 dark:text-white/40">
-            Tu última reflexión
+            Your latest reflection
           </h3>
 
           {viewModel.lastCompletedSession ? (
             <RecentSessionCard
-              title={viewModel.lastCompletedSession.title ?? 'Sesion completada'}
+              title={viewModel.lastCompletedSession.title ?? 'Completed session'}
               date={formatDisplayDate(
                 new Date(
                   viewModel.lastCompletedSession.completed_at ??

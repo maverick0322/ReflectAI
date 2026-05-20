@@ -8,7 +8,7 @@ import {
 } from '@/lib/api/route';
 import { deleteAuthenticatedAccount } from '@/lib/auth/session';
 import { apiMessages } from '@/lib/copy/api';
-import { deleteAccountSchema } from '@/lib/validations/auth';
+import { deleteAccountSchema } from '@/features/auth/schemas/auth';
 
 export async function DELETE(request: Request) {
   try {

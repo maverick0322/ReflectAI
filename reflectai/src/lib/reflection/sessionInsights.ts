@@ -1,9 +1,9 @@
-import type { ReflectionSessionListItem } from '@/lib/api/reflection';
+import type { ReflectionSessionListItem } from '@/features/reflection/services/reflectionService';
 import type {
   QuestionId,
   ReflectionSessionPayload,
   SessionResponse,
-} from '@/types/reflection';
+} from '@/features/reflection/types/reflection';
 
 type AnalysisRecord = Record<string, unknown>;
 

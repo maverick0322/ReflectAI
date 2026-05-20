@@ -1,13 +1,13 @@
 'use client';
 
-import GlassCard from '@/components/ui/GlassCard';
-import { ProfileAccountFooter } from '@/components/perfil/ProfileAccountFooter';
-import { ProfileHeader } from '@/components/perfil/ProfileHeader';
-import { ProfileMessageState } from '@/components/perfil/ProfilePageStates';
-import { ProfileNavigation } from '@/components/perfil/ProfileNavigation';
-import { ProfilePersonalInfoSection } from '@/components/perfil/ProfilePersonalInfoSection';
-import { ProfilePreferencesSection } from '@/components/perfil/ProfilePreferencesSection';
-import { useProfilePage } from '@/components/perfil/useProfilePage';
+import GlassCard from '@/shared/ui/GlassCard';
+import { ProfileAccountFooter } from '@/features/profile/components/ProfileAccountFooter';
+import { ProfileHeader } from '@/features/profile/components/ProfileHeader';
+import { ProfileMessageState } from '@/features/profile/components/ProfilePageStates';
+import { ProfileNavigation } from '@/features/profile/components/ProfileNavigation';
+import { ProfilePersonalInfoSection } from '@/features/profile/components/ProfilePersonalInfoSection';
+import { ProfilePreferencesSection } from '@/features/profile/components/ProfilePreferencesSection';
+import { useProfilePage } from '@/features/profile/hooks/useProfilePage';
 
 export function ProfilePage() {
   const {
@@ -32,13 +32,13 @@ export function ProfilePage() {
   } = useProfilePage();
 
   if (isLoading) {
-    return <ProfileMessageState message="Cargando perfil..." tone="default" />;
+    return <ProfileMessageState message="Loading profile..." tone="default" />;
   }
 
   if (!profile) {
     return (
       <ProfileMessageState
-        message="No se pudo cargar el perfil."
+        message="Unable to load the profile."
         tone="error"
       />
     );

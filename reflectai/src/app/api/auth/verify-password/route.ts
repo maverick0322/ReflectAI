@@ -1,4 +1,4 @@
-import { step1Schema } from '@/components/auth/changePasswordSchemas';
+import { step1Schema } from '@/features/auth/components/changePasswordSchemas';
 import {
   buildSuccessResponse,
   enforceRateLimit,

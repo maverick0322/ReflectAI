@@ -3,7 +3,7 @@ import type {
   ReflectionSessionPayload,
   SessionMetadata,
   SessionResponse,
-} from '@/types/reflection';
+} from '@/features/reflection/types/reflection';
 
 const DEFAULT_SCHEMA_VERSION = '1.1';
 const QUESTION_IDS = new Set<QuestionId>([

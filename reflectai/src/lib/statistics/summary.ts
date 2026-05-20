@@ -1,4 +1,4 @@
-import type { ReflectionSessionListItem } from '@/lib/api/reflection';
+import type { ReflectionSessionListItem } from '@/features/reflection/services/reflectionService';
 import {
   getAnalysisText,
   getAnalysisTextArray,
@@ -17,7 +17,7 @@ import type {
   StatisticsPattern,
   StatisticsSessionOption,
   StatisticsTopicItem,
-} from '@/types/statistics';
+} from '@/features/statistics/types/statistics';
 
 const EMOTION_COLORS = [
   '#8B5CF6',
@@ -191,6 +191,16 @@ export function buildStatisticsDashboardData(
     defaultSelection: {
       sessionA: firstSelection,
       sessionB: secondSelection,
+    },
+    comparisonResult: {
+      sessionAIntensity: sessionOptions[0]?.intensity ?? 0,
+      sessionBIntensity: sessionOptions[1]?.intensity ?? 0,
+      sessionALabel: sessionOptions[0]?.label ?? 'No session selected',
+      sessionBLabel: sessionOptions[1]?.label ?? 'No session selected',
+      insight:
+        sessionOptions.length >= 2
+          ? 'Comparison data is ready for backend-driven analysis.'
+          : 'Complete at least two sessions to compare emotional intensity.',
     },
   };
 }

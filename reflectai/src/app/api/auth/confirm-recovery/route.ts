@@ -1,38 +1,44 @@
-import {
-  buildSuccessResponse,
-  enforceRateLimit,
-  enforceTrustedMutationOrigin,
-  parseJsonBody,
-  toRouteErrorResponse,
-} from '@/lib/api/route';
-import { confirmPasswordRecovery } from '@/lib/auth/session';
-import { apiMessages } from '@/lib/copy/api';
-import { confirmRecoverySchema } from '@/lib/validations/auth';
+import { NextResponse } from 'next/server';
+
+import { confirmRecoverySchema } from '@/features/auth/schemas/auth';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    enforceTrustedMutationOrigin(request);
-    enforceRateLimit(request, {
-      key: 'auth:confirm-recovery',
-      maxRequests: 10,
-      windowMs: 15 * 60 * 1000,
-    });
+    const body = await request.json().catch(() => null);
+    const validation = confirmRecoverySchema.safeParse(body ?? {});
 
-    const recoveryConfirmation = await parseJsonBody({
-      request,
-      schema: confirmRecoverySchema,
-    });
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: 'Datos invalidos',
+            details: validation.error.flatten(),
+          },
+        },
+        { status: 400 },
+      );
+    }
 
-    await confirmPasswordRecovery(recoveryConfirmation.code);
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase.auth.exchangeCodeForSession(
+      validation.data.code,
+    );
 
-    return buildSuccessResponse({
-      message: apiMessages.auth.confirmRecoverySucceeded,
+    if (error || !data.session) {
+      return NextResponse.json(
+        { error: { message: 'No se pudo confirmar la recuperacion' } },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({
+      message: 'Recuperacion confirmada',
     });
-  } catch (error: unknown) {
-    return toRouteErrorResponse(
-      error,
-      apiMessages.auth.confirmRecoveryUnexpected,
-      'auth confirm recovery failed',
+  } catch {
+    return NextResponse.json(
+      { error: { message: 'Error inesperado al confirmar recuperacion' } },
+      { status: 500 },
     );
   }
 }

@@ -4,9 +4,9 @@ import {
   RegisterFormSection,
   RegisterHeader,
   RegisterSocialSection,
-} from '@/components/auth/RegisterPageSections';
-import { useRegisterPage } from '@/components/auth/useRegisterPage';
-import GlassCard from '@/components/ui/GlassCard';
+} from '@/features/auth/components/RegisterPageSections';
+import { useRegisterPage } from '@/features/auth/hooks/useRegisterPage';
+import GlassCard from '@/shared/ui/GlassCard';
 
 export function RegisterPage() {
   const page = useRegisterPage();
@@ -19,7 +19,6 @@ export function RegisterPage() {
           form={page.form}
           isSubmitting={page.isSubmitting}
           formError={page.formError}
-          onInvalidSubmit={page.handleInvalidSubmit}
           onSubmit={page.handleSubmitForm}
         />
         <RegisterSocialSection />

@@ -1,4 +1,4 @@
-import type { ReflectionSessionListItem } from '@/lib/api/reflection';
+import type { ReflectionSessionListItem } from '@/features/reflection/services/reflectionService';
 import {
   getCompletedSessions,
   getPrimaryEmotion,
@@ -13,7 +13,7 @@ import type {
   HistoryEmotionChip,
   HistoryMonthGroup,
   HistorySummary,
-} from '@/types/history';
+} from '@/features/history/types/history';
 
 const SEARCH_PLACEHOLDER = 'Buscar palabras clave o detonantes';
 

@@ -16,9 +16,10 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
       include: [
+        'src/core/**',
+        'src/shared/**',
+        'src/features/**',
         'src/lib/**',
-        'src/components/**',
-        'src/contexts/**',
         'src/app/api/**/route.ts',
         'src/app/auth/callback/route.ts',
       ],
@@ -28,8 +29,7 @@ export default defineConfig({
         'src/**/__tests__/**',
         'src/**/page.tsx',
         'src/**/layout.tsx',
-        'src/components/icons/**',
-        'src/types/**',
+        'src/shared/icons/**',
         'node_modules/**',
       ],
       thresholds: {

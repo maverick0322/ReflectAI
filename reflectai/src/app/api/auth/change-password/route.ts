@@ -1,47 +1,70 @@
-import {
-  buildSuccessResponse,
-  enforceRateLimit,
-  enforceTrustedMutationOrigin,
-  parseJsonBody,
-  requireAuthenticatedUser,
-  toRouteErrorResponse,
-} from '@/lib/api/route';
-import { updateAuthenticatedPassword } from '@/lib/auth/session';
-import { apiMessages } from '@/lib/copy/api';
-import { changePasswordSchema } from '@/lib/validations/auth';
+import { NextResponse } from 'next/server';
+
+import { changePasswordSchema } from '@/features/auth/schemas/auth';
+import { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 
 export async function POST(request: Request) {
   try {
-    enforceTrustedMutationOrigin(request);
-    enforceRateLimit(request, {
-      key: 'auth:change-password',
-      maxRequests: 6,
-      windowMs: 15 * 60 * 1000,
+    const body = await request.json().catch(() => null);
+    const validation = changePasswordSchema.safeParse(body ?? {});
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: 'Datos invalidos',
+            details: validation.error.flatten(),
+          },
+        },
+        { status: 400 },
+      );
+    }
+
+    const { supabase, user, error: authError } = await getAuthenticatedUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: { message: 'No autorizado' } }, { status: 401 });
+    }
+
+    if (validation.data.currentPassword) {
+      if (!user.email) {
+        return NextResponse.json(
+          { error: { message: 'Unable to validate the current password' } },
+          { status: 400 },
+        );
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: validation.data.currentPassword,
+      });
+
+      if (signInError) {
+        return NextResponse.json(
+          { error: { message: 'The current password is incorrect' } },
+          { status: 400 },
+        );
+      }
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password: validation.data.newPassword,
     });
 
-    const passwordChange = await parseJsonBody({
-      request,
-      schema: changePasswordSchema,
-    });
+    if (error) {
+      return NextResponse.json(
+        { error: { message: 'Unable to update the password' } },
+        { status: 500 },
+      );
+    }
 
-    const { supabase, user } = await requireAuthenticatedUser();
-    enforceRateLimit(request, {
-      key: 'auth:change-password:user',
-      identifier: user.id,
-      maxRequests: 4,
-      windowMs: 15 * 60 * 1000,
+    return NextResponse.json({
+      message: 'Password updated successfully',
     });
-
-    await updateAuthenticatedPassword(supabase, user, passwordChange);
-
-    return buildSuccessResponse({
-      message: apiMessages.auth.passwordUpdated,
-    });
-  } catch (error: unknown) {
-    return toRouteErrorResponse(
-      error,
-      apiMessages.auth.passwordUpdateUnexpected,
-      'auth change password failed',
+  } catch {
+    return NextResponse.json(
+      { error: { message: 'Unexpected error while updating the password' } },
+      { status: 500 },
     );
   }
 }

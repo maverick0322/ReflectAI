@@ -2,7 +2,7 @@ import type { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
 import type {
   ReflectionSessionPayload,
   SessionResponse,
-} from '@/types/reflection';
+} from '@/features/reflection/types/reflection';
 import type { ReflectionAnalysisResult } from '@/lib/ai/reflectionAnalysis';
 import type { MetadataPatch } from '@/lib/reflection/payload';
 

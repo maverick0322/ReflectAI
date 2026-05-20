@@ -1,7 +1,6 @@
-import type { ReflectionSessionPayload } from '@/types/reflection';
+import type { ReflectionSessionPayload } from '@/features/reflection/types/reflection';
 
 import { createGroqChatCompletion, type GroqChatMessage } from './groqClient';
-import { extractEmbeddedJsonObject, isRecord } from './json';
 
 export interface ReflectionAnalysisResult {
   primary_emotions: string[];
@@ -12,15 +11,37 @@ export interface ReflectionAnalysisResult {
   summary: string | null;
   recommendation: string | null;
   encouraging_message: string | null;
-  professional_support_reminder: string | null;
+  professional_support_reminder: string;
 }
 
-function findResponse(payload: ReflectionSessionPayload, id: string) {
+function findResponse(
+  payload: ReflectionSessionPayload,
+  id: string,
+) {
   return payload.responses.find((response) => response.id === id);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 function parseJsonContent(content: string): unknown {
-  return extractEmbeddedJsonObject(content);
+  const trimmed = content.trim();
+  try {
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      return JSON.parse(trimmed) as unknown;
+    }
+
+    const start = trimmed.indexOf('{');
+    const end = trimmed.lastIndexOf('}');
+    if (start !== -1 && end !== -1 && end > start) {
+      return JSON.parse(trimmed.slice(start, end + 1)) as unknown;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 }
 
 function toStringArray(value: unknown): string[] {
@@ -29,51 +50,23 @@ function toStringArray(value: unknown): string[] {
     : [];
 }
 
-function buildRedactedPayload(payload: ReflectionSessionPayload) {
-  return {
-    metadata: {
-      version: payload.metadata.version,
-      completed_at: payload.metadata.completed_at ?? null,
-    },
-    responses: payload.responses.map((response) => ({
-      id: response.id,
-      value: response.value ?? null,
-      category: response.category ?? null,
-      status: response.status ?? null,
-      method: response.method ?? null,
-      text: response.text ? '[REDACTED_SENSITIVE_TEXT]' : null,
-    })),
-  };
-}
-
-const ANALYSIS_SYSTEM_PROMPT = [
-  'You are an assistant that summarizes reflection sessions in Spanish.',
-  'This is not clinical care.',
-  'Return JSON only with keys:',
-  'primary_emotions (array of strings),',
-  'average_intensity (number or null),',
-  'key_themes (array of strings),',
-  'cognitive_distortion_detected (string or null),',
-  'session_title (string or null),',
-  'summary (string),',
-  'recommendation (string),',
-  'encouraging_message (string),',
-  'professional_support_reminder (string).',
-  'The reminder must always say that the best option is to consult a professional',
-  'when discomfort is intense, persistent, or affects daily life.',
-].join(' ');
-
 export function buildAnalysisMessages(payload: ReflectionSessionPayload): GroqChatMessage[] {
   return [
     {
       role: 'system',
-      content: ANALYSIS_SYSTEM_PROMPT,
+      content:
+        'You are an assistant that summarizes reflection sessions in Spanish. This is not clinical care. Return JSON only with keys: ' +
+        'primary_emotions (array of strings), average_intensity (number or null), ' +
+        'key_themes (array of strings), cognitive_distortion_detected (string or null), ' +
+        'session_title (string or null), summary (string), recommendation (string), ' +
+        'encouraging_message (string), professional_support_reminder (string). ' +
+        'The reminder must always say that the best option is to consult a professional when discomfort is intense, persistent, or affects daily life.',
     },
     {
       role: 'user',
       content: JSON.stringify({
         task: 'Analyze the reflection session and summarize insights.',
-        payload: buildRedactedPayload(payload),
+        payload,
       }),
     },
   ];
@@ -106,7 +99,7 @@ export function parseAnalysisResult(content: string): ReflectionAnalysisResult |
     professional_support_reminder:
       typeof parsed.professional_support_reminder === 'string'
         ? parsed.professional_support_reminder
-        : null,
+        : 'Esta reflexion no sustituye la atencion profesional. Si el malestar es intenso, persistente o afecta tu vida diaria, lo mejor es consultar a un profesional.',
   };
 }
 
@@ -117,8 +110,9 @@ export function buildFallbackAnalysis(
   const intensity = findResponse(payload, 'Q4_INT')?.value;
   const situation = findResponse(payload, 'Q1_SIT')?.text;
   const alternative = findResponse(payload, 'Q7_ALT')?.text;
-  const titleSource = alternative || situation || null;
-  const normalizedTitle = getNormalizedSessionTitle(titleSource);
+  const titleSource = alternative || situation || 'Sesion de reflexion';
+  const normalizedTitle =
+    titleSource.length > 64 ? `${titleSource.slice(0, 61).trim()}...` : titleSource;
 
   return {
     primary_emotions: emotion ? [emotion] : [],
@@ -126,23 +120,15 @@ export function buildFallbackAnalysis(
     key_themes: [],
     cognitive_distortion_detected: null,
     session_title: normalizedTitle,
-    summary: null,
-    recommendation: null,
-    encouraging_message: null,
-    professional_support_reminder: null,
+    summary:
+      'Registraste la situacion, el pensamiento asociado, la emocion principal y una interpretacion alternativa para mirar lo ocurrido con mas claridad.',
+    recommendation:
+      'Usa tu perspectiva alternativa como punto de apoyo y elige una accion pequena que dependa de ti para el siguiente paso.',
+    encouraging_message:
+      'Tomarte este tiempo para ordenar lo que sientes es un avance concreto.',
+    professional_support_reminder:
+      'Esta reflexion no sustituye la atencion profesional. Si el malestar es intenso, persistente o afecta tu vida diaria, lo mejor es consultar a un profesional.',
   };
-}
-
-function getNormalizedSessionTitle(titleSource: string | null) {
-  if (!titleSource) {
-    return null;
-  }
-
-  if (titleSource.length <= 64) {
-    return titleSource;
-  }
-
-  return `${titleSource.slice(0, 61).trim()}...`;
 }
 
 export async function analyzeReflectionSession(

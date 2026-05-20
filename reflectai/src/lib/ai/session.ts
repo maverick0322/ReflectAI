@@ -1,5 +1,8 @@
-import type { QuestionId, ReflectionSessionPayload } from '@/types/reflection';
 import type { getAuthenticatedUser } from '@/lib/auth/getAuthenticatedUser';
+import type {
+  QuestionId,
+  ReflectionSessionPayload,
+} from '@/features/reflection/types/reflection';
 
 import { getFallbackQuote, generateDailyQuote } from '@/lib/ai/dailyQuote';
 import { generateNextQuestion } from '@/lib/ai/nextQuestion';
@@ -89,11 +92,9 @@ export async function buildDailyQuoteForUser(user: AuthenticatedUser) {
     typeof metadata.full_name === 'string' ? metadata.full_name : undefined;
 
   try {
-    const quote = await generateDailyQuote(userName);
-
     return {
-      data: quote,
-      aiGenerated: quote.aiGenerated,
+      data: await generateDailyQuote(userName),
+      aiGenerated: true,
     };
   } catch (error: unknown) {
     void error;

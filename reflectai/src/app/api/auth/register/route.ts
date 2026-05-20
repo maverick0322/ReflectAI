@@ -1,55 +1,38 @@
+import { registerSchema } from '@/features/auth/schemas/auth';
 import {
   buildSuccessResponse,
-  enforceRateLimit,
-  enforceTrustedMutationOrigin,
   parseJsonBody,
   toRouteErrorResponse,
 } from '@/lib/api/route';
 import { registerAuthUser } from '@/lib/auth/register';
 import { apiMessages } from '@/lib/copy/api';
-import { registerSchema } from '@/lib/validations/auth';
 
 export async function POST(request: Request) {
   try {
-    enforceTrustedMutationOrigin(request);
-    enforceRateLimit(request, {
-      key: 'auth:register',
-      maxRequests: 5,
-      windowMs: 60 * 60 * 1000,
-    });
-
-    const registration = await parseJsonBody({
+    const registerInput = await parseJsonBody({
       request,
       schema: registerSchema,
-      invalidMessage: apiMessages.auth.invalidRegisterData,
       mapInput: (body) => ({
         ...(typeof body === 'object' && body !== null ? body : {}),
         confirmEmail:
           typeof body === 'object' && body !== null
-            ? (body as { email?: unknown }).email
+            ? (body as Record<string, unknown>).email
             : undefined,
         confirmPassword:
           typeof body === 'object' && body !== null
-            ? (body as { password?: unknown }).password
+            ? (body as Record<string, unknown>).password
             : undefined,
       }),
+      invalidMessage: apiMessages.auth.invalidRegisterData,
     });
-
-    enforceRateLimit(request, {
-      key: 'auth:register:account',
-      identifier: registration.email,
-      maxRequests: 3,
-      windowMs: 60 * 60 * 1000,
-    });
-
-    const result = await registerAuthUser(registration);
+    const { fullName, user } = await registerAuthUser(registerInput);
 
     return buildSuccessResponse(
       {
         data: {
-          id: result.user?.id,
-          email: result.user?.email,
-          fullName: result.fullName,
+          id: user.id,
+          email: user.email,
+          fullName,
         },
         message: apiMessages.auth.registerSucceeded,
       },

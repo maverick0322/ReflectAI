@@ -1,45 +1,60 @@
-import {
-  buildSuccessResponse,
-  enforceRateLimit,
-  enforceTrustedMutationOrigin,
-  parseJsonBody,
-  toRouteErrorResponse,
-} from '@/lib/api/route';
-import { sendPasswordRecoveryEmail } from '@/lib/auth/session';
-import { apiMessages } from '@/lib/copy/api';
-import { recoverPasswordSchema } from '@/lib/validations/auth';
+import { NextResponse } from 'next/server';
+
+import { APP_ROUTES } from '@/core/routing/routes';
+import { recoverPasswordSchema } from '@/features/auth/schemas/auth';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
+
+function buildRedirectUrl(requestUrl: string) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const baseUrl = siteUrl ?? new URL(requestUrl).origin;
+  const callbackUrl = new URL('/auth/callback', baseUrl);
+  callbackUrl.searchParams.set(
+    'next',
+    `${APP_ROUTES.changePassword}?mode=recovery`,
+  );
+  return callbackUrl.toString();
+}
 
 export async function POST(request: Request) {
   try {
-    enforceTrustedMutationOrigin(request);
-    enforceRateLimit(request, {
-      key: 'auth:recover',
-      maxRequests: 5,
-      windowMs: 15 * 60 * 1000,
-    });
+    const body = await request.json().catch(() => null);
+    const validation = recoverPasswordSchema.safeParse(body ?? {});
 
-    const recoveryRequest = await parseJsonBody({
-      request,
-      schema: recoverPasswordSchema,
-    });
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: 'Datos invalidos',
+            details: validation.error.flatten(),
+          },
+        },
+        { status: 400 },
+      );
+    }
 
-    enforceRateLimit(request, {
-      key: 'auth:recover:account',
-      identifier: recoveryRequest.email,
-      maxRequests: 3,
-      windowMs: 15 * 60 * 1000,
-    });
+    const supabase = await createServerSupabaseClient();
+    const redirectTo = buildRedirectUrl(request.url);
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      validation.data.email,
+      {
+        redirectTo,
+      },
+    );
 
-    await sendPasswordRecoveryEmail(recoveryRequest.email, request.url);
+    if (error) {
+      return NextResponse.json(
+        { error: { message: 'No se pudo enviar el enlace de recuperacion' } },
+        { status: 500 },
+      );
+    }
 
-    return buildSuccessResponse({
-      message: apiMessages.auth.recoverLinkSent,
+    return NextResponse.json({
+      message: 'Enlace de recuperacion enviado',
     });
-  } catch (error: unknown) {
-    return toRouteErrorResponse(
-      error,
-      apiMessages.auth.recoverUnexpected,
-      'auth recover failed',
+  } catch {
+    return NextResponse.json(
+      { error: { message: 'Error inesperado al recuperar contraseÃ±a' } },
+      { status: 500 },
     );
   }
 }

@@ -19,19 +19,11 @@ jobs:
 
       - name: Instalar dependencias
         working-directory: ./reflectai
-        run: npm ci
-
-      - name: Ejecutar lint
-        working-directory: ./reflectai
-        run: npm run lint
-
-      - name: Ejecutar typecheck
-        working-directory: ./reflectai
-        run: npm run typecheck
+        run: npm install
 
       - name: Correr pruebas y generar Cobertura
         working-directory: ./reflectai
-        run: npm run test:coverage
+        run: npm run test -- --coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2

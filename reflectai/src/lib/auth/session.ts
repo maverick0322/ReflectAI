@@ -32,7 +32,7 @@ function getSafeNextPath(value: string | null) {
 function buildRecoveryRedirectUrl(requestUrl: string) {
   const baseUrl = getTrustedSiteOrigin(requestUrl);
   const callbackUrl = new URL('/auth/callback', baseUrl);
-  callbackUrl.searchParams.set('next', '/cambiar-contrasena?mode=recovery');
+  callbackUrl.searchParams.set('next', '/change-password?mode=recovery');
   return callbackUrl.toString();
 }
 
@@ -198,7 +198,7 @@ export async function resolveAuthCallbackRedirect(request: Request) {
   const redirectUrl = new URL(next, requestUrl.origin);
 
   if (authErrorCode) {
-    redirectUrl.pathname = '/recuperar';
+    redirectUrl.pathname = '/recover';
     redirectUrl.search = `?recovery_error=${encodeURIComponent(authErrorCode)}`;
     return redirectUrl;
   }
@@ -214,8 +214,8 @@ export async function resolveAuthCallbackRedirect(request: Request) {
 
   if (error) {
     logServerError('Supabase auth callback failed', error);
-    const isRecoveryRedirect = next.startsWith('/cambiar-contrasena');
-    redirectUrl.pathname = isRecoveryRedirect ? '/recuperar' : '/login';
+    const isRecoveryRedirect = next.startsWith('/change-password');
+    redirectUrl.pathname = isRecoveryRedirect ? '/recover' : '/login';
     redirectUrl.search = isRecoveryRedirect
       ? '?recovery_error=invalid_code'
       : '?auth_error=invalid_code';

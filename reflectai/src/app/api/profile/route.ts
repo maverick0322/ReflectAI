@@ -1,3 +1,4 @@
+import { profileSchema } from '@/features/profile/schemas/profile';
 import {
   buildSuccessResponse,
   enforceTrustedMutationOrigin,
@@ -10,7 +11,6 @@ import {
   getUserProfileResponse,
   updateUserProfileResponse,
 } from '@/lib/profile/service';
-import { profileSchema } from '@/lib/validations/profile';
 
 export async function GET() {
   try {
@@ -24,7 +24,7 @@ export async function GET() {
     return toRouteErrorResponse(
       error,
       apiMessages.profile.fetchUnexpected,
-      'profile get failed',
+      'profile fetch failed',
     );
   }
 }
@@ -32,11 +32,11 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     enforceTrustedMutationOrigin(request);
-    const { supabase, user } = await requireAuthenticatedUser();
     const profileUpdate = await parseJsonBody({
       request,
       schema: profileSchema,
     });
+    const { supabase, user } = await requireAuthenticatedUser();
 
     return buildSuccessResponse({
       data: await updateUserProfileResponse(supabase, user, profileUpdate),
@@ -46,7 +46,7 @@ export async function PATCH(request: Request) {
     return toRouteErrorResponse(
       error,
       apiMessages.profile.updateUnexpected,
-      'profile patch failed',
+      'profile update failed',
     );
   }
 }
