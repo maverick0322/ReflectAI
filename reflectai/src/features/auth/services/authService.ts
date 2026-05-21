@@ -59,6 +59,16 @@ export async function confirmRecovery(code: string) {
   });
 }
 
+export async function verifyCurrentPassword(currentPassword: string) {
+  return requestJson<SimpleMessageResponse>('/api/auth/verify-password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ currentPassword }),
+  });
+}
+
 export async function changePassword(payload: {
   currentPassword?: string;
   newPassword: string;

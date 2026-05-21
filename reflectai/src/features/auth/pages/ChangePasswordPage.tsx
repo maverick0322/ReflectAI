@@ -16,8 +16,8 @@ function ChangePasswordContent() {
 
   return (
     <ChangePasswordCardFrame>
-      <GlassCard className="max-w-lg w-full">
-        <div className="mb-6 text-center">
+      <GlassCard className="mx-auto flex w-full max-w-md flex-col gap-6 p-8">
+        <div className="text-center">
           <h1 className="text-2xl font-bold text-reflect-dark">Change password</h1>
         </div>
 
@@ -27,6 +27,7 @@ function ChangePasswordContent() {
           <IdentityVerificationStep
             form={page.form1}
             isSubmitting={page.isSubmitting}
+            formError={page.formError}
             onSubmit={page.handleStep1Submit}
           />
         ) : (
@@ -48,7 +49,7 @@ function ChangePasswordContent() {
 function ChangePasswordPageFallback() {
   return (
     <ChangePasswordCardFrame>
-      <GlassCard className="max-w-lg w-full">
+      <GlassCard className="mx-auto flex w-full max-w-md flex-col gap-6 p-8">
         <div className="flex flex-col items-center justify-center py-8">
           <p className="text-sm text-reflect-dark/70">Loading...</p>
         </div>

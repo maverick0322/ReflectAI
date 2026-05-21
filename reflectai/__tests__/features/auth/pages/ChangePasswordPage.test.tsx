@@ -10,6 +10,7 @@ const {
   confirmRecoveryMock,
   pushMock,
   useSearchParamsMock,
+  verifyCurrentPasswordMock,
 } = vi.hoisted(() => ({
   changePasswordMock: vi.fn(async (...args: unknown[]) => {
     void args;
@@ -21,6 +22,10 @@ const {
   }),
   pushMock: vi.fn(),
   useSearchParamsMock: vi.fn(() => new URLSearchParams()),
+  verifyCurrentPasswordMock: vi.fn(async (...args: unknown[]) => {
+    void args;
+    return { message: 'ok' };
+  }),
 }));
 
 vi.mock('@/features/auth/services/authService', () => ({
@@ -30,6 +35,8 @@ vi.mock('@/features/auth/services/authService', () => ({
     confirmNewPassword: string;
   }) => changePasswordMock(payload),
   confirmRecovery: (code: string) => confirmRecoveryMock(code),
+  verifyCurrentPassword: (currentPassword: string) =>
+    verifyCurrentPasswordMock(currentPassword),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -43,6 +50,7 @@ describe('ChangePasswordPage step 1', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useSearchParamsMock.mockReturnValue(new URLSearchParams());
+    verifyCurrentPasswordMock.mockResolvedValue({ message: 'ok' });
   });
 
   it('shows an error when step 1 is submitted empty', async () => {
@@ -53,6 +61,21 @@ describe('ChangePasswordPage step 1', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/current password is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/please review the highlighted fields/i)).toBeInTheDocument();
+    });
+  });
+
+  it('clears the step 1 validation message when the password becomes valid', async () => {
+    const user = userEvent.setup();
+    render(<ChangePasswordPage />);
+
+    await user.click(screen.getByRole('button', { name: /continue/i }));
+    expect(screen.getByText(/current password is required/i)).toBeInTheDocument();
+
+    await user.type(screen.getByPlaceholderText(/current password/i), 'CurrentPassword123');
+
+    await waitFor(() => {
+      expect(screen.queryByText(/current password is required/i)).not.toBeInTheDocument();
     });
   });
 
@@ -73,6 +96,33 @@ describe('ChangePasswordPage step 1', () => {
     render(<ChangePasswordPage />);
     expect(screen.getByRole('link', { name: /cancel/i })).toHaveAttribute('href', '/profile');
   });
+
+  it('shows the backend error when the current password is invalid', async () => {
+    const user = userEvent.setup();
+    verifyCurrentPasswordMock.mockRejectedValueOnce(
+      new ApiError('invalid password', 400, {
+        message: 'Current password is incorrect',
+      }),
+    );
+
+    render(<ChangePasswordPage />);
+
+    await user.type(screen.getByPlaceholderText(/current password/i), 'WrongPassword123');
+    await user.click(screen.getByRole('button', { name: /continue/i }));
+
+    await waitFor(() => {
+      expect(verifyCurrentPasswordMock).toHaveBeenCalledWith('WrongPassword123');
+      expect(screen.getByRole('alert')).toHaveTextContent('Current password is incorrect');
+      expect(screen.getByText(/step 1 of 2/i)).toBeInTheDocument();
+    });
+  });
+
+  it('uses the shared auth card sizing classes', () => {
+    const { container } = render(<ChangePasswordPage />);
+    const card = container.querySelector('.rounded-\\[2rem\\]');
+
+    expect(card).toHaveClass('mx-auto', 'w-full', 'max-w-md', 'gap-6', 'p-8');
+  });
 });
 
 describe('ChangePasswordPage step 2', () => {
@@ -81,6 +131,7 @@ describe('ChangePasswordPage step 2', () => {
     useSearchParamsMock.mockReturnValue(new URLSearchParams());
     changePasswordMock.mockResolvedValue({ message: 'ok' });
     confirmRecoveryMock.mockResolvedValue({ message: 'ok' });
+    verifyCurrentPasswordMock.mockResolvedValue({ message: 'ok' });
   });
 
   async function moveToStep2() {
@@ -91,6 +142,7 @@ describe('ChangePasswordPage step 2', () => {
     await user.click(screen.getByRole('button', { name: /continue/i }));
 
     await waitFor(() => {
+      expect(verifyCurrentPasswordMock).toHaveBeenCalledWith('CurrentPassword123');
       expect(screen.getByText(/step 2 of 2/i)).toBeInTheDocument();
     });
 
@@ -150,6 +202,41 @@ describe('ChangePasswordPage step 2', () => {
 
     await waitFor(() => {
       expect(screen.queryByText(/passwords do not match/i)).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows validation messages when step 2 is submitted empty', async () => {
+    const user = await moveToStep2();
+
+    await user.click(screen.getByRole('button', { name: /update password/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/password is required/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/confirm your new password/i).length).toBeGreaterThan(0);
+      expect(screen.getByText(/please review the highlighted fields/i)).toBeInTheDocument();
+    });
+  });
+
+  it('clears the step 2 validation messages as fields are corrected', async () => {
+    const user = await moveToStep2();
+
+    await user.click(screen.getByRole('button', { name: /update password/i }));
+    expect(screen.getByText(/password is required/i)).toBeInTheDocument();
+
+    await user.type(screen.getByPlaceholderText(/^new password$/i), 'ValidPassword123');
+
+    await waitFor(() => {
+      expect(screen.queryByText(/password is required/i)).not.toBeInTheDocument();
+    });
+
+    expect(screen.getAllByText(/confirm your new password/i).length).toBeGreaterThan(0);
+    await user.type(
+      screen.getByPlaceholderText(/^confirm new password$/i),
+      'ValidPassword123',
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText(/^Confirm your new password$/i)).not.toBeInTheDocument();
     });
   });
 

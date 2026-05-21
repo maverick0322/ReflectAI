@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import { useFormState, type UseFormReturn } from 'react-hook-form';
 
 import Link from 'next/link';
 
@@ -24,6 +24,7 @@ interface ChangePasswordSectionHeaderProps {
 interface IdentityVerificationStepProps {
   form: UseFormReturn<Step1FormValues>;
   isSubmitting: boolean;
+  formError: string | null;
   onSubmit: (data: Step1FormValues) => Promise<void>;
 }
 
@@ -105,8 +106,13 @@ export function ChangePasswordRecoveryPending({
 export function IdentityVerificationStep({
   form,
   isSubmitting,
+  formError,
   onSubmit,
 }: IdentityVerificationStepProps) {
+  const { errors, submitCount } = useFormState({ control: form.control });
+  const hasValidationErrors =
+    submitCount > 0 && Object.keys(errors).length > 0;
+
   return (
     <>
       <ChangePasswordSectionHeader
@@ -124,7 +130,7 @@ export function IdentityVerificationStep({
           {...form.register('currentPassword')}
           placeholder="Current password"
           maxLength={64}
-          error={form.formState.errors.currentPassword?.message}
+          error={errors.currentPassword?.message}
           autoComplete="current-password"
         />
 
@@ -133,6 +139,18 @@ export function IdentityVerificationStep({
             Forgot your password?
           </CustomLink>
         </div>
+
+        {hasValidationErrors && !formError && (
+          <p className="text-sm font-semibold text-red-500" role="alert">
+            Please review the highlighted fields.
+          </p>
+        )}
+
+        {formError && (
+          <p className="text-sm font-semibold text-red-500" role="alert">
+            {formError}
+          </p>
+        )}
 
         <div className="flex gap-3 pt-2">
           <Link
@@ -159,6 +177,10 @@ export function NewPasswordStep({
   onBack,
   onSubmit,
 }: NewPasswordStepProps) {
+  const { errors, submitCount } = useFormState({ control: form.control });
+  const hasValidationErrors =
+    submitCount > 0 && Object.keys(errors).length > 0;
+
   return (
     <>
       <ChangePasswordSectionHeader
@@ -176,7 +198,7 @@ export function NewPasswordStep({
           {...form.register('newPassword')}
           placeholder="New password"
           maxLength={64}
-          error={form.formState.errors.newPassword?.message}
+          error={errors.newPassword?.message}
           autoComplete="new-password"
         />
 
@@ -184,9 +206,15 @@ export function NewPasswordStep({
           {...form.register('confirmNewPassword')}
           placeholder="Confirm new password"
           maxLength={64}
-          error={form.formState.errors.confirmNewPassword?.message}
+          error={errors.confirmNewPassword?.message}
           autoComplete="new-password"
         />
+
+        {hasValidationErrors && !formError && (
+          <p className="text-sm font-semibold text-red-500" role="alert">
+            Please review the highlighted fields.
+          </p>
+        )}
 
         {formError && (
           <p className="text-sm font-semibold text-red-500" role="alert">

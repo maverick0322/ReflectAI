@@ -8,6 +8,7 @@ export const emailField = z
 
 export const passwordField = z
   .string()
+  .min(1, 'Password is required')
   .min(8, 'Password must be at least 8 characters long')
   .max(64, 'Character limit reached')
   .regex(/[A-Z]/, 'Password must include uppercase, lowercase, and numeric characters')
