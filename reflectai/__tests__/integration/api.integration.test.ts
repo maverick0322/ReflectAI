@@ -90,10 +90,10 @@ const aiAnalysis = {
   average_intensity: 8,
   key_themes: ['trabajo', 'limites'],
   cognitive_distortion_detected: null,
-  session_title: 'Pausa ante una conversacion dificil',
+  session_title: 'Pausa ante una conversacion difÍcil',
   summary: 'Resumen generado por IA',
   recommendation: 'Elige una accion pequena bajo tu control.',
-  encouraging_message: 'Hiciste espacio para responder con mas claridad.',
+  encouraging_message: 'Hiciste espacio para responder con mÁs claridad.',
   professional_support_reminder:
     'Si el malestar persiste, consulta a un profesional.',
 };
@@ -103,7 +103,7 @@ const fallbackAnalysis = {
   average_intensity: null,
   key_themes: [],
   cognitive_distortion_detected: null,
-  session_title: 'Sesion de reflexion',
+  session_title: 'SesiÓn de reflexiÓn',
   summary: 'Resumen local',
   recommendation: 'Recomendacion local',
   encouraging_message: 'Mensaje local',
@@ -571,7 +571,7 @@ describe('Critical API integration - version 2026-05-12', () => {
         data: [
           {
             id: 'session-2',
-            title: 'Sesion reciente',
+            title: 'SesiÓn reciente',
             status: 'completed',
             started_at: '2026-05-12T09:00:00.000Z',
             completed_at: '2026-05-12T09:20:00.000Z',
@@ -579,7 +579,7 @@ describe('Critical API integration - version 2026-05-12', () => {
           },
           {
             id: 'session-1',
-            title: 'Sesion anterior',
+            title: 'SesiÓn anterior',
             status: 'draft',
             started_at: '2026-05-11T09:00:00.000Z',
             completed_at: null,
@@ -733,7 +733,7 @@ describe('Critical API integration - version 2026-05-12', () => {
           started_at: STARTED_AT,
           payload: {
             metadata: { version: '1.1', started_at: STARTED_AT },
-            responses: [{ id: 'Q1_SIT', text: 'Situacion' }],
+            responses: [{ id: 'Q1_SIT', text: 'SituaciÓn' }],
           },
         },
         error: null,
@@ -776,7 +776,7 @@ describe('Critical API integration - version 2026-05-12', () => {
               flags: ['grounding_completed'],
             },
             responses: [
-              { id: 'Q1_SIT', text: 'Una conversacion dificil' },
+              { id: 'Q1_SIT', text: 'Una conversacion difÍcil' },
               { id: 'Q2_THO', text: 'No me escuchan' },
               { id: 'Q3_EMO', text: 'Ansiedad' },
               { id: 'Q4_INT', value: 8 },
@@ -880,7 +880,7 @@ describe('Critical API integration - version 2026-05-12', () => {
 
   it('TC-04-02 generates next questions with per-question fallback', async () => {
     vi.mocked(generateNextQuestion)
-      .mockResolvedValueOnce('Que emocion aparece con mas fuerza?')
+      .mockResolvedValueOnce('QuÉ emociÓn aparece con mÁs fuerza?')
       .mockRejectedValueOnce(new Error('groq'));
     const readBuilder = createChain({
       singleResult: {
@@ -890,7 +890,7 @@ describe('Critical API integration - version 2026-05-12', () => {
           payload: {
             metadata: { version: '1.1', started_at: STARTED_AT },
             responses: [
-              { id: 'Q1_SIT', text: 'Una conversacion dificil' },
+              { id: 'Q1_SIT', text: 'Una conversacion difÍcil' },
               { id: 'Q2_THO', text: 'No me escuchan' },
             ],
           },
@@ -926,13 +926,13 @@ describe('Critical API integration - version 2026-05-12', () => {
     expect(body.data).toMatchObject({
       done: false,
       questionId: 'Q3_EMO',
-      questionText: 'Que emocion aparece con mas fuerza?',
+      questionText: 'QuÉ emociÓn aparece con mÁs fuerza?',
       aiGenerated: true,
     });
     expect(body.data?.questions).toEqual([
       {
         questionId: 'Q3_EMO',
-        questionText: 'Que emocion aparece con mas fuerza?',
+        questionText: 'QuÉ emociÓn aparece con mÁs fuerza?',
         aiGenerated: true,
       },
       {
@@ -954,7 +954,7 @@ describe('Critical API integration - version 2026-05-12', () => {
           started_at: STARTED_AT,
           payload: {
             metadata: { version: '1.1', started_at: STARTED_AT },
-            responses: [{ id: 'Q1_SIT', text: 'Situacion' }],
+            responses: [{ id: 'Q1_SIT', text: 'SituaciÓn' }],
           },
         },
         error: null,

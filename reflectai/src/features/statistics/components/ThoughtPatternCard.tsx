@@ -22,7 +22,7 @@ export function ThoughtPatternCard({
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Pattern detected
+            Patrón detectado
           </span>
           <h2 className="text-base font-semibold text-slate-900">
             {pattern.title}

@@ -25,9 +25,9 @@ describe('RecoverPasswordPage', () => {
   it('renders the recovery form', () => {
     render(<RecoverPasswordPage />);
 
-    expect(screen.getByRole('heading', { name: /recover access/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /send link/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /back to sign in/i })).toHaveAttribute(
+    expect(screen.getByRole('heading', { name: /recuperar acceso/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /enviar enlace/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /volver a iniciar sesiÓn/i })).toHaveAttribute(
       'href',
       '/login',
     );
@@ -37,10 +37,10 @@ describe('RecoverPasswordPage', () => {
     const user = userEvent.setup();
     render(<RecoverPasswordPage />);
 
-    await user.click(screen.getByRole('button', { name: /send link/i }));
+    await user.click(screen.getByRole('button', { name: /enviar enlace/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/email is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/el correo es obligatorio/i)).toBeInTheDocument();
     });
   });
 
@@ -48,12 +48,12 @@ describe('RecoverPasswordPage', () => {
     const user = userEvent.setup();
     render(<RecoverPasswordPage />);
 
-    await user.type(screen.getByPlaceholderText(/^email address$/i), 'ana@example.com');
-    await user.click(screen.getByRole('button', { name: /send link/i }));
+    await user.type(screen.getByPlaceholderText(/^correo electrÓnico$/i), 'ana@example.com');
+    await user.click(screen.getByRole('button', { name: /enviar enlace/i }));
 
     await waitFor(() => {
       expect(recoverPasswordMock).toHaveBeenCalledWith('ana@example.com');
-      expect(screen.getByRole('status')).toHaveTextContent(/check your inbox/i);
+      expect(screen.getByRole('status')).toHaveTextContent(/revisa tu bandeja de entrada/i);
     });
   });
 
@@ -65,8 +65,8 @@ describe('RecoverPasswordPage', () => {
 
     render(<RecoverPasswordPage />);
 
-    await user.type(screen.getByPlaceholderText(/^email address$/i), 'ana@example.com');
-    await user.click(screen.getByRole('button', { name: /send link/i }));
+    await user.type(screen.getByPlaceholderText(/^correo electrÓnico$/i), 'ana@example.com');
+    await user.click(screen.getByRole('button', { name: /enviar enlace/i }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Email not found');
   });

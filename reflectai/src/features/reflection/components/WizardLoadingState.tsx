@@ -5,7 +5,7 @@ interface WizardLoadingStateProps {
 }
 
 export function WizardLoadingState({
-  message = 'Preparing your session...',
+  message = 'Preparando tu sesión...',
 }: WizardLoadingStateProps) {
   return (
     <main className="min-h-screen flex items-center justify-center p-4">

@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     if (validation.data.currentPassword) {
       if (!user.email) {
         return NextResponse.json(
-          { error: { message: 'Unable to validate the current password' } },
+          { error: { message: 'No se pudo validar la contraseña actual' } },
           { status: 400 },
         );
       }
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
       if (signInError) {
         return NextResponse.json(
-          { error: { message: 'The current password is incorrect' } },
+          { error: { message: 'La contraseña actual es incorrecta' } },
           { status: 400 },
         );
       }
@@ -53,17 +53,17 @@ export async function POST(request: Request) {
 
     if (error) {
       return NextResponse.json(
-        { error: { message: 'Unable to update the password' } },
+        { error: { message: 'No se pudo actualizar la contraseña' } },
         { status: 500 },
       );
     }
 
     return NextResponse.json({
-      message: 'Password updated successfully',
+      message: 'Contraseña actualizada correctamente',
     });
   } catch {
     return NextResponse.json(
-      { error: { message: 'Unexpected error while updating the password' } },
+      { error: { message: 'Error inesperado al actualizar la contraseña' } },
       { status: 500 },
     );
   }

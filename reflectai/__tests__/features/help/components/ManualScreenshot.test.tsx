@@ -53,7 +53,7 @@ describe('ManualScreenshot', () => {
   it('shows the default callout text when none is provided', () => {
     render(<ManualScreenshot src="/manual/step-1.png" alt="Default callout screenshot" />);
 
-    expect(screen.getByText(/tap here/i)).toBeInTheDocument();
+    expect(screen.getByText(/toca aquí/i)).toBeInTheDocument();
   });
 
   it('shows a custom callout text', () => {
@@ -91,9 +91,9 @@ describe('ManualScreenshot', () => {
 
     fireEvent.error(screen.getByTestId('manual-image'));
 
-    expect(screen.getByText(/screenshot pending/i)).toBeInTheDocument();
+    expect(screen.getByText(/captura pendiente/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/this image will be added once the interface is finalized/i),
+      screen.getByText(/esta imagen se agregará cuando la interfaz quede finalizada/i),
     ).toBeInTheDocument();
     expect(screen.getByTestId('camera-icon')).toBeInTheDocument();
     expect(screen.queryByTestId('manual-image')).not.toBeInTheDocument();

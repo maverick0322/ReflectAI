@@ -63,7 +63,7 @@ const completedPayload = {
     started_at: STARTED_AT,
   },
   responses: [
-    { id: 'Q1_SIT', text: 'Situacion' },
+    { id: 'Q1_SIT', text: 'SituaciÓn' },
     { id: 'Q2_THO', text: 'Pensamiento' },
     { id: 'Q3_EMO', text: 'Ansiedad' },
     { id: 'Q4_INT', value: 7 },
@@ -79,7 +79,7 @@ const fallbackAnalysis = {
   average_intensity: null,
   key_themes: [],
   cognitive_distortion_detected: null,
-  session_title: 'Sesion de reflexion',
+  session_title: 'SesiÓn de reflexiÓn',
   summary: 'Resumen local',
   recommendation: 'Recomendacion local',
   encouraging_message: 'Mensaje local',
@@ -198,7 +198,7 @@ describe('ruta API de siguiente pregunta', () => {
     });
     mockAuthenticatedUser({ supabase: { from: vi.fn(() => readBuilder) } });
     vi.mocked(generateNextQuestion)
-      .mockResolvedValueOnce('Pregunta generada para emocion')
+      .mockResolvedValueOnce('Pregunta generada para emociÓn')
       .mockRejectedValueOnce(new Error('groq'));
 
     const response = await nextQuestionPost(
@@ -213,13 +213,13 @@ describe('ruta API de siguiente pregunta', () => {
     expect(body.data).toMatchObject({
       done: false,
       questionId: 'Q3_EMO',
-      questionText: 'Pregunta generada para emocion',
+      questionText: 'Pregunta generada para emociÓn',
       aiGenerated: true,
     });
     expect(body.data?.questions).toEqual([
       {
         questionId: 'Q3_EMO',
-        questionText: 'Pregunta generada para emocion',
+        questionText: 'Pregunta generada para emociÓn',
         aiGenerated: true,
       },
       {
@@ -253,7 +253,7 @@ describe('ruta API de siguiente pregunta', () => {
     expect(generateNextQuestion).not.toHaveBeenCalled();
   });
 
-  it('rechaza payload invalido, usuario anonimo y sesion inexistente', async () => {
+  it('rechaza payload invalido, usuario anonimo y sesiÓn inexistente', async () => {
     const invalidResponse = await nextQuestionPost(
       jsonRequest('/api/ai/next-question', {
         sessionId: 'no-es-uuid',
@@ -287,8 +287,8 @@ describe('ruta API de siguiente pregunta', () => {
   });
 });
 
-describe('ruta API de analisis de sesion', () => {
-  it('analiza sesion y persiste resultado de IA', async () => {
+describe('ruta API de analisis de sesiÓn', () => {
+  it('analiza sesiÓn y persiste resultado de IA', async () => {
     const aiAnalysis = {
       ...fallbackAnalysis,
       primary_emotions: ['ansiedad'],
@@ -359,7 +359,7 @@ describe('ruta API de analisis de sesion', () => {
     expect(updateBuilder.update).toHaveBeenCalledWith({ ai_analysis: fallbackAnalysis });
   });
 
-  it('rechaza payload invalido, usuario anonimo, sesion inexistente y fallo al guardar', async () => {
+  it('rechaza payload invalido, usuario anonimo, sesiÓn inexistente y fallo al guardar', async () => {
     const invalidResponse = await analyzeSessionPost(
       jsonRequest('/api/ai/analyze-session', {
         sessionId: 'bad',

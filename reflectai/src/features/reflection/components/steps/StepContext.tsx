@@ -12,7 +12,7 @@ interface StepProps {
 }
 
 const DEFAULT_QUESTION =
-  'What specific situation triggered the need to reflect today?';
+  '¿Qué situación específica despertó hoy la necesidad de reflexionar?';
 
 function getTextareaClassName(shouldShowError: boolean) {
   return [
@@ -44,7 +44,7 @@ export const StepContext = ({
       </h2>
 
       <p className="-mt-4 text-sm font-medium text-slate-500">
-        Describe the facts without judgment.
+        Describe los hechos sin juzgarlos
       </p>
 
       <div className="flex flex-col gap-2">
@@ -56,7 +56,7 @@ export const StepContext = ({
               {...field}
               value={field.value ?? ''}
               maxLength={3000}
-              placeholder="Write here..."
+              placeholder="Escribe aquí..."
               className={getTextareaClassName(shouldShowError)}
             />
           )}
@@ -72,7 +72,7 @@ export const StepContext = ({
       </div>
 
       <Button type="button" onClick={onNext}>
-        Next
+        Siguiente
       </Button>
     </div>
   );

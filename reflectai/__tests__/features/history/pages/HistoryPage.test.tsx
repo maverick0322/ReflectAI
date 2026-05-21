@@ -39,10 +39,8 @@ describe('HistoryPage', () => {
 
     const { container } = render(<HistoryPage />);
 
-    expect(await screen.findByRole('heading', { name: /my history/i })).toBeInTheDocument();
-    expect(
-      screen.getByText(/you have completed 1 reflection sessions/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /mi historial/i })).toBeInTheDocument();
+    expect(screen.getByText(/has completado 1 sesiones de reflexión/i)).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /anxiety before a project deadline/i }),
     ).toBeInTheDocument();
@@ -89,17 +87,19 @@ describe('HistoryPage', () => {
 
     render(<HistoryPage />);
 
-    expect(await screen.findByLabelText(/search history/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/buscar en el historial/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /abril de 2026/i })).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /anxiety before a project deadline/i }),
     ).toBeInTheDocument();
 
-    await user.type(screen.getByRole('searchbox', { name: /search history/i }), 'family');
+    await user.type(screen.getByRole('searchbox', { name: /buscar en el historial/i }), 'family');
 
-    expect(screen.queryByRole('heading', {
-      name: /anxiety before a project deadline/i,
-    })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', {
+        name: /anxiety before a project deadline/i,
+      }),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /family discussion/i })).toBeInTheDocument();
   });
 
@@ -126,10 +126,10 @@ describe('HistoryPage', () => {
     render(<HistoryPage />);
 
     await screen.findByRole('heading', { name: /anxiety before a project deadline/i });
-    await user.type(screen.getByRole('searchbox', { name: /search history/i }), 'health');
+    await user.type(screen.getByRole('searchbox', { name: /buscar en el historial/i }), 'health');
 
     expect(
-      screen.getByText(/no completed reflections match your search/i),
+      screen.getByText(/ninguna reflexión completada coincide con tu búsqueda/i),
     ).toBeInTheDocument();
   });
 
@@ -138,6 +138,6 @@ describe('HistoryPage', () => {
 
     render(<HistoryPage />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/unable to load your history/i);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/no se pudo cargar tu historial/i);
   });
 });

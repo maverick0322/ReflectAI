@@ -46,7 +46,7 @@ describe('supabase clients', () => {
     process.env = OLD_ENV;
   });
 
-  it('crea cliente admin con sesion no persistente', () => {
+  it('crea cliente admin con sesiÓn no persistente', () => {
     expect(createAdminSupabaseClient()).toEqual({ admin: true });
     expect(createSupabaseClient).toHaveBeenCalledWith(
       'https://project.supabase.co',

@@ -30,9 +30,9 @@ describe('RegisterPage', () => {
   it('renders the main register form structure', () => {
     render(<RegisterPage />);
 
-    expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /register/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /sign in here/i })).toHaveAttribute(
+    expect(screen.getByRole('heading', { name: /crear cuenta/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /registrarme/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /inicia sesi(?:o|\u00f3)n aqu(?:i|\u00ed)/i })).toHaveAttribute(
       'href',
       '/login',
     );
@@ -42,26 +42,43 @@ describe('RegisterPage', () => {
     const user = userEvent.setup();
     render(<RegisterPage />);
 
-    await user.click(screen.getByRole('button', { name: /register/i }));
+    await user.click(screen.getByRole('button', { name: /registrarme/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
-      expect(screen.getAllByText(/email is required/i).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/password is required/i).length).toBeGreaterThan(0);
-      expect(screen.getByText(/birth date is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/please review the highlighted fields/i)).toBeInTheDocument();
+      expect(screen.getByText(/el nombre es obligatorio/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/el correo es obligatorio/i).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByText(/la contrase(?:n|\u00f1)a es obligatoria/i).length,
+      ).toBeGreaterThan(0);
+      expect(screen.getByText(/la fecha de nacimiento es obligatoria/i)).toBeInTheDocument();
+      expect(screen.getByText(/revisa los campos marcados/i)).toBeInTheDocument();
     });
   });
 
-  it('shows confirm email validation as the user types', async () => {
+  it('shows confirm email validation when the form is checked', async () => {
     const user = userEvent.setup();
     render(<RegisterPage />);
 
-    await user.type(screen.getByPlaceholderText(/^email address$/i), 'ana@example.com');
-    await user.type(screen.getByPlaceholderText(/^confirm email address$/i), 'ana@other.com');
+    await user.type(screen.getByPlaceholderText(/nombre/i), 'Ana');
+    await user.type(
+      screen.getByPlaceholderText(/^correo electr(?:o|\u00f3)nico$/i),
+      'ana@example.com',
+    );
+    await user.type(screen.getByPlaceholderText(/^confirma tu correo$/i), 'ana@other.com');
+    await user.type(
+      screen.getByPlaceholderText(/^contrase(?:n|\u00f1)a$/i),
+      'ValidPassword123',
+    );
+    await user.type(
+      screen.getByPlaceholderText(/^confirma tu contrase(?:n|\u00f1)a$/i),
+      'ValidPassword123',
+    );
+    await user.type(screen.getByPlaceholderText(/^dd\/mm\/yyyy$/i), '10/05/1998');
+
+    await user.click(screen.getByRole('button', { name: /registrarme/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/email addresses do not match/i)).toBeInTheDocument();
+      expect(screen.getByText(/los correos no coinciden/i)).toBeInTheDocument();
     });
   });
 
@@ -69,27 +86,30 @@ describe('RegisterPage', () => {
     const user = userEvent.setup();
     render(<RegisterPage />);
 
-    await user.click(screen.getByRole('button', { name: /register/i }));
+    await user.click(screen.getByRole('button', { name: /registrarme/i }));
 
-    expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
+    expect(screen.getByText(/el nombre es obligatorio/i)).toBeInTheDocument();
 
-    await user.type(screen.getByPlaceholderText(/first name/i), 'Ana');
+    await user.type(screen.getByPlaceholderText(/nombre/i), 'Ana');
 
     await waitFor(() => {
-      expect(screen.queryByText(/first name is required/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/el nombre es obligatorio/i)).not.toBeInTheDocument();
     });
 
-    expect(screen.getAllByText(/email is required/i).length).toBeGreaterThan(0);
-    await user.type(screen.getByPlaceholderText(/^email address$/i), 'ana@example.com');
+    expect(screen.getAllByText(/el correo es obligatorio/i).length).toBeGreaterThan(0);
+    await user.type(
+      screen.getByPlaceholderText(/^correo electr(?:o|\u00f3)nico$/i),
+      'ana@example.com',
+    );
 
     await waitFor(() => {
-      expect(screen.getAllByText(/email is required/i).length).toBe(1);
+      expect(screen.getAllByText(/el correo es obligatorio/i).length).toBe(1);
     });
 
-    await user.type(screen.getByPlaceholderText(/^confirm email address$/i), 'ana@example.com');
+    await user.type(screen.getByPlaceholderText(/^confirma tu correo$/i), 'ana@example.com');
 
     await waitFor(() => {
-      expect(screen.queryByText(/email is required/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/el correo es obligatorio/i)).not.toBeInTheDocument();
     });
   });
 
@@ -97,14 +117,23 @@ describe('RegisterPage', () => {
     const user = userEvent.setup();
     render(<RegisterPage />);
 
-    await user.type(screen.getByPlaceholderText(/first name/i), 'Ana');
-    await user.type(screen.getByPlaceholderText(/^email address$/i), 'ana@example.com');
-    await user.type(screen.getByPlaceholderText(/^confirm email address$/i), 'ana@example.com');
-    await user.type(screen.getByPlaceholderText(/^password$/i), 'ValidPassword123');
-    await user.type(screen.getByPlaceholderText(/^confirm password$/i), 'ValidPassword123');
-    await user.type(screen.getByPlaceholderText(/birth date/i), '1998-05-10');
+    await user.type(screen.getByPlaceholderText(/nombre/i), 'Ana');
+    await user.type(
+      screen.getByPlaceholderText(/^correo electr(?:o|\u00f3)nico$/i),
+      'ana@example.com',
+    );
+    await user.type(screen.getByPlaceholderText(/^confirma tu correo$/i), 'ana@example.com');
+    await user.type(
+      screen.getByPlaceholderText(/^contrase(?:n|\u00f1)a$/i),
+      'ValidPassword123',
+    );
+    await user.type(
+      screen.getByPlaceholderText(/^confirma tu contrase(?:n|\u00f1)a$/i),
+      'ValidPassword123',
+    );
+    await user.type(screen.getByPlaceholderText(/^dd\/mm\/yyyy$/i), '10/05/1998');
 
-    await user.click(screen.getByRole('button', { name: /register/i }));
+    await user.click(screen.getByRole('button', { name: /registrarme/i }));
 
     await waitFor(() => {
       expect(registerUserMock).toHaveBeenCalledWith({
@@ -128,14 +157,23 @@ describe('RegisterPage', () => {
 
     render(<RegisterPage />);
 
-    await user.type(screen.getByPlaceholderText(/first name/i), 'Ana');
-    await user.type(screen.getByPlaceholderText(/^email address$/i), 'ana@example.com');
-    await user.type(screen.getByPlaceholderText(/^confirm email address$/i), 'ana@example.com');
-    await user.type(screen.getByPlaceholderText(/^password$/i), 'ValidPassword123');
-    await user.type(screen.getByPlaceholderText(/^confirm password$/i), 'ValidPassword123');
-    await user.type(screen.getByPlaceholderText(/birth date/i), '1998-05-10');
+    await user.type(screen.getByPlaceholderText(/nombre/i), 'Ana');
+    await user.type(
+      screen.getByPlaceholderText(/^correo electr(?:o|\u00f3)nico$/i),
+      'ana@example.com',
+    );
+    await user.type(screen.getByPlaceholderText(/^confirma tu correo$/i), 'ana@example.com');
+    await user.type(
+      screen.getByPlaceholderText(/^contrase(?:n|\u00f1)a$/i),
+      'ValidPassword123',
+    );
+    await user.type(
+      screen.getByPlaceholderText(/^confirma tu contrase(?:n|\u00f1)a$/i),
+      'ValidPassword123',
+    );
+    await user.type(screen.getByPlaceholderText(/^dd\/mm\/yyyy$/i), '10/05/1998');
 
-    await user.click(screen.getByRole('button', { name: /register/i }));
+    await user.click(screen.getByRole('button', { name: /registrarme/i }));
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('That email is already registered');

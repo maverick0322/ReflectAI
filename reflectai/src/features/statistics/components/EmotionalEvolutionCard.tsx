@@ -22,16 +22,16 @@ export function EmotionalEvolutionCard({
     <GlassCard className="p-5 gap-4 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex flex-col gap-1">
         <h2 className="text-lg font-semibold text-slate-900">
-          Emotional evolution
+          Evolución emocional
         </h2>
         <p className="text-sm text-slate-500">
-          Recent emotional intensity across your completed reflections.
+          Intensidad emocional reciente en tus reflexiones completadas
         </p>
       </div>
 
       {evolution.length > 0 ? (
         <div
-          aria-label="Emotional evolution chart"
+          aria-label="Gráfica de evolución emocional"
           className={evolutionChartClassName}
         >
           {evolution.map((point) => (
@@ -52,7 +52,7 @@ export function EmotionalEvolutionCard({
       ) : (
         <div className="rounded-2xl border border-dashed border-white/60 bg-white/20 p-4">
           <p className="text-sm text-slate-500">
-            Complete a few reflections to visualize your emotional evolution.
+            Completa algunas reflexiones para visualizar tu evolución emocional
           </p>
         </div>
       )}

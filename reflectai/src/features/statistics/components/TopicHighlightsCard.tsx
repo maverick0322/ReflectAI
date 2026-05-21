@@ -16,9 +16,9 @@ export function TopicHighlightsCard({
   return (
     <GlassCard className="p-5 gap-4 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex flex-col gap-1">
-        <h2 className="text-base font-semibold text-slate-900">Frequent topics</h2>
+        <h2 className="text-base font-semibold text-slate-900">Temas frecuentes</h2>
         <p className="text-sm text-slate-500">
-          Topics that show up most often in your completed sessions.
+          Temas que aparecen con mayor frecuencia en tus sesiones completadas
         </p>
       </div>
 
@@ -36,7 +36,7 @@ export function TopicHighlightsCard({
       ) : (
         <div className="rounded-2xl border border-dashed border-white/60 bg-white/20 p-4">
           <p className="text-sm text-slate-500">
-            Complete more reflections to surface recurring topics.
+            Completa más reflexiones para descubrir temas recurrentes
           </p>
         </div>
       )}

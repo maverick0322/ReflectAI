@@ -22,16 +22,15 @@ export function HistoryPage() {
   const hasActiveSearch = searchQuery.trim().length > 0;
 
   return (
-    <main className="flex-1 w-full max-w-lg mx-auto px-4 py-6">
+    <main className="mx-auto flex-1 w-full max-w-lg px-4 py-6">
       <GlassCard className={historyCardClassName}>
         <header className="flex flex-col gap-3">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-              My history
+              Mi historial
             </h1>
             <p className="mt-2 text-sm text-slate-500">
-              You have completed {summary.completedSessions}{' '}
-              reflection sessions
+              Has completado {summary.completedSessions} sesiones de reflexión
             </p>
           </div>
         </header>
@@ -47,7 +46,7 @@ export function HistoryPage() {
             role="status"
             className="rounded-2xl border border-dashed border-slate-200 bg-white/80 px-4 py-6"
           >
-            <p className="text-sm text-slate-500">Loading your history...</p>
+            <p className="text-sm text-slate-500">Cargando tu historial...</p>
           </div>
         ) : formError ? (
           <div
@@ -69,8 +68,8 @@ export function HistoryPage() {
           >
             <p className="text-sm text-slate-500">
               {hasActiveSearch
-                ? 'No completed reflections match your search.'
-                : 'Complete a reflection to start building your history.'}
+                ? 'Ninguna reflexión completada coincide con tu búsqueda'
+                : 'Completa una reflexión para comenzar a construir tu historial'}
             </p>
           </div>
         )}

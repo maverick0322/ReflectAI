@@ -65,9 +65,11 @@ describe('StatisticsPage', () => {
 
     const { container } = render(<StatisticsPage />);
 
-    expect(await screen.findByRole('heading', { name: /my statistics/i })).toBeInTheDocument();
     expect(
-      screen.getByText(/explore your trends across 2 completed reflections/i),
+      await screen.findByRole('heading', { name: /mis estad(?:i|\u00ed)sticas/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/explora tus tendencias en 2 reflexiones completadas/i),
     ).toBeInTheDocument();
     expect(container.querySelector('main')).toHaveClass('max-w-lg');
   });
@@ -122,10 +124,12 @@ describe('StatisticsPage', () => {
 
     render(<StatisticsPage />);
 
-    expect(await screen.findByRole('heading', { name: /emotional evolution/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /frequent emotions/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /frequent topics/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /compare sessions/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: /evoluci(?:o|\u00f3)n emocional/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /emociones frecuentes/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /temas frecuentes/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /comparar sesiones/i })).toBeInTheDocument();
     expect(screen.getByText(/work \(1\)/i)).toBeInTheDocument();
     expect(screen.getByText(/mind reading/i)).toBeInTheDocument();
   });
@@ -180,14 +184,14 @@ describe('StatisticsPage', () => {
     render(<StatisticsPage />);
 
     expect(
-      await screen.findByText(/select two sessions and press compare to view the result/i),
+      await screen.findByText(/selecciona dos sesiones y presiona comparar para ver el resultado/i),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /show comparison/i }));
+    await user.click(screen.getByRole('button', { name: /mostrar comparaci(?:o|\u00f3)n/i }));
 
     expect(screen.getByText(/80%/i)).toBeInTheDocument();
     expect(screen.getAllByText(/40%/i)).toHaveLength(1);
-    expect(screen.getByText(/shows higher emotional intensity/i)).toBeInTheDocument();
+    expect(screen.getByText(/muestra una intensidad emocional mayor que/i)).toBeInTheDocument();
   });
 
   it('resets the comparison result when a selected session changes', async () => {
@@ -239,20 +243,14 @@ describe('StatisticsPage', () => {
     });
     render(<StatisticsPage />);
 
-    await screen.findByRole('button', { name: /show comparison/i });
-    await user.click(screen.getByRole('button', { name: /show comparison/i }));
-    expect(screen.getByText(/shows higher emotional intensity/i)).toBeInTheDocument();
+    await screen.findByRole('button', { name: /mostrar comparaci(?:o|\u00f3)n/i });
+    await user.click(screen.getByRole('button', { name: /mostrar comparaci(?:o|\u00f3)n/i }));
+    expect(screen.getByText(/muestra una intensidad emocional mayor que/i)).toBeInTheDocument();
 
-    await user.selectOptions(
-      screen.getByLabelText('Session A'),
-      'session-low',
-    );
+    await user.selectOptions(screen.getByLabelText(/sesi(?:o|\u00f3)n a/i), 'session-low');
 
-    expect(
-      screen.getByText(/select two sessions and press compare/i),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/shows higher emotional intensity/i))
-      .not.toBeInTheDocument();
+    expect(screen.getByText(/selecciona dos sesiones y presiona comparar/i)).toBeInTheDocument();
+    expect(screen.queryByText(/muestra una intensidad emocional mayor que/i)).not.toBeInTheDocument();
   });
 
   it('shows an empty comparison state when there are not enough sessions', async () => {
@@ -264,9 +262,13 @@ describe('StatisticsPage', () => {
     render(<StatisticsPage />);
 
     expect(
-      await screen.findByText(/complete at least two sessions to unlock the comparison/i),
+      await screen.findByText(
+        /completa al menos dos sesiones para desbloquear la comparaci(?:o|\u00f3)n/i,
+      ),
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /show comparison/i })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /mostrar comparaci(?:o|\u00f3)n/i }),
+    ).toBeDisabled();
   });
 
   it('shows an error when the statistics request fails', async () => {
@@ -275,7 +277,7 @@ describe('StatisticsPage', () => {
     render(<StatisticsPage />);
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      /unable to load your statistics/i,
+      /no se pudieron cargar tus estad(?:i|\u00ed)sticas/i,
     );
   });
 });

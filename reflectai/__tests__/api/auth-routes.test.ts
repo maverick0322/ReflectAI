@@ -156,7 +156,7 @@ describe('rutas API de autenticacion', () => {
     });
   });
 
-  it('confirma recuperacion solo cuando Supabase devuelve sesion', async () => {
+  it('confirma recuperacion solo cuando Supabase devuelve sesiÓn', async () => {
     const exchangeCodeForSession = vi.fn(async () => ({
       data: { session: { access_token: 'token' } },
       error: null,
@@ -205,7 +205,7 @@ describe('rutas API de autenticacion', () => {
     const body = await readJson(response);
 
     expect(response.status).toBe(200);
-    expect(body.message).toBe('Password updated successfully');
+    expect(body.message).toBe('Contraseña actualizada correctamente');
     expect(signInWithPassword).toHaveBeenCalledWith({
       email: 'ana@reflectai.com',
       password: 'PasswordActual123',
@@ -242,10 +242,10 @@ describe('rutas API de autenticacion', () => {
     const badCurrentBody = await readJson(badCurrentResponse);
 
     expect(badCurrentResponse.status).toBe(400);
-    expect(badCurrentBody.error?.message).toBe('The current password is incorrect');
+    expect(badCurrentBody.error?.message).toBe('La contraseña actual es incorrecta');
   });
 
-  it('elimina cuenta limpiando sesiones, perfil y usuario auth', async () => {
+  it('elimina cuenta limpiando sesiÓnes, perfil y usuario auth', async () => {
     const signInWithPassword = vi.fn(async () => ({ error: null }));
     const signOut = vi.fn();
     mockAuthenticatedUser({

@@ -23,7 +23,7 @@ export function HistorySearchBar({
       <SearchIcon className="h-5 w-5 text-slate-400" />
       <input
         type="search"
-        aria-label="Search history"
+        aria-label="Buscar en el historial"
         placeholder={placeholder}
         defaultValue={defaultValue}
         value={value}

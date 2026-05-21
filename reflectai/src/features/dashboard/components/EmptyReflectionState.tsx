@@ -20,13 +20,13 @@ export function EmptyReflectionState() {
   return (
     <div className={emptyStateClassName}>
       <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
-        You have not recorded any reflections yet.
+        Aún no has registrado ninguna reflexión
       </p>
       <Link
         href={APP_ROUTES.newSession}
         className={startLinkClassName}
       >
-        Start my first entry
+        Comenzar mi primera reflexión
       </Link>
     </div>
   );

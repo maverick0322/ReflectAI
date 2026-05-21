@@ -25,13 +25,13 @@ export function ProfileAccountFooter({
         onClick={onLogout}
         className="gap-2 border-slate-300 text-slate-600 hover:bg-white/60"
       >
-        <LogOutIcon className="h-5 w-5" /> Sign out
+        <LogOutIcon className="h-5 w-5" /> Cerrar sesión
       </Button>
       <Link
         href={APP_ROUTES.deleteAccount}
         className={deleteAccountLinkClassName}
       >
-        <TrashIcon className="h-4 w-4" /> Delete account permanently
+        <TrashIcon className="h-4 w-4" /> Eliminar cuenta permanentemente
       </Link>
     </footer>
   );

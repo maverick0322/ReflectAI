@@ -20,7 +20,7 @@ function getHistoryErrorMessage(error: unknown) {
     return error.payload.message;
   }
 
-  return 'Unable to load your history.';
+  return 'No se pudo cargar tu historial.';
 }
 
 export function useHistoryPage(): UseHistoryPageResult {

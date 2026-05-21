@@ -21,9 +21,9 @@ export function StreakWidget({ days, streakMessage }: StreakWidgetProps) {
 
         <div className="flex flex-1 flex-col justify-center">
           <span className="text-base font-bold text-slate-800 dark:text-white">
-            {days}-day streak
+            Racha de {days} días
           </span>
-          <span className="leading-tight text-sm text-slate-600 dark:text-slate-300">
+          <span className="text-sm leading-tight text-slate-600 dark:text-slate-300">
             {streakMessage}
           </span>
         </div>

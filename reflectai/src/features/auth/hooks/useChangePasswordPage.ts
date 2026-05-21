@@ -81,7 +81,7 @@ export function useChangePasswordPage(): UseChangePasswordPageResult {
         setFormError(
           getAuthFormErrorMessage(
             error,
-            'Unable to validate your current password',
+            'No se pudo validar tu contraseña actual',
           ),
         );
       } finally {
@@ -105,7 +105,7 @@ export function useChangePasswordPage(): UseChangePasswordPageResult {
         router.push('/login');
       } catch (error) {
         setFormError(
-          getAuthFormErrorMessage(error, 'Unable to update the password'),
+          getAuthFormErrorMessage(error, 'No se pudo actualizar la contraseña'),
         );
       } finally {
         setIsSubmitting(false);
@@ -139,7 +139,7 @@ export function useChangePasswordPage(): UseChangePasswordPageResult {
           return;
         }
 
-        setFormError(getAuthFormErrorMessage(error, 'Unable to validate the link'));
+        setFormError(getAuthFormErrorMessage(error, 'No se pudo validar el enlace'));
       } finally {
         if (isMounted) {
           setIsConfirmingRecovery(false);

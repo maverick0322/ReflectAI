@@ -43,7 +43,7 @@ export function DashboardPage() {
         <section className="flex flex-col gap-4">
           <div>
             <h2 className="text-sm font-medium uppercase tracking-widest text-slate-500">
-              Today
+              Hoy
             </h2>
             <p className="text-xl font-semibold text-slate-900 dark:text-white">
               {formatDisplayDate(today)}
@@ -68,12 +68,12 @@ export function DashboardPage() {
 
         <section className="flex flex-col gap-4">
           <h3 className={latestReflectionHeadingClassName}>
-            Your latest reflection
+            Tu reflexión más reciente
           </h3>
 
           {viewModel.lastCompletedSession ? (
             <RecentSessionCard
-              title={viewModel.lastCompletedSession.title ?? 'Completed session'}
+              title={viewModel.lastCompletedSession.title ?? 'Sesión completada'}
               date={formatDisplayDate(
                 new Date(
                   viewModel.lastCompletedSession.completed_at ??

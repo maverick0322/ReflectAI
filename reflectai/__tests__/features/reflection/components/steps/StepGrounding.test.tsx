@@ -12,7 +12,7 @@ describe('StepGrounding', () => {
 
     render(<StepGrounding onContinue={onContinue} onPrev={onPrev} />);
 
-    await user.click(screen.getByRole('button', { name: /i am ready to continue/i }));
+    await user.click(screen.getByRole('button', { name: /estoy listo para continuar/i }));
 
     expect(onContinue).toHaveBeenCalled();
   });

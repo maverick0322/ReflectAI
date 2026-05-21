@@ -19,9 +19,11 @@ describe('DeleteAccountPage', () => {
   it('shows the warning state', () => {
     render(<DeleteAccountPage />);
 
-    expect(screen.getByText(/warning/i)).toBeInTheDocument();
+    expect(screen.getByText(/advertencia/i)).toBeInTheDocument();
     expect(screen.getByText(/irreversible/i)).toBeInTheDocument();
-    expect(screen.getByText(/all of your data will be removed permanently/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/todos tus datos se eliminar(?:a|\u00e1)n permanentemente/i),
+    ).toBeInTheDocument();
   });
 
   it('requires typing DELETE to enable the button', async () => {
@@ -29,8 +31,8 @@ describe('DeleteAccountPage', () => {
     render(<DeleteAccountPage />);
 
     const input = screen.getByPlaceholderText('DELETE');
-    const passwordInput = screen.getByPlaceholderText(/current password/i);
-    const deleteButton = screen.getByRole('button', { name: /^delete$/i });
+    const passwordInput = screen.getByPlaceholderText(/contrase(?:n|\u00f1)a actual/i);
+    const deleteButton = screen.getByRole('button', { name: /^eliminar$/i });
 
     expect(deleteButton).toBeDisabled();
 
@@ -66,7 +68,7 @@ describe('DeleteAccountPage', () => {
 
   it('includes a cancel link back to profile', () => {
     render(<DeleteAccountPage />);
-    expect(screen.getByRole('link', { name: /cancel/i })).toHaveAttribute('href', '/profile');
+    expect(screen.getByRole('link', { name: /cancelar/i })).toHaveAttribute('href', '/profile');
   });
 
   it('uses the shared auth card sizing classes', () => {
@@ -81,11 +83,14 @@ describe('DeleteAccountPage', () => {
     render(<DeleteAccountPage />);
 
     await user.type(screen.getByPlaceholderText('DELETE'), 'DELETE');
-    await user.type(screen.getByPlaceholderText(/current password/i), 'PasswordActual123');
-    await user.click(screen.getByRole('button', { name: /^delete$/i }));
+    await user.type(
+      screen.getByPlaceholderText(/contrase(?:n|\u00f1)a actual/i),
+      'PasswordActual123',
+    );
+    await user.click(screen.getByRole('button', { name: /^eliminar$/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/account deleted/i)).toBeInTheDocument();
+      expect(screen.getByText(/cuenta eliminada/i)).toBeInTheDocument();
     });
   });
 
@@ -93,12 +98,15 @@ describe('DeleteAccountPage', () => {
     const user = userEvent.setup();
     render(<DeleteAccountPage />);
 
-    const deleteButton = screen.getByRole('button', { name: /^delete$/i });
+    const deleteButton = screen.getByRole('button', { name: /^eliminar$/i });
     expect(deleteButton).toHaveClass('cursor-not-allowed');
 
     await user.type(screen.getByPlaceholderText('DELETE'), 'DELETE');
     expect(deleteButton).toHaveClass('cursor-not-allowed');
-    await user.type(screen.getByPlaceholderText(/current password/i), 'PasswordActual123');
+    await user.type(
+      screen.getByPlaceholderText(/contrase(?:n|\u00f1)a actual/i),
+      'PasswordActual123',
+    );
 
     await waitFor(() => {
       expect(deleteButton).not.toHaveClass('cursor-not-allowed');
@@ -110,10 +118,10 @@ describe('DeleteAccountPage', () => {
     render(<DeleteAccountPage />);
 
     const input = screen.getByPlaceholderText('DELETE');
-    const passwordInput = screen.getByPlaceholderText(/current password/i);
+    const passwordInput = screen.getByPlaceholderText(/contrase(?:n|\u00f1)a actual/i);
     fireEvent.change(input, { target: { value: 'DELETE' } });
     fireEvent.change(passwordInput, { target: { value: 'PasswordActual123' } });
-    fireEvent.click(screen.getByRole('button', { name: /^delete$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^eliminar$/i }));
 
     await Promise.resolve();
     expect(pushMock).not.toHaveBeenCalled();

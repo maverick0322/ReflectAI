@@ -79,7 +79,7 @@ function getTriggerPreview(session: ReflectionSessionListItem) {
     getResponseText(session.payload, 'Q1_SIT') ??
     getAnalysisText(analysis, 'summary') ??
     getResponseText(session.payload, 'Q7_ALT') ??
-    'Sin descripcion registrada.';
+    'Sin descripción registrada.';
 
   return preview.length > 120 ? `${preview.slice(0, 117).trim()}...` : preview;
 }

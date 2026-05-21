@@ -32,7 +32,7 @@ export function WizardSuccessState({
           </div>
           <div className="text-center">
             <h2 className="text-2xl font-bold text-slate-800">
-              Reflection saved
+              Reflexión guardada
             </h2>
             {summary.title && (
               <p className="mt-1 text-sm font-semibold text-slate-500">
@@ -44,7 +44,7 @@ export function WizardSuccessState({
           <section className="flex flex-col gap-3">
             <div className="rounded-2xl border border-white/60 bg-white/35 p-4">
               <h3 className="text-sm font-bold uppercase tracking-wide text-indigo-600">
-                Summary
+                Resumen
               </h3>
               <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
                 {summary.summary}
@@ -53,7 +53,7 @@ export function WizardSuccessState({
 
             <div className="rounded-2xl border border-white/60 bg-white/35 p-4">
               <h3 className="text-sm font-bold uppercase tracking-wide text-indigo-600">
-                Recommendation
+                Recomendación
               </h3>
               <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
                 {summary.recommendation}
@@ -73,7 +73,7 @@ export function WizardSuccessState({
             onClick={onGoToDashboard}
             className={dashboardButtonClassName}
           >
-            Go to dashboard
+            Ir al panel principal
           </button>
         </GlassCard>
       </div>

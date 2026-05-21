@@ -17,12 +17,12 @@ export type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export const changePasswordSchema = z
   .object({
-    currentPassword: z.string().min(1, 'Current password is required'),
+    currentPassword: z.string().min(1, 'La contraseña actual es obligatoria'),
     newPassword: passwordField,
-    confirmNewPassword: z.string().min(1, 'Confirm your new password'),
+    confirmNewPassword: z.string().min(1, 'Confirma tu nueva contraseña'),
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
-    message: 'Passwords do not match',
+    message: 'Las contraseñas no coinciden',
     path: ['confirmNewPassword'],
   });
 

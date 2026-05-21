@@ -20,18 +20,18 @@ export function ProfilePreferencesSection({
 }: ProfilePreferencesSectionProps) {
   return (
     <section className="flex flex-col gap-4">
-      <SectionTitle>Preferences</SectionTitle>
+      <SectionTitle>Preferencias</SectionTitle>
       <div className="flex flex-col gap-4 rounded-2xl border border-white/50 bg-white/30 p-4">
         <PreferenceRow
           icon={<BellIcon className="h-5 w-5 text-slate-600" />}
-          label="Daily notifications"
+          label="Notificaciones diarias"
           enabled={profile.preferences.notifications}
           onChange={onToggleNotifications}
         />
         <hr className="border-slate-200/50" />
         <PreferenceRow
           icon={<MoonIcon className="h-5 w-5 text-slate-600" />}
-          label="Dark mode"
+          label="Modo oscuro"
           enabled={profile.preferences.darkMode}
           onChange={onToggleDarkMode}
         />

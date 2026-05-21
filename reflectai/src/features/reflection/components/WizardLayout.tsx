@@ -31,9 +31,9 @@ export const WizardLayout = ({
             type="button"
             onClick={() => router.back()}
             className="text-sm font-medium text-gray-500 transition-colors hover:text-gray-800"
-            aria-label="Exit session"
+            aria-label="Salir de la sesión"
           >
-            Close
+            Cerrar
           </button>
 
           <Button
@@ -43,7 +43,7 @@ export const WizardLayout = ({
             onClick={onSaveDraft}
             className="text-xs text-gray-500"
           >
-            Pause / Save draft
+            Pausar / Guardar borrador
           </Button>
         </div>
 

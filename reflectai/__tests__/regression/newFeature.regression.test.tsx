@@ -108,7 +108,7 @@ function buildCompletedResponse() {
 
 async function renderWizard() {
   render(<NewSessionPage />);
-  return screen.findByPlaceholderText(/write here/i);
+  return screen.findByPlaceholderText(/escribe aqu(?:i|\u00ed)/i);
 }
 
 beforeEach(() => {
@@ -146,44 +146,48 @@ describe('New feature regression - version 2026-05-19', () => {
     await renderWizard();
 
     await user.type(
-      screen.getByPlaceholderText(/write here/i),
-      'I had a difficult conversation at work.',
+      screen.getByPlaceholderText(/escribe aqu(?:i|\u00ed)/i),
+      'Tuve una conversación difícil en el trabajo.',
     );
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.click(screen.getByRole('button', { name: /siguiente/i }));
 
     await user.type(
-      screen.getByPlaceholderText(/i told myself that/i),
-      'My effort is not being taken seriously.',
+      screen.getByPlaceholderText(/me dije a mi mismo que/i),
+      'Siento que no estan tomando en serio mi esfuerzo.',
     );
-    await user.click(screen.getByRole('button', { name: 'Anger' }));
+    await user.click(screen.getByRole('button', { name: 'Enojo' }));
     fireEvent.change(screen.getByRole('slider'), { target: { value: '9' } });
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.click(screen.getByRole('button', { name: /siguiente/i }));
 
-    expect(await screen.findByText(/emotion feels very intense right now/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/la emoci(?:o|\u00f3)n se siente muy intensa en este momento/i),
+    ).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /i am ready to continue/i }));
-
-    await user.type(
-      screen.getByPlaceholderText(/i think this emotion was trying to/i),
-      'Protect my boundaries.',
-    );
-    await user.type(
-      screen.getByPlaceholderText(/my actions, my words, my boundaries/i),
-      'My tone and my pause.',
-    );
-    await user.type(
-      screen.getByPlaceholderText(/their reactions, their choices, the context/i),
-      'The other person response.',
-    );
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.click(screen.getByRole('button', { name: /estoy listo para continuar/i }));
 
     await user.type(
-      screen.getByPlaceholderText(/an alternative perspective could be/i),
-      'I can respond calmly and ask for clarity.',
+      screen.getByPlaceholderText(
+        /creo que esta emoci(?:o|\u00f3)n estaba intentando/i,
+      ),
+      'Proteger mis limites.',
     );
-    await user.click(screen.getByRole('button', { name: /finish reflection/i }));
+    await user.type(
+      screen.getByPlaceholderText(/mis acciones, mis palabras, mis l(?:i|\u00ed)mites/i),
+      'Mi tono y mi pausa.',
+    );
+    await user.type(
+      screen.getByPlaceholderText(/sus reacciones, sus decisiones, el contexto/i),
+      'La respuesta de la otra persona.',
+    );
+    await user.click(screen.getByRole('button', { name: /siguiente/i }));
 
-    expect(await screen.findByText(/reflection saved/i)).toBeInTheDocument();
+    await user.type(
+      screen.getByPlaceholderText(/una perspectiva alternativa podr(?:i|\u00ed)a ser/i),
+      'Puedo responder con calma y pedir claridad.',
+    );
+    await user.click(screen.getByRole('button', { name: /finalizar reflexi(?:o|\u00f3)n/i }));
+
+    expect(await screen.findByText(/reflexi(?:o|\u00f3)n guardada/i)).toBeInTheDocument();
     expect(createReflectionSessionMock).toHaveBeenCalledTimes(1);
     expect(addReflectionResponseMock).toHaveBeenCalledWith(
       SESSION_ID,
@@ -253,8 +257,10 @@ describe('New feature regression - version 2026-05-19', () => {
 
     render(<DashboardPage />);
 
-    expect(await screen.findByText(/you have a paused reflection/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /continue session/i })).toHaveAttribute(
+    expect(
+      await screen.findByText(/tienes una reflexi(?:o|\u00f3)n en pausa/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /continuar sesi(?:o|\u00f3)n/i })).toHaveAttribute(
       'href',
       '/new-session?sessionId=draft-new',
     );
@@ -305,7 +311,9 @@ describe('New feature regression - version 2026-05-19', () => {
     render(<DashboardPage />);
 
     expect(await screen.findByText(/recent completed session/i)).toBeInTheDocument();
-    expect(screen.queryByText(/you have a paused reflection/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/tienes una reflexi(?:o|\u00f3)n en pausa/i),
+    ).not.toBeInTheDocument();
   });
 
   it('RG-05 resumes an in-progress draft and continues with the original sessionId', async () => {
@@ -332,7 +340,9 @@ describe('New feature regression - version 2026-05-19', () => {
     render(<NewSessionPage />);
 
     expect(
-      await screen.findByPlaceholderText(/i think this emotion was trying to/i),
+      await screen.findByPlaceholderText(
+        /creo que esta emoci(?:o|\u00f3)n estaba intentando/i,
+      ),
     ).toBeInTheDocument();
     expect(createReflectionSessionMock).not.toHaveBeenCalled();
     expect(requestNextQuestionMock).toHaveBeenCalledWith(SESSION_ID, [
@@ -342,27 +352,29 @@ describe('New feature regression - version 2026-05-19', () => {
     ]);
 
     await user.type(
-      screen.getByPlaceholderText(/i think this emotion was trying to/i),
-      'It was trying to protect my boundaries.',
+      screen.getByPlaceholderText(
+        /creo que esta emoci(?:o|\u00f3)n estaba intentando/i,
+      ),
+      'Estaba intentando proteger mis limites.',
     );
     await user.type(
-      screen.getByPlaceholderText(/my actions, my words, my boundaries/i),
-      'I can pause before responding.',
+      screen.getByPlaceholderText(/mis acciones, mis palabras, mis l(?:i|\u00ed)mites/i),
+      'Puedo pausar antes de responder.',
     );
     await user.type(
-      screen.getByPlaceholderText(/their reactions, their choices, the context/i),
-      'Their reactions do not depend on me.',
+      screen.getByPlaceholderText(/sus reacciones, sus decisiones, el contexto/i),
+      'Sus reacciones no dependen de mi.',
     );
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.click(screen.getByRole('button', { name: /siguiente/i }));
 
     expect(
-      await screen.findByPlaceholderText(/an alternative perspective could be/i),
+      await screen.findByPlaceholderText(/una perspectiva alternativa podr(?:i|\u00ed)a ser/i),
     ).toBeInTheDocument();
     expect(addReflectionResponseMock).toHaveBeenCalledWith(
       SESSION_ID,
       expect.objectContaining({
         id: 'Q5_TEL',
-        text: 'It was trying to protect my boundaries.',
+        text: 'Estaba intentando proteger mis limites.',
       }),
       undefined,
     );

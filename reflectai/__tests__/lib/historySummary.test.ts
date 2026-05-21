@@ -91,9 +91,9 @@ describe('buildHistorySummary', () => {
     ]);
 
     expect(summary.monthGroups[0].entries[0]).toMatchObject({
-      title: 'Sesion de reflexion',
+      title: 'Sesión de reflexión',
       triggerPreview: 'Resumen generado por IA',
-      emotion: expect.objectContaining({ label: 'Sin emocion' }),
+      emotion: expect.objectContaining({ label: 'Sin emoción' }),
     });
   });
 

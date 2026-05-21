@@ -83,21 +83,21 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    fireEvent.click(screen.getByRole('button', { name: /edit/i }));
+    fireEvent.click(screen.getByRole('button', { name: /editar/i }));
 
-    const firstNameInput = screen.getByPlaceholderText('First name');
+    const firstNameInput = screen.getByPlaceholderText('Nombre');
     fireEvent.change(firstNameInput, { target: { value: 'Artur0' } });
 
-    expect(await screen.findByText('First name can only contain letters')).toBeInTheDocument();
+    expect(await screen.findByText('El nombre solo puede contener letras')).toBeInTheDocument();
 
     fireEvent.change(firstNameInput, { target: { value: 'Arturo' } });
 
     await waitFor(() => {
-      expect(screen.queryByText('First name can only contain letters')).not.toBeInTheDocument();
+      expect(screen.queryByText('El nombre solo puede contener letras')).not.toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByPlaceholderText('Last name'), { target: { value: '' } });
-    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    fireEvent.change(screen.getByPlaceholderText('Apellidos'), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /arturo/i })).toBeInTheDocument();
@@ -108,29 +108,29 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    fireEvent.click(screen.getByRole('button', { name: /edit/i }));
-    fireEvent.change(screen.getByPlaceholderText('First name'), { target: { value: 'Ana' } });
-    fireEvent.change(screen.getByPlaceholderText('Last name'), { target: { value: 'Lopez' } });
-    fireEvent.change(screen.getByDisplayValue('2005-06-19'), { target: { value: '1999-01-01' } });
-    fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+    fireEvent.change(screen.getByPlaceholderText('Nombre'), { target: { value: 'Ana' } });
+    fireEvent.change(screen.getByPlaceholderText('Apellidos'), { target: { value: 'Lopez' } });
+    fireEvent.change(screen.getByDisplayValue('19/06/2005'), { target: { value: '01/01/1999' } });
+    fireEvent.click(screen.getByRole('button', { name: /cancelar/i }));
 
     expect(screen.getByRole('heading', { name: /arturo cuevas/i })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /edit/i }));
-    expect(screen.getByPlaceholderText('First name')).toHaveValue('Arturo');
-    expect(screen.getByPlaceholderText('Last name')).toHaveValue('Cuevas');
-    expect(screen.getByDisplayValue('2005-06-19')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+    expect(screen.getByPlaceholderText('Nombre')).toHaveValue('Arturo');
+    expect(screen.getByPlaceholderText('Apellidos')).toHaveValue('Cuevas');
+    expect(screen.getByDisplayValue('19/06/2005')).toBeInTheDocument();
   });
 
   it('does not allow saving an empty birth date', async () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    fireEvent.click(screen.getByRole('button', { name: /edit/i }));
-    fireEvent.change(screen.getByDisplayValue('2005-06-19'), { target: { value: '' } });
-    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+    fireEvent.change(screen.getByDisplayValue('19/06/2005'), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
 
-    expect(await screen.findByText('Birth date is required')).toBeInTheDocument();
+    expect(await screen.findByText('La fecha de nacimiento es obligatoria')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /arturo cuevas/i })).toBeInTheDocument();
   });
 
@@ -138,8 +138,8 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    const notificationSwitch = screen.getByRole('switch', { name: /daily notifications/i });
-    const darkModeSwitch = screen.getByRole('switch', { name: /dark mode/i });
+    const notificationSwitch = screen.getByRole('switch', { name: /notificaciones diarias/i });
+    const darkModeSwitch = screen.getByRole('switch', { name: /modo oscuro/i });
 
     fireEvent.click(notificationSwitch);
     expect(notificationSwitch).toHaveClass('bg-slate-300/50');
@@ -154,11 +154,11 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    expect(screen.getByRole('link', { name: /change password/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /cambiar contraseÑa/i })).toHaveAttribute(
       'href',
       '/change-password',
     );
-    expect(screen.getByRole('link', { name: /delete account permanently/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /eliminar cuenta permanentemente/i })).toHaveAttribute(
       'href',
       '/delete-account',
     );
@@ -169,7 +169,7 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    await user.click(screen.getByRole('button', { name: /sign out/i }));
+    await user.click(screen.getByRole('button', { name: /cerrar sesiÓn/i }));
 
     expect(logoutUserMock).toHaveBeenCalled();
     expect(pushMock).toHaveBeenCalledWith('/login');
@@ -181,7 +181,7 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    await user.click(screen.getByRole('button', { name: /sign out/i }));
+    await user.click(screen.getByRole('button', { name: /cerrar sesiÓn/i }));
 
     expect(pushMock).toHaveBeenCalledWith('/login');
   });
@@ -212,14 +212,14 @@ describe('ProfilePage', () => {
 
     await user.upload(input, file);
 
-    expect(await screen.findByText(/unable to upload the profile photo/i)).toBeInTheDocument();
+    expect(await screen.findByText(/no se pudo subir la foto de perfil/i)).toBeInTheDocument();
   });
 
   it('shows an error state when the profile cannot be loaded', async () => {
     fetchProfileMock.mockRejectedValueOnce(new Error('db down'));
     render(<ProfilePage />);
 
-    expect(await screen.findByText(/unable to load the profile/i)).toBeInTheDocument();
+    expect(await screen.findByText(/no se pudo cargar el perfil/i)).toBeInTheDocument();
   });
 
   it('shows the backend error when saving the profile fails', async () => {
@@ -227,12 +227,12 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    fireEvent.click(screen.getByRole('button', { name: /edit/i }));
-    fireEvent.change(screen.getByPlaceholderText('First name'), {
+    fireEvent.click(screen.getByRole('button', { name: /editar/i }));
+    fireEvent.change(screen.getByPlaceholderText('Nombre'), {
       target: { value: 'Arturo' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    fireEvent.click(screen.getByRole('button', { name: /guardar/i }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/unable to update the profile/i);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/no se pudo actualizar el perfil/i);
   });
 });

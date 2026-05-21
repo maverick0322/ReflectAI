@@ -14,14 +14,14 @@ export type ReflectionSession = {
 };
 
 export enum PrimaryEmotion {
-  JOY = 'Joy',
-  TRUST = 'Trust',
-  FEAR = 'Fear',
-  SURPRISE = 'Surprise',
-  SADNESS = 'Sadness',
-  AVERSION = 'Aversion',
-  ANGER = 'Anger',
-  ANTICIPATION = 'Anticipation',
+  JOY = 'Alegria',
+  TRUST = 'Confianza',
+  FEAR = 'Miedo',
+  SURPRISE = 'Sorpresa',
+  SADNESS = 'Tristeza',
+  AVERSION = 'Aversión',
+  ANGER = 'Enojo',
+  ANTICIPATION = 'Anticipación',
 }
 
 export type QuestionId =

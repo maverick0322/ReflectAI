@@ -18,7 +18,7 @@ function ChangePasswordContent() {
     <ChangePasswordCardFrame>
       <GlassCard className="mx-auto flex w-full max-w-md flex-col gap-6 p-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-reflect-dark">Change password</h1>
+          <h1 className="text-2xl font-bold text-reflect-dark">Cambiar contraseña</h1>
         </div>
 
         {page.isRecoveryFlow && !page.recoveryReady ? (
@@ -51,7 +51,7 @@ function ChangePasswordPageFallback() {
     <ChangePasswordCardFrame>
       <GlassCard className="mx-auto flex w-full max-w-md flex-col gap-6 p-8">
         <div className="flex flex-col items-center justify-center py-8">
-          <p className="text-sm text-reflect-dark/70">Loading...</p>
+          <p className="text-sm text-reflect-dark/70">Cargando...</p>
         </div>
       </GlassCard>
     </ChangePasswordCardFrame>

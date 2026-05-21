@@ -26,17 +26,17 @@ export function DashboardHeader({
     <header className="flex items-start justify-between">
       <div className="flex flex-col gap-0.5">
         <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-          Welcome back
+          Bienvenido de nuevo
         </span>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-          {isLoading ? '...' : userName ?? 'User'}
+          {isLoading ? '...' : userName ?? 'Usuario'}
         </h1>
       </div>
 
       <div className="flex shrink-0 items-center gap-3">
         <Link
           href={APP_ROUTES.help}
-          aria-label="Help"
+          aria-label="Ayuda"
           className="rounded-full focus:outline-none focus:ring-2 focus:ring-violet-500"
         >
           <div className={headerActionFrameClassName}>
@@ -46,14 +46,14 @@ export function DashboardHeader({
 
         <Link
           href={APP_ROUTES.profile}
-          aria-label="Profile"
+          aria-label="Perfil"
           className="rounded-full focus:outline-none focus:ring-2 focus:ring-violet-500"
         >
           <div className={headerActionFrameClassName}>
             {avatarUrl ? (
               <Image
                 src={avatarUrl}
-                alt="Profile"
+                alt="Perfil"
                 width={48}
                 height={48}
                 unoptimized

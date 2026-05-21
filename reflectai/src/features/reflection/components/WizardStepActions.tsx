@@ -11,7 +11,7 @@ export function WizardStepActions({
   onPrev,
   onNext,
   nextLabel,
-  prevLabel = 'Back',
+  prevLabel = 'Atrás',
 }: WizardStepActionsProps) {
   if (!onPrev) {
     return (

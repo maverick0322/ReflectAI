@@ -121,7 +121,7 @@ describe('ai session helpers', () => {
       questionId: 'Q2_THO',
       aiGenerated: false,
     });
-    expect(fallbackResult.questionText).toMatch(/thought/i);
+    expect(fallbackResult.questionText).toMatch(/pensamiento/i);
   });
 
   it('builds analysis and daily quotes with success and fallback behavior', async () => {

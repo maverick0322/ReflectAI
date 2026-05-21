@@ -22,7 +22,7 @@ const baseSession: ReflectionSessionListItem = {
   payload: {
     metadata: { version: '1.1', started_at: '2026-05-10T10:00:00.000Z' },
     responses: [
-      { id: 'Q1_SIT', text: 'Situacion importante' },
+      { id: 'Q1_SIT', text: 'SituaciÓn importante' },
       { id: 'Q3_EMO', text: 'Calma' },
       { id: 'Q4_INT', value: 4 },
     ],
@@ -32,7 +32,7 @@ const baseSession: ReflectionSessionListItem = {
 
 describe('sessionInsights', () => {
   it('reads values from payload and handles missing values', () => {
-    expect(getResponseText(baseSession.payload, 'Q1_SIT')).toBe('Situacion importante');
+    expect(getResponseText(baseSession.payload, 'Q1_SIT')).toBe('SituaciÓn importante');
     expect(getResponseText(undefined, 'Q1_SIT')).toBeNull();
     expect(getResponseValue(baseSession.payload, 'Q4_INT')).toBe(4);
     expect(getResponseValue(undefined, 'Q4_INT')).toBeNull();
@@ -59,7 +59,7 @@ describe('sessionInsights', () => {
     expect(getSessionAnalysis({ ai_analysis: null as never })).toEqual({});
     expect(getPrimaryEmotion(baseSession)).toBe('Calma');
     expect(getAverageIntensityScore(baseSession)).toBe(4);
-    expect(getSessionTitle(baseSession)).toBe('Situacion importante');
+    expect(getSessionTitle(baseSession)).toBe('SituaciÓn importante');
 
     const analyzedSession = {
       ...baseSession,

@@ -25,9 +25,9 @@ interface EmotionSelectorProps {
 }
 
 const DEFAULT_THOUGHT_QUESTION =
-  'What was the first thought that crossed your mind?';
-const DEFAULT_EMOTION_QUESTION = 'What was the main emotion you experienced?';
-const DEFAULT_INTENSITY_QUESTION = 'Emotional intensity';
+  '¿Cuál fue el primer pensamiento que cruzó por tu mente?';
+const DEFAULT_EMOTION_QUESTION = '¿Cuál fue la emoción principal que experimentaste?';
+const DEFAULT_INTENSITY_QUESTION = 'Intensidad emocional';
 const rangeInputClassName = [
   'h-3 w-full cursor-pointer appearance-none rounded-lg bg-white/50',
   'accent-indigo-600',
@@ -109,8 +109,8 @@ function IntensitySlider({
           )}
         />
         <div className="flex justify-between px-1 text-xs font-bold text-slate-500">
-          <span>Low (1)</span>
-          <span>Overwhelming (10)</span>
+          <span>Baja (1)</span>
+          <span>Abrumadora (10)</span>
         </div>
       </div>
     </section>
@@ -153,7 +153,7 @@ export const Step2Evaluation = ({
           control={control}
           name="thought"
           value={thoughtText}
-          placeholder="I told myself that..."
+          placeholder="Me dije a mi mismo que..."
           shouldShowError={Boolean(errors.thought) && shouldShowErrors}
           errorMessage={errors.thought?.message}
         />
@@ -182,7 +182,7 @@ export const Step2Evaluation = ({
         intensityQuestion={intensityQuestion}
       />
 
-      <WizardStepActions onPrev={onPrev} onNext={onNext} nextLabel="Next" />
+      <WizardStepActions onPrev={onPrev} onNext={onNext} nextLabel="Siguiente" />
     </div>
   );
 };

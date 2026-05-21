@@ -34,9 +34,9 @@ describe('profilePageUtils', () => {
 
   it('formats names and birth dates with fallbacks', () => {
     expect(formatFullName('Ana', 'Lopez')).toBe('Ana Lopez');
-    expect(formatFullName('', '')).toBe('Your profile');
-    expect(formatDisplayBirthDate('')).toBe('Not specified');
-    expect(formatDisplayBirthDate('2000-01-02')).toMatch(/2000/);
+    expect(formatFullName('', '')).toBe('Tu perfil');
+    expect(formatDisplayBirthDate('')).toBe('No especificada');
+    expect(formatDisplayBirthDate('2000-01-02')).toBe('02/01/2000');
   });
 
   it('extracts API error messages or returns fallback text', () => {

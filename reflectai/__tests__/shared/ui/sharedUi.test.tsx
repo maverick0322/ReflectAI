@@ -33,11 +33,11 @@ describe('shared UI components', () => {
 
     render(<BottomNav />);
 
-    expect(screen.getByLabelText('Home')).toHaveAttribute('href', '/dashboard');
-    expect(screen.getByLabelText('History')).toHaveAttribute('href', '/history');
-    expect(screen.getByLabelText('Statistics')).toHaveAttribute('href', '/statistics');
-    expect(screen.getByLabelText('New session')).toHaveAttribute('href', '/new-session');
-    expect(screen.getByLabelText('Profile')).toHaveAttribute('href', '/profile');
+    expect(screen.getByLabelText('Inicio')).toHaveAttribute('href', '/dashboard');
+    expect(screen.getByLabelText('Historial')).toHaveAttribute('href', '/history');
+    expect(screen.getByLabelText('Estadísticas')).toHaveAttribute('href', '/statistics');
+    expect(screen.getByLabelText('Nueva sesión')).toHaveAttribute('href', '/new-session');
+    expect(screen.getByLabelText('Perfil')).toHaveAttribute('href', '/profile');
   });
 
   it('marks the active BottomNav route', () => {
@@ -45,8 +45,8 @@ describe('shared UI components', () => {
 
     render(<BottomNav />);
 
-    expect(screen.getByLabelText('History')).toHaveAttribute('aria-current', 'page');
-    expect(screen.getByLabelText('Profile')).not.toHaveAttribute('aria-current');
+    expect(screen.getByLabelText('Historial')).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByLabelText('Perfil')).not.toHaveAttribute('aria-current');
   });
 
   it('renders SocialButton with the provider and disabled state', () => {

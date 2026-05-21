@@ -69,8 +69,8 @@ describe('dashboard metrics', () => {
     vi.setSystemTime(new Date('2026-05-07T12:00:00.000Z'));
 
     expect(formatTimeAgo('2026-05-07T10:00:00.000Z')).toBe('2 h');
-    expect(formatTimeAgo('2026-05-06T11:00:00.000Z')).toBe('1 day');
-    expect(formatTimeAgo('2026-05-04T11:00:00.000Z')).toBe('3 days');
+    expect(formatTimeAgo('2026-05-06T11:00:00.000Z')).toBe('1 dia');
+    expect(formatTimeAgo('2026-05-04T11:00:00.000Z')).toBe('3 dias');
   });
 
   it('formatDisplayDate formats a readable date', () => {

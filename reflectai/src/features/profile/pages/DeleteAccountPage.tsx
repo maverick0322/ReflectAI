@@ -93,7 +93,7 @@ export function DeleteAccountPage() {
       const message =
         error instanceof ApiError && error.payload?.message
           ? error.payload.message
-          : 'Unable to delete the account';
+          : 'No se pudo eliminar la cuenta';
       setFormError(message);
       setIsDeleting(false);
     }
@@ -104,7 +104,7 @@ export function DeleteAccountPage() {
       <GlassCard className="mx-auto flex w-full max-w-md flex-col gap-6 p-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-reflect-dark">
-            Delete account
+            Eliminar cuenta
           </h1>
         </div>
 
@@ -126,10 +126,10 @@ export function DeleteAccountPage() {
               </svg>
             </div>
             <h2 className="text-xl font-bold text-reflect-dark">
-              Account deleted
+              Cuenta eliminada
             </h2>
             <p className="mt-2 text-center text-sm text-reflect-dark/60">
-              Your account was deleted successfully. Redirecting...
+              Tu cuenta se eliminó correctamente. Redirigiendo...
             </p>
           </div>
         ) : (
@@ -140,10 +140,10 @@ export function DeleteAccountPage() {
                   <WarningIcon className="h-7 w-7" />
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-reflect-dark">Warning</h2>
+              <h2 className="text-xl font-bold text-reflect-dark">Advertencia</h2>
               <p className="text-sm text-reflect-dark/70">
-                This action is <strong className="text-red-500">irreversible</strong>;
-                all of your data will be removed permanently.
+                Esta acción es <strong className="text-red-500">irreversible</strong>;
+                todos tus datos se eliminarán permanentemente.
               </p>
             </header>
 
@@ -153,8 +153,8 @@ export function DeleteAccountPage() {
                   htmlFor="delete-confirm-input"
                   className="text-center text-xs font-medium text-reflect-dark"
                 >
-                  To confirm, type <strong>{DELETE_CONFIRMATION_TEXT}</strong>{' '}
-                  below:
+                  Para confirmar, escribe <strong>{DELETE_CONFIRMATION_TEXT}</strong>{' '}
+                  abajo:
                 </label>
                 <Input
                   id="delete-confirm-input"
@@ -170,7 +170,7 @@ export function DeleteAccountPage() {
                 type="password"
                 value={currentPassword}
                 onChange={(event) => setCurrentPassword(event.target.value)}
-                placeholder="Current password"
+                placeholder="Contraseña actual"
               />
 
               {formError && (
@@ -184,7 +184,7 @@ export function DeleteAccountPage() {
                   href={APP_ROUTES.profile}
                   className={cancelLinkClassName}
                 >
-                  Cancel
+                  Cancelar
                 </Link>
 
                 <button
@@ -193,7 +193,7 @@ export function DeleteAccountPage() {
                   disabled={!canDelete}
                   className={getDeleteButtonClassName(canDelete)}
                 >
-                  Delete
+                  Eliminar
                 </button>
               </div>
             </div>

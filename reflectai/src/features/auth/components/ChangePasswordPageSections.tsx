@@ -50,7 +50,7 @@ const cancelLinkClassName = [
 ].join(' ');
 
 function getNewPasswordEyebrow(isRecoveryFlow: boolean) {
-  return isRecoveryFlow ? 'Reset password' : 'Step 2 of 2';
+  return isRecoveryFlow ? 'Restablecer contraseña' : 'Paso 2 de 2';
 }
 
 function getSubmitLabel(
@@ -58,10 +58,10 @@ function getSubmitLabel(
   isConfirmingRecovery: boolean,
 ) {
   if (isConfirmingRecovery) {
-    return 'Validating link...';
+    return 'Validando enlace...';
   }
 
-  return isSubmitting ? 'Updating...' : 'Update password';
+  return isSubmitting ? 'Actualizando...' : 'Actualizar contraseña';
 }
 
 export function ChangePasswordCardFrame({
@@ -93,7 +93,7 @@ export function ChangePasswordRecoveryPending({
 }: Readonly<{ formError?: string | null }>) {
   return (
     <div className="animate-in flex flex-col items-center justify-center py-8 fade-in duration-300">
-      <p className="text-sm text-reflect-dark/70">Validating link...</p>
+      <p className="text-sm text-reflect-dark/70">Validando enlace...</p>
       {formError ? (
         <p className="mt-3 text-sm font-semibold text-red-500" role="alert">
           {formError}
@@ -116,9 +116,9 @@ export function IdentityVerificationStep({
   return (
     <>
       <ChangePasswordSectionHeader
-        eyebrow="Step 1 of 2"
-        title="Verify your identity"
-        description="For security, enter your current password."
+        eyebrow="Paso 1 de 2"
+        title="Verifica tu identidad"
+        description="Por seguridad, ingresa tu contraseña actual"
       />
 
       <form
@@ -128,7 +128,7 @@ export function IdentityVerificationStep({
       >
         <PasswordInput
           {...form.register('currentPassword')}
-          placeholder="Current password"
+          placeholder="Contraseña actual"
           maxLength={64}
           error={errors.currentPassword?.message}
           autoComplete="current-password"
@@ -136,13 +136,13 @@ export function IdentityVerificationStep({
 
         <div className="-mt-2 px-1 text-right">
           <CustomLink href={APP_ROUTES.recover} className="text-[10px]">
-            Forgot your password?
+            ¿Olvidaste tu contraseña?
           </CustomLink>
         </div>
 
         {hasValidationErrors && !formError && (
           <p className="text-sm font-semibold text-red-500" role="alert">
-            Please review the highlighted fields.
+            Revisa los campos marcados
           </p>
         )}
 
@@ -157,10 +157,10 @@ export function IdentityVerificationStep({
             href={APP_ROUTES.profile}
             className={cancelLinkClassName}
           >
-            Cancel
+            Cancelar
           </Link>
           <Button type="submit" className="flex-1" disabled={isSubmitting}>
-            {isSubmitting ? 'Validating...' : 'Continue'}
+            {isSubmitting ? 'Validando...' : 'Continuar'}
           </Button>
         </div>
       </form>
@@ -185,8 +185,8 @@ export function NewPasswordStep({
     <>
       <ChangePasswordSectionHeader
         eyebrow={getNewPasswordEyebrow(isRecoveryFlow)}
-        title="New password"
-        description="Enter and confirm your new password."
+        title="Nueva contraseña"
+        description="Ingresa y confirma tu nueva contraseña."
       />
 
       <form
@@ -196,7 +196,7 @@ export function NewPasswordStep({
       >
         <PasswordInput
           {...form.register('newPassword')}
-          placeholder="New password"
+          placeholder="Nueva contraseña"
           maxLength={64}
           error={errors.newPassword?.message}
           autoComplete="new-password"
@@ -204,7 +204,7 @@ export function NewPasswordStep({
 
         <PasswordInput
           {...form.register('confirmNewPassword')}
-          placeholder="Confirm new password"
+          placeholder="Confirma tu nueva contraseña"
           maxLength={64}
           error={errors.confirmNewPassword?.message}
           autoComplete="new-password"
@@ -212,7 +212,7 @@ export function NewPasswordStep({
 
         {hasValidationErrors && !formError && (
           <p className="text-sm font-semibold text-red-500" role="alert">
-            Please review the highlighted fields.
+            Revisa los campos marcados
           </p>
         )}
 
@@ -230,7 +230,7 @@ export function NewPasswordStep({
               onClick={onBack}
               className="flex-1"
             >
-              Back
+              Atrás
             </Button>
           )}
           <Button

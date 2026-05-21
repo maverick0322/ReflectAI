@@ -23,7 +23,7 @@ function parseDateKey(value: string) {
 }
 
 export function formatDisplayDate(date: Date) {
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('es-MX', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -45,7 +45,7 @@ export function formatTimeAgo(dateIso: string) {
   }
 
   const diffDays = Math.floor(diffHours / 24);
-  return diffDays === 1 ? '1 day' : `${diffDays} days`;
+  return diffDays === 1 ? '1 dia' : `${diffDays} dias`;
 }
 
 export function buildWeekRecords(
@@ -69,7 +69,7 @@ export function buildWeekRecords(
     const key = toDateKey(current);
     records.push({
       date: key,
-      label: new Intl.DateTimeFormat('en-US', { weekday: 'short' })
+      label: new Intl.DateTimeFormat('es-MX', { weekday: 'short' })
         .format(current)
         .slice(0, 1)
         .toUpperCase(),

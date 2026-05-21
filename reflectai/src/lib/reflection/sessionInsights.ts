@@ -7,6 +7,17 @@ import type {
 
 type AnalysisRecord = Record<string, unknown>;
 
+const EMOTION_LABEL_MAP: Record<string, string> = {
+  Joy: 'Alegria',
+  Trust: 'Confianza',
+  Fear: 'Miedo',
+  Surprise: 'Sorpresa',
+  Sadness: 'Tristeza',
+  Aversion: 'Aversión',
+  Anger: 'Enojo',
+  Anticipation: 'Anticipación',
+};
+
 function isRecord(value: unknown): value is AnalysisRecord {
   return typeof value === 'object' && value !== null;
 }
@@ -73,11 +84,12 @@ export function getAnalysisTextArray(
 
 export function getPrimaryEmotion(session: ReflectionSessionListItem) {
   const analysis = getSessionAnalysis(session);
-  return (
+  const primaryEmotion =
     getAnalysisTextArray(analysis, 'primary_emotions')[0] ??
     getResponseText(session.payload, 'Q3_EMO') ??
-    'Sin emocion'
-  );
+    'Sin emoción';
+
+  return EMOTION_LABEL_MAP[primaryEmotion] ?? primaryEmotion;
 }
 
 export function getAverageIntensityScore(session: ReflectionSessionListItem) {
@@ -93,7 +105,7 @@ export function getSessionTitle(session: ReflectionSessionListItem) {
   const fallback =
     getAnalysisText(analysis, 'session_title') ??
     getResponseText(session.payload, 'Q1_SIT') ??
-    'Sesion de reflexion';
+    'Sesión de reflexión';
   const title = session.title?.trim() || fallback;
 
   return title.length > 72 ? `${title.slice(0, 69).trim()}...` : title;

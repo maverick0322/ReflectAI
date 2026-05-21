@@ -57,11 +57,13 @@ describe('ChangePasswordPage step 1', () => {
     const user = userEvent.setup();
     render(<ChangePasswordPage />);
 
-    await user.click(screen.getByRole('button', { name: /continue/i }));
+    await user.click(screen.getByRole('button', { name: /continuar/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/current password is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/please review the highlighted fields/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/la contrase(?:n|\u00f1)a actual es obligatoria/i),
+      ).toBeInTheDocument();
+      expect(screen.getByText(/revisa los campos marcados/i)).toBeInTheDocument();
     });
   });
 
@@ -69,32 +71,38 @@ describe('ChangePasswordPage step 1', () => {
     const user = userEvent.setup();
     render(<ChangePasswordPage />);
 
-    await user.click(screen.getByRole('button', { name: /continue/i }));
-    expect(screen.getByText(/current password is required/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /continuar/i }));
+    expect(
+      screen.getByText(/la contrase(?:n|\u00f1)a actual es obligatoria/i),
+    ).toBeInTheDocument();
 
-    await user.type(screen.getByPlaceholderText(/current password/i), 'CurrentPassword123');
+    await user.type(
+      screen.getByPlaceholderText(/contrase(?:n|\u00f1)a actual/i),
+      'CurrentPassword123',
+    );
 
     await waitFor(() => {
-      expect(screen.queryByText(/current password is required/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/la contrase(?:n|\u00f1)a actual es obligatoria/i),
+      ).not.toBeInTheDocument();
     });
   });
 
   it('shows step 1 of 2 in the header', () => {
     render(<ChangePasswordPage />);
-    expect(screen.getByText(/step 1 of 2/i)).toBeInTheDocument();
+    expect(screen.getByText(/paso 1 de 2/i)).toBeInTheDocument();
   });
 
   it('includes a recovery link', () => {
     render(<ChangePasswordPage />);
-    expect(screen.getByRole('link', { name: /forgot your password/i })).toHaveAttribute(
-      'href',
-      '/recover',
-    );
+    expect(
+      screen.getByRole('link', { name: /olvidaste tu contrase(?:n|\u00f1)a/i }),
+    ).toHaveAttribute('href', '/recover');
   });
 
   it('includes a cancel link back to profile', () => {
     render(<ChangePasswordPage />);
-    expect(screen.getByRole('link', { name: /cancel/i })).toHaveAttribute('href', '/profile');
+    expect(screen.getByRole('link', { name: /cancelar/i })).toHaveAttribute('href', '/profile');
   });
 
   it('shows the backend error when the current password is invalid', async () => {
@@ -107,13 +115,16 @@ describe('ChangePasswordPage step 1', () => {
 
     render(<ChangePasswordPage />);
 
-    await user.type(screen.getByPlaceholderText(/current password/i), 'WrongPassword123');
-    await user.click(screen.getByRole('button', { name: /continue/i }));
+    await user.type(
+      screen.getByPlaceholderText(/contrase(?:n|\u00f1)a actual/i),
+      'WrongPassword123',
+    );
+    await user.click(screen.getByRole('button', { name: /continuar/i }));
 
     await waitFor(() => {
       expect(verifyCurrentPasswordMock).toHaveBeenCalledWith('WrongPassword123');
       expect(screen.getByRole('alert')).toHaveTextContent('Current password is incorrect');
-      expect(screen.getByText(/step 1 of 2/i)).toBeInTheDocument();
+      expect(screen.getByText(/paso 1 de 2/i)).toBeInTheDocument();
     });
   });
 
@@ -138,12 +149,15 @@ describe('ChangePasswordPage step 2', () => {
     const user = userEvent.setup();
     render(<ChangePasswordPage />);
 
-    await user.type(screen.getByPlaceholderText(/current password/i), 'CurrentPassword123');
-    await user.click(screen.getByRole('button', { name: /continue/i }));
+    await user.type(
+      screen.getByPlaceholderText(/contrase(?:n|\u00f1)a actual/i),
+      'CurrentPassword123',
+    );
+    await user.click(screen.getByRole('button', { name: /continuar/i }));
 
     await waitFor(() => {
       expect(verifyCurrentPasswordMock).toHaveBeenCalledWith('CurrentPassword123');
-      expect(screen.getByText(/step 2 of 2/i)).toBeInTheDocument();
+      expect(screen.getByText(/paso 2 de 2/i)).toBeInTheDocument();
     });
 
     return user;
@@ -151,13 +165,17 @@ describe('ChangePasswordPage step 2', () => {
 
   it('validates the new password in real time and clears the error when valid', async () => {
     const user = await moveToStep2();
-    const newPasswordInput = screen.getByPlaceholderText(/^new password$/i);
+    const newPasswordInput = screen.getByPlaceholderText(
+      /^nueva contrase(?:n|\u00f1)a$/i,
+    );
 
     await user.type(newPasswordInput, 'validpassword123');
 
     await waitFor(() => {
       expect(
-        screen.getByText(/password must include uppercase, lowercase, and numeric characters/i),
+        screen.getByText(
+          /la contrase(?:n|\u00f1)a debe incluir may(?:u|\u00fa)sculas, min(?:u|\u00fa)sculas y n(?:u|\u00fa)meros/i,
+        ),
       ).toBeInTheDocument();
     });
 
@@ -166,7 +184,9 @@ describe('ChangePasswordPage step 2', () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByText(/password must include uppercase, lowercase, and numeric characters/i),
+        screen.queryByText(
+          /la contrase(?:n|\u00f1)a debe incluir may(?:u|\u00fa)sculas, min(?:u|\u00fa)sculas y n(?:u|\u00fa)meros/i,
+        ),
       ).not.toBeInTheDocument();
     });
   });
@@ -174,69 +194,83 @@ describe('ChangePasswordPage step 2', () => {
   it('allows returning from step 2 to step 1', async () => {
     const user = await moveToStep2();
 
-    await user.click(screen.getByRole('button', { name: /back/i }));
+    await user.click(screen.getByRole('button', { name: /atr(?:a|\u00e1)s/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/step 1 of 2/i)).toBeInTheDocument();
+      expect(screen.getByText(/paso 1 de 2/i)).toBeInTheDocument();
     });
   });
 
   it('validates that the new passwords match', async () => {
     const user = await moveToStep2();
 
-    await user.type(screen.getByPlaceholderText(/^new password$/i), 'ValidPassword123');
+    await user.type(screen.getByPlaceholderText(/^nueva contrase(?:n|\u00f1)a$/i), 'ValidPassword123');
     await user.type(
-      screen.getByPlaceholderText(/^confirm new password$/i),
+      screen.getByPlaceholderText(/^confirma tu nueva contrase(?:n|\u00f1)a$/i),
       'DifferentPassword123',
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+      expect(screen.getByText(/las contrase(?:n|\u00f1)as no coinciden/i)).toBeInTheDocument();
     });
 
-    await user.clear(screen.getByPlaceholderText(/^confirm new password$/i));
+    await user.clear(
+      screen.getByPlaceholderText(/^confirma tu nueva contrase(?:n|\u00f1)a$/i),
+    );
     await user.type(
-      screen.getByPlaceholderText(/^confirm new password$/i),
+      screen.getByPlaceholderText(/^confirma tu nueva contrase(?:n|\u00f1)a$/i),
       'ValidPassword123',
     );
 
     await waitFor(() => {
-      expect(screen.queryByText(/passwords do not match/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/las contrase(?:n|\u00f1)as no coinciden/i),
+      ).not.toBeInTheDocument();
     });
   });
 
   it('shows validation messages when step 2 is submitted empty', async () => {
     const user = await moveToStep2();
 
-    await user.click(screen.getByRole('button', { name: /update password/i }));
+    await user.click(
+      screen.getByRole('button', { name: /actualizar contrase(?:n|\u00f1)a/i }),
+    );
 
     await waitFor(() => {
-      expect(screen.getByText(/password is required/i)).toBeInTheDocument();
-      expect(screen.getAllByText(/confirm your new password/i).length).toBeGreaterThan(0);
-      expect(screen.getByText(/please review the highlighted fields/i)).toBeInTheDocument();
+      expect(screen.getByText(/la contrase(?:n|\u00f1)a es obligatoria/i)).toBeInTheDocument();
+      expect(
+        screen.getAllByText(/confirma tu nueva contrase(?:n|\u00f1)a/i).length,
+      ).toBeGreaterThan(0);
+      expect(screen.getByText(/revisa los campos marcados/i)).toBeInTheDocument();
     });
   });
 
   it('clears the step 2 validation messages as fields are corrected', async () => {
     const user = await moveToStep2();
 
-    await user.click(screen.getByRole('button', { name: /update password/i }));
-    expect(screen.getByText(/password is required/i)).toBeInTheDocument();
+    await user.click(
+      screen.getByRole('button', { name: /actualizar contrase(?:n|\u00f1)a/i }),
+    );
+    expect(screen.getByText(/la contrase(?:n|\u00f1)a es obligatoria/i)).toBeInTheDocument();
 
-    await user.type(screen.getByPlaceholderText(/^new password$/i), 'ValidPassword123');
+    await user.type(screen.getByPlaceholderText(/^nueva contrase(?:n|\u00f1)a$/i), 'ValidPassword123');
 
     await waitFor(() => {
-      expect(screen.queryByText(/password is required/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/la contrase(?:n|\u00f1)a es obligatoria/i),
+      ).not.toBeInTheDocument();
     });
 
-    expect(screen.getAllByText(/confirm your new password/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/confirma tu nueva contrase(?:n|\u00f1)a/i).length).toBeGreaterThan(0);
     await user.type(
-      screen.getByPlaceholderText(/^confirm new password$/i),
+      screen.getByPlaceholderText(/^confirma tu nueva contrase(?:n|\u00f1)a$/i),
       'ValidPassword123',
     );
 
     await waitFor(() => {
-      expect(screen.queryByText(/^Confirm your new password$/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/^Confirma tu nueva contrase(?:n|\u00f1)a$/i),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -245,9 +279,9 @@ describe('ChangePasswordPage step 2', () => {
 
     render(<ChangePasswordPage />);
 
-    expect(await screen.findByText(/reset password/i)).toBeInTheDocument();
-    expect(screen.queryByText(/step 1 of 2/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /back/i })).not.toBeInTheDocument();
+    expect(await screen.findByText(/restablecer contrase(?:n|\u00f1)a/i)).toBeInTheDocument();
+    expect(screen.queryByText(/paso 1 de 2/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /atr(?:a|\u00e1)s/i })).not.toBeInTheDocument();
   });
 
   it('validates the recovery link before showing the new password form', async () => {
@@ -255,11 +289,11 @@ describe('ChangePasswordPage step 2', () => {
 
     render(<ChangePasswordPage />);
 
-    expect(screen.getAllByText(/validating link/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/validando enlace/i).length).toBeGreaterThan(0);
 
     await waitFor(() => {
       expect(confirmRecoveryMock).toHaveBeenCalledWith('recovery-code');
-      expect(screen.getByText(/reset password/i)).toBeInTheDocument();
+      expect(screen.getByText(/restablecer contrase(?:n|\u00f1)a/i)).toBeInTheDocument();
     });
   });
 
@@ -280,13 +314,15 @@ describe('ChangePasswordPage step 2', () => {
 
     render(<ChangePasswordPage />);
 
-    await screen.findByText(/reset password/i);
-    await user.type(screen.getByPlaceholderText(/^new password$/i), 'ValidPassword123');
+    await screen.findByText(/restablecer contrase(?:n|\u00f1)a/i);
+    await user.type(screen.getByPlaceholderText(/^nueva contrase(?:n|\u00f1)a$/i), 'ValidPassword123');
     await user.type(
-      screen.getByPlaceholderText(/^confirm new password$/i),
+      screen.getByPlaceholderText(/^confirma tu nueva contrase(?:n|\u00f1)a$/i),
       'ValidPassword123',
     );
-    await user.click(screen.getByRole('button', { name: /update password/i }));
+    await user.click(
+      screen.getByRole('button', { name: /actualizar contrase(?:n|\u00f1)a/i }),
+    );
 
     await waitFor(() => {
       expect(changePasswordMock).toHaveBeenCalledWith({

@@ -23,7 +23,7 @@ describe('ProfileAvatar', () => {
 
     fireEvent.change(input, { target: { files: [file] } });
 
-    expect(await screen.findByText('Only JPG, PNG, and WEBP files are allowed.')).toBeInTheDocument();
+    expect(await screen.findByText('Solo se permiten archivos JPG, PNG y WEBP.')).toBeInTheDocument();
   });
 
   it('shows an error when the image is larger than 2MB', async () => {
@@ -36,7 +36,7 @@ describe('ProfileAvatar', () => {
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(input, file);
 
-    expect(await screen.findByText('The image must be smaller than 2MB.')).toBeInTheDocument();
+    expect(await screen.findByText('La imagen debe pesar menos de 2 MB.')).toBeInTheDocument();
   });
 
   it('calls onPhotoSelected when a valid image is uploaded', async () => {
@@ -64,7 +64,7 @@ describe('ProfileAvatar', () => {
 
     expect(onPhotoSelected).toHaveBeenCalledWith(file);
     expect(
-      await screen.findByText('Unable to save the photo. Please try again.'),
+      await screen.findByText('No se pudo guardar la foto. Intentalo de nuevo.'),
     ).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText('AC')).toBeInTheDocument());
   });
@@ -82,7 +82,7 @@ describe('ProfileAvatar', () => {
     await user.upload(input, file);
 
     expect(
-      await screen.findByText('Upload was interrupted. Please try again.'),
+      await screen.findByText('La carga se interrumpio. Intentalo de nuevo.'),
     ).toBeInTheDocument();
   });
 });

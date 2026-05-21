@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState, type UseFormReturn } from 'react-hook-form';
+import { Controller, useFormState, type UseFormReturn } from 'react-hook-form';
 
 import type { RegisterFormValues } from '@/features/auth/schemas/auth';
 import { FacebookIcon } from '@/shared/icons/FacebookIcon';
@@ -10,6 +10,7 @@ import CustomLink from '@/shared/ui/CustomLink';
 import Input from '@/shared/ui/Input';
 import PasswordInput from '@/shared/ui/PasswordInput';
 import SocialButton from '@/shared/ui/SocialButton';
+import { formatDisplayDateForInput } from '@/shared/utils/date';
 
 interface RegisterFormSectionProps {
   form: UseFormReturn<RegisterFormValues>;
@@ -40,13 +41,13 @@ function RegisterNameFields({
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <Input
         {...register('firstName')}
-        placeholder="First name"
+        placeholder="Nombre"
         maxLength={120}
         error={errors.firstName}
       />
       <Input
         {...register('lastName')}
-        placeholder="Last name (optional)"
+        placeholder="Apellidos (opcional)"
         maxLength={120}
         error={errors.lastName}
       />
@@ -67,14 +68,14 @@ function RegisterEmailFields({
       <Input
         {...register('email')}
         type="email"
-        placeholder="Email address"
+        placeholder="Correo electrónico"
         maxLength={254}
         error={errors.email}
       />
       <Input
         {...register('confirmEmail')}
         type="email"
-        placeholder="Confirm email address"
+        placeholder="Confirma tu correo"
         maxLength={254}
         error={errors.confirmEmail}
       />
@@ -94,13 +95,13 @@ function RegisterPasswordFields({
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <PasswordInput
         {...register('password')}
-        placeholder="Password"
+        placeholder="Contraseña"
         maxLength={64}
         error={errors.password}
       />
       <PasswordInput
         {...register('confirmPassword')}
-        placeholder="Confirm password"
+        placeholder="Confirma tu contraseña"
         maxLength={64}
         error={errors.confirmPassword}
       />
@@ -111,8 +112,8 @@ function RegisterPasswordFields({
 export function RegisterHeader() {
   return (
     <header className="space-y-2 text-center">
-      <h1 className="text-4xl font-bold tracking-tight text-reflect-dark">Create account</h1>
-      <p className="text-sm font-medium text-reflect-dark/70">Start your reflection journey</p>
+      <h1 className="text-4xl font-bold tracking-tight text-reflect-dark">Crear cuenta</h1>
+      <p className="text-sm font-medium text-reflect-dark/70">Comienza tu camino de reflexión</p>
     </header>
   );
 }
@@ -143,17 +144,33 @@ export function RegisterFormSection({
       <RegisterEmailFields register={register} errors={fieldErrors} />
       <RegisterPasswordFields register={register} errors={fieldErrors} />
 
-      <Input
-        {...register('birthDate')}
-        type="date"
-        placeholder="Birth date"
-        className="text-reflect-dark/70"
-        error={fieldErrors.birthDate}
+      <Controller
+        control={control}
+        name="birthDate"
+        render={({ field }) => (
+          <Input
+            id="register-birth-date"
+            ref={field.ref}
+            name={field.name}
+            value={field.value ?? ''}
+            onBlur={field.onBlur}
+            onChange={(event) => {
+              field.onChange(formatDisplayDateForInput(event.target.value));
+            }}
+            placeholder="dd/mm/yyyy"
+            inputMode="numeric"
+            autoComplete="bday"
+            maxLength={10}
+            showCounter={false}
+            className="text-reflect-dark/70"
+            error={fieldErrors.birthDate}
+          />
+        )}
       />
 
       {hasValidationErrors && !formError && (
         <p className="text-sm font-semibold text-red-500" role="alert">
-          Please review the highlighted fields.
+          Revisa los campos marcados
         </p>
       )}
 
@@ -169,13 +186,13 @@ export function RegisterFormSection({
           disabled={isSubmitting}
           className={isSubmitting ? 'opacity-60' : ''}
         >
-          {isSubmitting ? 'Creating account...' : 'Register'}
+          {isSubmitting ? 'Creando cuenta...' : 'Registrarme'}
         </Button>
       </div>
 
       <p className="text-[11px] text-reflect-dark/60 text-center">
-        ReflectAI is not a clinical tool, does not diagnose, and does not replace
-        professional psychological care.
+        ReflectAI no es una herramienta clinica, no diagnostica y no sustituye
+        la atención psicologica profesional
       </p>
     </form>
   );
@@ -186,7 +203,7 @@ export function RegisterSocialSection() {
     <>
       <div className="relative flex items-center py-2 text-sm font-medium text-reflect-dark/50">
         <div className="flex-grow border-t border-reflect-dark/10" />
-        <span className="mx-4">or sign up with</span>
+        <span className="mx-4">o registrate con</span>
         <div className="flex-grow border-t border-reflect-dark/10" />
       </div>
 
@@ -196,11 +213,11 @@ export function RegisterSocialSection() {
       </div>
 
       <p className="text-xs text-reflect-dark/50 text-center">
-        Google and Facebook sign-up will be available soon.
+        El registro con Google y Facebook estarán disponibles pronto
       </p>
 
       <footer className="text-center text-sm text-reflect-dark/70">
-        Already have an account? <CustomLink href="/login">Sign in here</CustomLink>
+        ¿Ya tienes una cuenta? <CustomLink href="/login">Inicia sesión aquí</CustomLink>
       </footer>
     </>
   );

@@ -12,8 +12,8 @@ export const loginSchema = z.object({
   email: emailField,
   password: z
     .string()
-    .min(1, 'Password is required')
-    .max(64, 'Password cannot exceed 64 characters'),
+    .min(1, 'La contraseña es obligatoria')
+    .max(64, 'La contraseña no puede exceder 64 caracteres'),
 });
 
 export const registerSchema = z
@@ -27,11 +27,11 @@ export const registerSchema = z
     birthDate: birthDateField,
   })
   .refine((data) => data.email === data.confirmEmail, {
-    message: 'Email addresses do not match',
+    message: 'Los correos no coinciden',
     path: ['confirmEmail'],
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
+    message: 'Las contraseñas no coinciden',
     path: ['confirmPassword'],
   });
 
@@ -40,22 +40,22 @@ export const recoverPasswordSchema = z.object({
 });
 
 export const confirmRecoverySchema = z.object({
-  code: z.string().min(1, 'Recovery code is required'),
+  code: z.string().min(1, 'El código de recuperación es obligatorio'),
 });
 
 export const changePasswordSchema = z
   .object({
-    currentPassword: z.string().min(1, 'Current password is required').optional(),
+    currentPassword: z.string().min(1, 'La contraseña actual es obligatoria').optional(),
     newPassword: passwordField,
-    confirmNewPassword: z.string().min(1, 'Confirm your new password'),
+    confirmNewPassword: z.string().min(1, 'Confirma tu nueva contraseña'),
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
-    message: 'Passwords do not match',
+    message: 'Las contraseñas no coinciden',
     path: ['confirmNewPassword'],
   });
 
 export const deleteAccountSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
+  currentPassword: z.string().min(1, 'La contraseña actual es obligatoria'),
 });
 
 export type LoginFormValues = z.infer<typeof loginSchema>;

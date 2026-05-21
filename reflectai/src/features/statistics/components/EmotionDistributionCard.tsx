@@ -21,16 +21,16 @@ export function EmotionDistributionCard({ emotions }: Readonly<EmotionDistributi
   return (
     <GlassCard className="p-5 gap-4 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex flex-col gap-1">
-        <h2 className="text-base font-semibold text-slate-900">Frequent emotions</h2>
+        <h2 className="text-base font-semibold text-slate-900">Emociones frecuentes</h2>
         <p className="text-sm text-slate-500">
-          Distribution of the emotions that appear most often.
+          Distribución de las emociones que aparecen con mayor frecuencia
         </p>
       </div>
 
       {emotions.length > 0 ? (
         <div className="flex flex-col items-center gap-4">
           <div
-            aria-label="Emotion distribution"
+            aria-label="Distribución de emociones"
             className="relative flex h-24 w-24 items-center justify-center rounded-full shadow-inner"
             style={{ background: `conic-gradient(${buildDistributionGradient(emotions)})` }}
           >
@@ -54,7 +54,7 @@ export function EmotionDistributionCard({ emotions }: Readonly<EmotionDistributi
       ) : (
         <div className="rounded-2xl border border-dashed border-white/60 bg-white/20 p-4">
           <p className="text-sm text-slate-500">
-            Complete more reflections to see your emotion distribution.
+            Completa más reflexiones para ver tu distribución emocional
           </p>
         </div>
       )}

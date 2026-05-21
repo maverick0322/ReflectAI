@@ -8,22 +8,22 @@ describe('PausedSessionAlert', () => {
     const testTime = '3 h';
     render(<PausedSessionAlert timeAgo={testTime} />);
 
-    expect(screen.getByText('You have a paused reflection')).toBeInTheDocument();
-    expect(screen.getByText(`Saved ${testTime} ago`)).toBeInTheDocument();
+    expect(screen.getByText('Tienes una reflexión en pausa')).toBeInTheDocument();
+    expect(screen.getByText(`Guardada hace ${testTime}`)).toBeInTheDocument();
   });
 
   it('renders the continue button', () => {
     render(<PausedSessionAlert timeAgo="1 h" />);
 
-    expect(screen.getByRole('button', { name: /continue session/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /continuar sesión/i })).toBeInTheDocument();
   });
 
   it('hides itself when the close button is clicked', () => {
     render(<PausedSessionAlert timeAgo="1 h" />);
 
-    expect(screen.getByText('You have a paused reflection')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /close alert/i }));
+    expect(screen.getByText('Tienes una reflexión en pausa')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /cerrar alerta/i }));
 
-    expect(screen.queryByText('You have a paused reflection')).not.toBeInTheDocument();
+    expect(screen.queryByText('Tienes una reflexión en pausa')).not.toBeInTheDocument();
   });
 });

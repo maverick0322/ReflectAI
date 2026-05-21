@@ -21,7 +21,7 @@ export function ProfileNavigation() {
       >
         <ArrowLeftIcon />
       </Link>
-      <h1 className="text-xl font-bold text-slate-800">My profile</h1>
+      <h1 className="text-xl font-bold text-slate-800">Mi perfil</h1>
     </div>
   );
 }
