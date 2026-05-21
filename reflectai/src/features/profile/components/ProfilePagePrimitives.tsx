@@ -6,6 +6,14 @@ interface SwitchProps {
   ariaLabel: string;
 }
 
+function getSwitchClassName(enabled: boolean) {
+  return [
+    'relative inline-flex h-6 w-11 items-center rounded-full',
+    'transition-colors duration-300',
+    enabled ? 'bg-indigo-500' : 'bg-slate-300/50',
+  ].join(' ');
+}
+
 export function Switch({ enabled, onChange, ariaLabel }: SwitchProps) {
   return (
     <button
@@ -14,9 +22,7 @@ export function Switch({ enabled, onChange, ariaLabel }: SwitchProps) {
       aria-checked={enabled}
       aria-label={ariaLabel}
       onClick={onChange}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-        enabled ? 'bg-indigo-500' : 'bg-slate-300/50'
-      }`}
+      className={getSwitchClassName(enabled)}
     >
       <span
         className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-300 ${

@@ -5,9 +5,14 @@ interface GlassCardProps {
   className?: string;
 }
 
+const baseClassName = [
+  'flex flex-col rounded-[2rem] border border-white/60 bg-white/40',
+  'shadow-2xl shadow-purple-200/50 backdrop-blur-xl',
+].join(' ');
+
 export default function GlassCard({ children, className = '' }: GlassCardProps) {
   return (
-    <div className={`bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem] shadow-2xl shadow-purple-200/50 flex flex-col ${className}`}>
+    <div className={`${baseClassName} ${className}`}>
       {children}
     </div>
   );

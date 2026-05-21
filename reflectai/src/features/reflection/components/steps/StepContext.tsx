@@ -14,6 +14,16 @@ interface StepProps {
 const DEFAULT_QUESTION =
   'What specific situation triggered the need to reflect today?';
 
+function getTextareaClassName(shouldShowError: boolean) {
+  return [
+    'min-h-[180px] w-full resize-none rounded-2xl bg-white/30 p-4',
+    'text-slate-700 outline-none transition-all placeholder:text-slate-400',
+    shouldShowError
+      ? 'border-2 border-red-400 focus:ring-red-400'
+      : 'border border-white/60 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300/50',
+  ].join(' ');
+}
+
 export const StepContext = ({
   onNext,
   questionText = DEFAULT_QUESTION,
@@ -47,11 +57,7 @@ export const StepContext = ({
               value={field.value ?? ''}
               maxLength={3000}
               placeholder="Write here..."
-              className={`w-full min-h-[180px] resize-none rounded-2xl bg-white/30 p-4 text-slate-700 outline-none transition-all placeholder:text-slate-400 ${
-                shouldShowError
-                  ? 'border-2 border-red-400 focus:ring-red-400'
-                  : 'border border-white/60 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300/50'
-              }`}
+              className={getTextareaClassName(shouldShowError)}
             />
           )}
         />

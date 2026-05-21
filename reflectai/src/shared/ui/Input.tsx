@@ -31,6 +31,11 @@ function getCharacterCounter(charCount: number, maxLength?: number) {
   };
 }
 
+const rightElementWrapperClassName = [
+  'absolute right-4 top-1/2 flex -translate-y-1/2 items-center',
+  'justify-center',
+].join(' ');
+
 function buildInputClassName({
   className,
   error,
@@ -84,7 +89,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           />
 
           {rightElement && (
-            <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center justify-center">
+            <div className={rightElementWrapperClassName}>
               {rightElement}
             </div>
           )}

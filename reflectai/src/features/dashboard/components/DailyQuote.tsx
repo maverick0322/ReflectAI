@@ -5,9 +5,14 @@ interface DailyQuoteProps {
   author: string;
 }
 
+const dailyQuoteClassName = [
+  'flex flex-col gap-3 border-white/20 bg-white/10 p-6 text-center',
+  'dark:bg-black/10',
+].join(' ');
+
 export function DailyQuote({ text, author }: DailyQuoteProps) {
   return (
-    <GlassCard className="flex flex-col gap-3 border-white/20 bg-white/10 p-6 text-center dark:bg-black/10">
+    <GlassCard className={dailyQuoteClassName}>
       <p className="text-lg font-serif italic leading-relaxed text-slate-800 dark:text-slate-100">
         &ldquo;{text}&rdquo;
       </p>

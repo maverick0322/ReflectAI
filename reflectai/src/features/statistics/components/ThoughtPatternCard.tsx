@@ -6,9 +6,16 @@ interface ThoughtPatternCardProps {
   pattern: StatisticsPattern;
 }
 
-export function ThoughtPatternCard({ pattern }: Readonly<ThoughtPatternCardProps>) {
+const patternCardClassName = [
+  'gap-4 border-l-4 border-l-violet-500 bg-white/25 p-5',
+  'shadow-xl shadow-violet-200/20',
+].join(' ');
+
+export function ThoughtPatternCard({
+  pattern,
+}: Readonly<ThoughtPatternCardProps>) {
   return (
-    <GlassCard className="p-5 gap-4 border-l-4 border-l-violet-500 bg-white/25 shadow-xl shadow-violet-200/20">
+    <GlassCard className={patternCardClassName}>
       <div className="flex items-start gap-4">
         <div className="rounded-full bg-violet-100 p-3 text-violet-600">
           <LightningIcon className="h-5 w-5" />
@@ -17,7 +24,9 @@ export function ThoughtPatternCard({ pattern }: Readonly<ThoughtPatternCardProps
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
             Pattern detected
           </span>
-          <h2 className="text-base font-semibold text-slate-900">{pattern.title}</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            {pattern.title}
+          </h2>
           <p className="text-sm text-slate-600">{pattern.description}</p>
         </div>
       </div>

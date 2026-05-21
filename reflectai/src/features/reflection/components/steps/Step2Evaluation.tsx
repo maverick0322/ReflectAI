@@ -28,6 +28,19 @@ const DEFAULT_THOUGHT_QUESTION =
   'What was the first thought that crossed your mind?';
 const DEFAULT_EMOTION_QUESTION = 'What was the main emotion you experienced?';
 const DEFAULT_INTENSITY_QUESTION = 'Emotional intensity';
+const rangeInputClassName = [
+  'h-3 w-full cursor-pointer appearance-none rounded-lg bg-white/50',
+  'accent-indigo-600',
+].join(' ');
+
+function getEmotionButtonClassName(isSelected: boolean) {
+  return [
+    'rounded-xl border px-2 py-3 text-sm font-bold transition-all duration-300',
+    isSelected
+      ? 'scale-105 border-indigo-500 bg-indigo-500 text-white shadow-md shadow-indigo-500/30'
+      : 'border-white/60 bg-white/40 text-slate-600 hover:bg-white/60',
+  ].join(' ');
+}
 
 function EmotionSelector({
   title,
@@ -35,7 +48,7 @@ function EmotionSelector({
   shouldShowError,
   errorMessage,
   onSelectEmotion,
-}: EmotionSelectorProps) {
+}: Readonly<EmotionSelectorProps>) {
   return (
     <section className="flex flex-col gap-4">
       <h3 className="text-lg font-bold text-slate-800">{title}</h3>
@@ -45,11 +58,7 @@ function EmotionSelector({
             key={emotion}
             type="button"
             onClick={() => onSelectEmotion(emotion)}
-            className={`rounded-xl border px-2 py-3 text-sm font-bold transition-all duration-300 ${
-              currentEmotion === emotion
-                ? 'scale-105 border-indigo-500 bg-indigo-500 text-white shadow-md shadow-indigo-500/30'
-                : 'border-white/60 bg-white/40 text-slate-600 hover:bg-white/60'
-            }`}
+            className={getEmotionButtonClassName(currentEmotion === emotion)}
           >
             {emotion}
           </button>
@@ -67,10 +76,10 @@ function EmotionSelector({
 function IntensitySlider({
   currentIntensity,
   intensityQuestion,
-}: {
+}: Readonly<{
   currentIntensity: number;
   intensityQuestion: string;
-}) {
+}>) {
   const { control } = useFormContext<WizardFormValues>();
 
   return (
@@ -95,7 +104,7 @@ function IntensitySlider({
               step="1"
               value={field.value ?? 5}
               onChange={(event) => field.onChange(Number(event.target.value))}
-              className="h-3 w-full cursor-pointer appearance-none rounded-lg bg-white/50 accent-indigo-600"
+              className={rangeInputClassName}
             />
           )}
         />
@@ -114,7 +123,7 @@ export const Step2Evaluation = ({
   thoughtQuestion = DEFAULT_THOUGHT_QUESTION,
   emotionQuestion = DEFAULT_EMOTION_QUESTION,
   intensityQuestion = DEFAULT_INTENSITY_QUESTION,
-}: StepProps) => {
+}: Readonly<StepProps>) => {
   const {
     control,
     setValue,

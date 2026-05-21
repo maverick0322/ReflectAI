@@ -1,5 +1,8 @@
 import type { MetadataPatch } from '@/lib/reflection/payload';
 import type {
+  requestNextQuestion,
+} from '@/features/reflection/services/reflectionService';
+import type {
   QuestionId,
   ReflectionSessionPayload,
   SessionResponse,
@@ -246,7 +249,9 @@ export function buildDraftMetadataPatch(
   };
 }
 
-export function buildGroundingMetadataPatch(durationSeconds?: number): MetadataPatch {
+export function buildGroundingMetadataPatch(
+  durationSeconds?: number,
+): MetadataPatch {
   return {
     flags: ['high_intensity_triggered', 'grounding_completed'],
     grounding_duration_seconds: durationSeconds,
@@ -268,7 +273,7 @@ export function buildCompletionMetadataPatch(
 }
 
 export function buildQuestionPromptMap(
-  response: Awaited<ReturnType<typeof import('@/features/reflection/services/reflectionService').requestNextQuestion>>,
+  response: Awaited<ReturnType<typeof requestNextQuestion>>,
 ) {
   const questions =
     response.data.questions ??

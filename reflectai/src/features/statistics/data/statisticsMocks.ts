@@ -56,6 +56,7 @@ export const statisticsDashboardMock: StatisticsDashboardData = {
     sessionALabel: 'Latest session (Yesterday)',
     sessionBLabel: 'Session: Work conflict',
     insight:
-      'Your latest session reflects higher emotional intensity. Backend can replace this with a dynamic analysis.',
+      'Your latest session reflects higher emotional intensity. Backend can ' +
+      'replace this with a dynamic analysis.',
   },
 };

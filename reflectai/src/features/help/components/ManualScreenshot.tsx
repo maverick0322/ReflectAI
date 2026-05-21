@@ -13,6 +13,27 @@ type ManualScreenshotProps = Readonly<{
   caption?: string;
 }>;
 
+const screenshotFrameClassName = [
+  'relative w-full overflow-hidden rounded-2xl border border-white/50',
+  'bg-white/30 shadow-lg shadow-purple-200/30 backdrop-blur-md',
+].join(' ');
+
+const placeholderClassName = [
+  'absolute inset-0 flex flex-col items-center justify-center gap-3',
+  'bg-gradient-to-br from-white/40 to-white/10 px-6 text-center',
+].join(' ');
+
+const placeholderIconClassName = [
+  'flex h-12 w-12 items-center justify-center rounded-2xl border',
+  'border-white/70 bg-white/60 shadow',
+].join(' ');
+
+const calloutClassName = [
+  'inline-flex items-center gap-2 rounded-full bg-violet-600/95 px-3 py-1',
+  'text-xs font-semibold text-white shadow-lg shadow-violet-500/25',
+  'ring-1 ring-white/30',
+].join(' ');
+
 export default function ManualScreenshot({
   src,
   alt,
@@ -24,7 +45,7 @@ export default function ManualScreenshot({
 
   return (
     <figure className="w-full">
-      <div className="relative w-full overflow-hidden rounded-2xl border border-white/50 bg-white/30 backdrop-blur-md shadow-lg shadow-purple-200/30">
+      <div className={screenshotFrameClassName}>
         <div className="relative aspect-[16/9] w-full">
           {!hasError ? (
             <Image
@@ -37,12 +58,14 @@ export default function ManualScreenshot({
               priority={false}
             />
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-white/40 to-white/10 px-6 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/70 bg-white/60 shadow">
+            <div className={placeholderClassName}>
+              <div className={placeholderIconClassName}>
                 <CameraIcon className="h-6 w-6 text-slate-600" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-slate-700">Screenshot pending</p>
+                <p className="text-sm font-semibold text-slate-700">
+                  Screenshot pending
+                </p>
                 <p className="text-xs text-slate-500">
                   This image will be added once the interface is finalized.
                 </p>
@@ -51,7 +74,7 @@ export default function ManualScreenshot({
           )}
 
           <div className="absolute left-3 top-3">
-            <span className="inline-flex items-center gap-2 rounded-full bg-violet-600/95 px-3 py-1 text-xs font-semibold text-white shadow-lg shadow-violet-500/25 ring-1 ring-white/30">
+            <span className={calloutClassName}>
               {calloutText}
             </span>
           </div>

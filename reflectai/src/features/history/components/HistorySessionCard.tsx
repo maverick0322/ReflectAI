@@ -4,6 +4,13 @@ interface HistorySessionCardProps {
   entry: HistoryEntry;
 }
 
+function getEmotionClassName(toneClassName: string) {
+  return [
+    'inline-flex rounded-full px-3 py-1 text-xs font-semibold',
+    toneClassName,
+  ].join(' ');
+}
+
 export function HistorySessionCard({ entry }: Readonly<HistorySessionCardProps>) {
   return (
     <article className="rounded-[1.75rem] bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
@@ -22,9 +29,7 @@ export function HistorySessionCard({ entry }: Readonly<HistorySessionCardProps>)
       <p className="mt-3 text-sm leading-6 text-slate-500">{entry.triggerPreview}</p>
 
       <div className="mt-4">
-        <span
-          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${entry.emotion.toneClassName}`}
-        >
+        <span className={getEmotionClassName(entry.emotion.toneClassName)}>
           {entry.emotion.label}
         </span>
       </div>

@@ -68,4 +68,21 @@ describe('ProfileAvatar', () => {
     ).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText('AC')).toBeInTheDocument());
   });
+
+  it('shows a specific message when the upload is interrupted', async () => {
+    const user = userEvent.setup();
+    const interruptedError = new Error('aborted');
+    interruptedError.name = 'AbortError';
+    const onPhotoSelected = vi.fn().mockRejectedValue(interruptedError);
+
+    render(<ProfileAvatar firstName="Arturo" lastName="Cuevas" onPhotoSelected={onPhotoSelected} />);
+
+    const file = new File(['avatar'], 'avatar.png', { type: 'image/png' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await user.upload(input, file);
+
+    expect(
+      await screen.findByText('Upload was interrupted. Please try again.'),
+    ).toBeInTheDocument();
+  });
 });

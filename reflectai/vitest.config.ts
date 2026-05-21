@@ -29,7 +29,6 @@ export default defineConfig({
         'src/**/__tests__/**',
         'src/**/page.tsx',
         'src/**/layout.tsx',
-        'src/shared/icons/**',
         'node_modules/**',
       ],
       thresholds: {

@@ -14,8 +14,28 @@ interface ProfileAvatarProps {
   onPhotoSelected: (file: File) => void | Promise<void>;
 }
 
+const avatarButtonClassName = [
+  'flex h-24 w-24 items-center justify-center overflow-hidden rounded-full',
+  'bg-gradient-to-tr from-orange-200 to-orange-300 text-3xl font-bold',
+  'text-orange-600 shadow-inner transition-opacity hover:opacity-90',
+  'focus:outline-none focus:ring-4 focus:ring-orange-300/50',
+].join(' ');
+
+const cameraButtonClassName = [
+  'absolute bottom-0 right-0 rounded-full bg-orange-400 p-2 text-white',
+  'shadow-lg transition-transform hover:scale-110',
+].join(' ');
+
 function getInitials(name: string, surname: string) {
   return (name.charAt(0) + (surname ? surname.charAt(0) : '')).toUpperCase();
+}
+
+function getAvatarUploadErrorMessage(error: unknown) {
+  if (error instanceof Error && error.name === 'AbortError') {
+    return 'Upload was interrupted. Please try again.';
+  }
+
+  return 'Unable to save the photo. Please try again.';
 }
 
 export default function ProfileAvatar({
@@ -63,9 +83,8 @@ export default function ProfileAvatar({
       await onPhotoSelected(file);
       setPreview(objectUrl);
     } catch (uploadError: unknown) {
-      void uploadError;
       URL.revokeObjectURL(objectUrl);
-      setError('Unable to save the photo. Please try again.');
+      setError(getAvatarUploadErrorMessage(uploadError));
     } finally {
       input.value = '';
     }
@@ -86,7 +105,7 @@ export default function ProfileAvatar({
           type="button"
           aria-label="Change profile photo"
           onClick={() => fileInputRef.current?.click()}
-          className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-tr from-orange-200 to-orange-300 text-3xl font-bold text-orange-600 shadow-inner transition-opacity hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-orange-300/50"
+          className={avatarButtonClassName}
         >
           {preview ? (
             <Image
@@ -106,12 +125,14 @@ export default function ProfileAvatar({
           type="button"
           aria-label="Open file picker"
           onClick={() => fileInputRef.current?.click()}
-          className="absolute bottom-0 right-0 rounded-full bg-orange-400 p-2 text-white shadow-lg transition-transform hover:scale-110"
+          className={cameraButtonClassName}
         >
           <CameraIcon className="h-4 w-4" />
         </button>
       </div>
-      {error && <span className="text-[10px] font-medium text-red-500">{error}</span>}
+      {error && (
+        <span className="text-[10px] font-medium text-red-500">{error}</span>
+      )}
     </div>
   );
 }

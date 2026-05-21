@@ -42,4 +42,23 @@ describe('StatisticsPage', () => {
     expect(screen.getAllByText(/45%/i)).toHaveLength(2);
     expect(screen.getByText(/higher emotional intensity/i)).toBeInTheDocument();
   });
+
+  it('resets the comparison result when a selected session changes', async () => {
+    const user = userEvent.setup();
+    render(<StatisticsPage />);
+
+    await user.click(screen.getByRole('button', { name: /show comparison/i }));
+    expect(screen.getByText(/higher emotional intensity/i)).toBeInTheDocument();
+
+    await user.selectOptions(
+      screen.getByLabelText('Session A'),
+      'family-discussion',
+    );
+
+    expect(
+      screen.getByText(/select two sessions and press compare/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/higher emotional intensity/i))
+      .not.toBeInTheDocument();
+  });
 });

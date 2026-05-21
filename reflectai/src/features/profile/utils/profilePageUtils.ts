@@ -1,5 +1,7 @@
 import { ApiError } from '@/core/api/http';
-import type { ProfileData as ProfileResponseData } from '@/features/profile/services/profileService';
+import type {
+  ProfileData as ProfileResponseData,
+} from '@/features/profile/services/profileService';
 
 export interface ProfilePreferences {
   notifications: boolean;

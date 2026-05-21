@@ -34,6 +34,33 @@ interface ProfilePersonalInfoSectionProps {
   clearErrors: UseFormClearErrors<ProfileFormValues>;
 }
 
+const actionButtonClassName = [
+  'flex items-center gap-1.5 text-xs font-bold text-orange-500',
+  'transition-colors hover:text-orange-600',
+].join(' ');
+
+const verifiedBadgeClassName = [
+  'rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold',
+  'uppercase text-green-600',
+].join(' ');
+
+const changePasswordLinkClassName = [
+  'flex w-fit items-center gap-2 px-1 pt-1 text-sm font-bold',
+  'text-orange-500 transition-colors hover:text-orange-600',
+].join(' ');
+
+function getEditFieldsClassName(isEditing: boolean) {
+  return isEditing
+    ? 'animate-in flex flex-col gap-3 fade-in duration-300'
+    : 'hidden';
+}
+
+function getReadOnlyFieldsClassName(isEditing: boolean) {
+  return isEditing
+    ? 'hidden'
+    : 'animate-in flex flex-col gap-4 fade-in duration-300';
+}
+
 export function ProfilePersonalInfoSection({
   profile,
   isEditing,
@@ -64,7 +91,7 @@ export function ProfilePersonalInfoSection({
               form="profile-form"
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-1.5 text-xs font-bold text-orange-500 transition-colors hover:text-orange-600"
+              className={actionButtonClassName}
             >
               <SaveIcon className="h-4 w-4" /> {isSaving ? 'Saving...' : 'Save'}
             </button>
@@ -73,7 +100,7 @@ export function ProfilePersonalInfoSection({
           <button
             type="button"
             onClick={onStartEditing}
-            className="flex items-center gap-1.5 text-xs font-bold text-orange-500 transition-colors hover:text-orange-600"
+            className={actionButtonClassName}
           >
             <PencilIcon className="h-4 w-4" /> Edit
           </button>
@@ -88,9 +115,7 @@ export function ProfilePersonalInfoSection({
       >
         <div
           key={editSessionKey}
-          className={
-            isEditing ? 'flex flex-col gap-3 animate-in fade-in duration-300' : 'hidden'
-          }
+          className={getEditFieldsClassName(isEditing)}
         >
           <Input
             {...register('firstName')}
@@ -112,11 +137,7 @@ export function ProfilePersonalInfoSection({
           />
         </div>
 
-        <div
-          className={
-            isEditing ? 'hidden' : 'flex flex-col gap-4 animate-in fade-in duration-300'
-          }
-        >
+        <div className={getReadOnlyFieldsClassName(isEditing)}>
           <DataRow
             label="Full name"
             value={formatFullName(profile.firstName, profile.lastName)}
@@ -136,7 +157,7 @@ export function ProfilePersonalInfoSection({
           </span>
           <div className="mt-1 flex items-center justify-between">
             <span className="font-medium text-slate-500">{profile.email}</span>
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase text-green-600">
+            <span className={verifiedBadgeClassName}>
               Verified
             </span>
           </div>
@@ -146,7 +167,7 @@ export function ProfilePersonalInfoSection({
 
         <CustomLink
           href={APP_ROUTES.changePassword}
-          className="flex w-fit items-center gap-2 px-1 pt-1 text-sm font-bold text-orange-500 transition-colors hover:text-orange-600"
+          className={changePasswordLinkClassName}
         >
           <LockIcon className="h-4 w-4" /> Change password
         </CustomLink>
