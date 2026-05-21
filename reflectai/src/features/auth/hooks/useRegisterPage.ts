@@ -23,7 +23,9 @@ export function useRegisterPage(): UseRegisterPageResult {
   const [formError, setFormError] = useState<string | null>(null);
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    mode: 'onTouched',
+    mode: 'all',
+    reValidateMode: 'onChange',
+    shouldFocusError: true,
   });
 
   const handleSubmitForm = useCallback(

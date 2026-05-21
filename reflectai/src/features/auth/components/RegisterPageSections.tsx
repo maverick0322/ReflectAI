@@ -1,6 +1,6 @@
 'use client';
 
-import type { UseFormReturn } from 'react-hook-form';
+import { useFormState, type UseFormReturn } from 'react-hook-form';
 
 import type { RegisterFormValues } from '@/features/auth/schemas/auth';
 import { FacebookIcon } from '@/shared/icons/FacebookIcon';
@@ -18,13 +18,23 @@ interface RegisterFormSectionProps {
   onSubmit: (data: RegisterFormValues) => Promise<void>;
 }
 
+interface RegisterFieldErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  confirmEmail?: string;
+  password?: string;
+  confirmPassword?: string;
+  birthDate?: string;
+}
+
 function RegisterNameFields({
-  form,
-}: Readonly<{ form: UseFormReturn<RegisterFormValues> }>) {
-  const {
-    register,
-    formState: { errors },
-  } = form;
+  register,
+  errors,
+}: Readonly<{
+  register: UseFormReturn<RegisterFormValues>['register'];
+  errors: RegisterFieldErrors;
+}>) {
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -32,25 +42,25 @@ function RegisterNameFields({
         {...register('firstName')}
         placeholder="First name"
         maxLength={120}
-        error={errors.firstName?.message}
+        error={errors.firstName}
       />
       <Input
         {...register('lastName')}
         placeholder="Last name (optional)"
         maxLength={120}
-        error={errors.lastName?.message}
+        error={errors.lastName}
       />
     </div>
   );
 }
 
 function RegisterEmailFields({
-  form,
-}: Readonly<{ form: UseFormReturn<RegisterFormValues> }>) {
-  const {
-    register,
-    formState: { errors },
-  } = form;
+  register,
+  errors,
+}: Readonly<{
+  register: UseFormReturn<RegisterFormValues>['register'];
+  errors: RegisterFieldErrors;
+}>) {
 
   return (
     <>
@@ -59,26 +69,26 @@ function RegisterEmailFields({
         type="email"
         placeholder="Email address"
         maxLength={254}
-        error={errors.email?.message}
+        error={errors.email}
       />
       <Input
         {...register('confirmEmail')}
         type="email"
         placeholder="Confirm email address"
         maxLength={254}
-        error={errors.confirmEmail?.message}
+        error={errors.confirmEmail}
       />
     </>
   );
 }
 
 function RegisterPasswordFields({
-  form,
-}: Readonly<{ form: UseFormReturn<RegisterFormValues> }>) {
-  const {
-    register,
-    formState: { errors },
-  } = form;
+  register,
+  errors,
+}: Readonly<{
+  register: UseFormReturn<RegisterFormValues>['register'];
+  errors: RegisterFieldErrors;
+}>) {
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -86,13 +96,13 @@ function RegisterPasswordFields({
         {...register('password')}
         placeholder="Password"
         maxLength={64}
-        error={errors.password?.message}
+        error={errors.password}
       />
       <PasswordInput
         {...register('confirmPassword')}
         placeholder="Confirm password"
         maxLength={64}
-        error={errors.confirmPassword?.message}
+        error={errors.confirmPassword}
       />
     </div>
   );
@@ -113,25 +123,39 @@ export function RegisterFormSection({
   formError,
   onSubmit,
 }: RegisterFormSectionProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = form;
+  const { register, handleSubmit, control } = form;
+  const { errors, submitCount } = useFormState({ control });
+  const fieldErrors: RegisterFieldErrors = {
+    firstName: errors.firstName?.message,
+    lastName: errors.lastName?.message,
+    email: errors.email?.message,
+    confirmEmail: errors.confirmEmail?.message,
+    password: errors.password?.message,
+    confirmPassword: errors.confirmPassword?.message,
+    birthDate: errors.birthDate?.message,
+  };
+  const hasValidationErrors =
+    submitCount > 0 && Object.keys(errors).length > 0;
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <RegisterNameFields form={form} />
-      <RegisterEmailFields form={form} />
-      <RegisterPasswordFields form={form} />
+      <RegisterNameFields register={register} errors={fieldErrors} />
+      <RegisterEmailFields register={register} errors={fieldErrors} />
+      <RegisterPasswordFields register={register} errors={fieldErrors} />
 
       <Input
         {...register('birthDate')}
         type="date"
         placeholder="Birth date"
         className="text-reflect-dark/70"
-        error={errors.birthDate?.message}
+        error={fieldErrors.birthDate}
       />
+
+      {hasValidationErrors && !formError && (
+        <p className="text-sm font-semibold text-red-500" role="alert">
+          Please review the highlighted fields.
+        </p>
+      )}
 
       {formError && (
         <p className="text-sm text-red-500 font-semibold" role="alert">

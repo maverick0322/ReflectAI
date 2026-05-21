@@ -69,6 +69,13 @@ describe('DeleteAccountPage', () => {
     expect(screen.getByRole('link', { name: /cancel/i })).toHaveAttribute('href', '/profile');
   });
 
+  it('uses the shared auth card sizing classes', () => {
+    const { container } = render(<DeleteAccountPage />);
+    const card = container.querySelector('.rounded-\\[2rem\\]');
+
+    expect(card).toHaveClass('mx-auto', 'w-full', 'max-w-md', 'gap-6', 'p-8');
+  });
+
   it('shows the success state after deletion', async () => {
     const user = userEvent.setup();
     render(<DeleteAccountPage />);

@@ -46,6 +46,50 @@ describe('RegisterPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/email is required/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/password is required/i).length).toBeGreaterThan(0);
+      expect(screen.getByText(/birth date is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/please review the highlighted fields/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows confirm email validation as the user types', async () => {
+    const user = userEvent.setup();
+    render(<RegisterPage />);
+
+    await user.type(screen.getByPlaceholderText(/^email address$/i), 'ana@example.com');
+    await user.type(screen.getByPlaceholderText(/^confirm email address$/i), 'ana@other.com');
+
+    await waitFor(() => {
+      expect(screen.getByText(/email addresses do not match/i)).toBeInTheDocument();
+    });
+  });
+
+  it('clears field validation messages as each field is corrected', async () => {
+    const user = userEvent.setup();
+    render(<RegisterPage />);
+
+    await user.click(screen.getByRole('button', { name: /register/i }));
+
+    expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
+
+    await user.type(screen.getByPlaceholderText(/first name/i), 'Ana');
+
+    await waitFor(() => {
+      expect(screen.queryByText(/first name is required/i)).not.toBeInTheDocument();
+    });
+
+    expect(screen.getAllByText(/email is required/i).length).toBeGreaterThan(0);
+    await user.type(screen.getByPlaceholderText(/^email address$/i), 'ana@example.com');
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/email is required/i).length).toBe(1);
+    });
+
+    await user.type(screen.getByPlaceholderText(/^confirm email address$/i), 'ana@example.com');
+
+    await waitFor(() => {
+      expect(screen.queryByText(/email is required/i)).not.toBeInTheDocument();
     });
   });
 

@@ -101,8 +101,8 @@ export function DeleteAccountPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 py-12">
-      <GlassCard className="w-full max-w-lg">
-        <div className="mb-6 text-center">
+      <GlassCard className="mx-auto flex w-full max-w-md flex-col gap-6 p-8">
+        <div className="text-center">
           <h1 className="text-2xl font-bold text-reflect-dark">
             Delete account
           </h1>

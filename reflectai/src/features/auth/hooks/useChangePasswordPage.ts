@@ -5,7 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { changePassword, confirmRecovery } from '@/features/auth/services/authService';
+import {
+  changePassword,
+  confirmRecovery,
+  verifyCurrentPassword,
+} from '@/features/auth/services/authService';
 
 import {
   step1Schema,
@@ -51,22 +55,38 @@ export function useChangePasswordPage(): UseChangePasswordPageResult {
 
   const form1 = useForm<Step1FormValues>({
     resolver: zodResolver(step1Schema),
-    mode: 'onChange',
+    mode: 'all',
     reValidateMode: 'onChange',
+    shouldFocusError: true,
   });
 
   const form2 = useForm<Step2FormValues>({
     resolver: zodResolver(step2Schema),
-    mode: 'onChange',
+    mode: 'all',
     reValidateMode: 'onChange',
+    shouldFocusError: true,
   });
 
   const handleStep1Submit = useCallback(
     async (data: Step1FormValues) => {
-      setCurrentPassword(data.currentPassword);
-      form2.reset({ newPassword: '', confirmNewPassword: '' });
       setFormError(null);
-      setStep(2);
+      setIsSubmitting(true);
+
+      try {
+        await verifyCurrentPassword(data.currentPassword);
+        setCurrentPassword(data.currentPassword);
+        form2.reset({ newPassword: '', confirmNewPassword: '' });
+        setStep(2);
+      } catch (error) {
+        setFormError(
+          getAuthFormErrorMessage(
+            error,
+            'Unable to validate your current password',
+          ),
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
     },
     [form2],
   );
