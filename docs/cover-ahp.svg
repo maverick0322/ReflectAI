@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2480" height="3508" viewBox="0 0 2480 3508">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbfaf7"/>
+      <stop offset="100%" stop-color="#eef4ff"/>
+    </linearGradient>
+    <style>
+      .title { font: 800 120px Arial, sans-serif; fill: #162033; letter-spacing: -1px; }
+      .subtitle { font: 400 44px Arial, sans-serif; fill: #4b5563; }
+      .meta { font: 700 34px Arial, sans-serif; fill: #6b7280; }
+      .chip { fill: #ffffff; stroke: #d6d3cc; stroke-width: 4; rx: 40; }
+      .chip-text { font: 700 30px Arial, sans-serif; fill: #344054; }
+      .blob1 { fill: #d9f99d; opacity: 0.85; }
+      .blob2 { fill: #c7d2fe; opacity: 0.75; }
+    </style>
+  </defs>
+  <rect width="2480" height="3508" fill="url(#g1)"/>
+  <circle class="blob1" cx="1980" cy="520" r="320"/>
+  <circle class="blob2" cx="360" cy="2780" r="420"/>
+
+  <rect x="210" y="320" width="560" height="110" class="chip"/>
+  <text x="490" y="392" text-anchor="middle" class="chip-text">Evaluacion AHP</text>
+
+  <text x="220" y="820" class="subtitle">ReflectAI</text>
+  <text x="220" y="1000" class="title">Seleccion de</text>
+  <text x="220" y="1140" class="title">stack tecnologico</text>
+
+  <text x="220" y="1360" class="subtitle">Matriz de criterios, pesos y consistencia</text>
+
+  <rect x="220" y="1600" width="620" height="120" class="chip"/>
+  <text x="530" y="1676" text-anchor="middle" class="meta">Documento independiente</text>
+
+  <rect x="220" y="3200" width="2040" height="140" rx="44" fill="#ffffff" opacity="0.85" stroke="#d6d3cc" stroke-width="4"/>
+  <text x="1240" y="3288" text-anchor="middle" class="subtitle">ReflectAI · Evaluacion AHP</text>
+</svg>

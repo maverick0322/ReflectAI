@@ -22,7 +22,7 @@ footer:
       content: '{page-number}'
 base:
   font_color: #333333
-  font_family: Noto Serif
+  font_family: Helvetica
   font_size: 11
   line_height_length: 12
   line_height: 1.15

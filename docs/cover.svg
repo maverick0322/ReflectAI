@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2480" height="3508" viewBox="0 0 2480 3508">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbfaf7"/>
+      <stop offset="100%" stop-color="#eef4ff"/>
+    </linearGradient>
+    <radialGradient id="g2" cx="30%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <style>
+      .title { font: 800 128px Arial, sans-serif; fill: #162033; letter-spacing: -1px; }
+      .subtitle { font: 500 48px Arial, sans-serif; fill: #4b5563; }
+      .meta { font: 700 34px Arial, sans-serif; fill: #6b7280; }
+      .caption { font: 400 34px Arial, sans-serif; fill: #6b7280; }
+      .line { stroke: #c7d2fe; stroke-width: 8; opacity: 0.7; }
+      .blob1 { fill: #dbeafe; opacity: 0.95; }
+      .blob2 { fill: #ffe4c7; opacity: 0.9; }
+      .blob3 { fill: #d9f99d; opacity: 0.7; }
+      .footer { font: 700 36px Arial, sans-serif; fill: #1f2937; }
+      .footer-sub { font: 400 30px Arial, sans-serif; fill: #4b5563; }
+      .pill { fill: #ffffff; stroke: #d6d3cc; stroke-width: 4; rx: 44; }
+    </style>
+  </defs>
+  <rect width="2480" height="3508" fill="url(#g1)"/>
+  <circle cx="420" cy="420" r="540" fill="url(#g2)"/>
+  <circle class="blob1" cx="1980" cy="500" r="310"/>
+  <circle class="blob2" cx="1920" cy="980" r="210"/>
+  <circle class="blob3" cx="320" cy="2800" r="430"/>
+  <path class="line" d="M 250 1200 C 700 980, 1000 1500, 1460 1280 S 2020 1080, 2260 1400" fill="none"/>
+  <path class="line" d="M 220 1450 C 640 1280, 1040 1800, 1500 1580 S 2020 1360, 2250 1700" fill="none" opacity="0.4"/>
+
+  <rect x="220" y="300" width="620" height="120" class="pill"/>
+  <text x="530" y="378" text-anchor="middle" class="meta">Documento tecnico principal</text>
+
+  <text x="220" y="820" class="subtitle">ReflectAI</text>
+  <text x="220" y="1020" class="title">Arquitectura,</text>
+  <text x="220" y="1168" class="title">requerimientos y</text>
+  <text x="220" y="1316" class="title">diseno tecnico</text>
+
+  <text x="220" y="1540" class="caption">Sistema de reflexion guiada con historial, analisis y comparacion de sesiones.</text>
+
+  <rect x="220" y="3180" width="2040" height="160" rx="48" fill="#ffffff" opacity="0.85" stroke="#d6d3cc" stroke-width="4"/>
+  <text x="2200" y="3240" text-anchor="end" class="footer">ReflectAI · Documento tecnico</text>
+  <text x="2200" y="3290" text-anchor="end" class="footer-sub">ReflecAI Team</text>
+  <text x="2200" y="3330" text-anchor="end" class="footer-sub">Version 1.0 · 2026-05-29</text>
+</svg>

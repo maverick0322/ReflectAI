@@ -1,0 +1,17 @@
+= ReflectAI - Evaluacion AHP
+:author: ReflecAI Team
+:revnumber: 1.0
+:revdate: 2026-05-29
+:doctype: book
+:notitle:
+:toc:!
+:sectnums!:
+:sectanchors:
+:pdf-theme: {docdir}/../theme.yml
+:icons: font
+:imagesdir: {docdir}
+
+image::cover-ahp.svg[align=center, pdfwidth=100%]
+<<<
+
+include::../ahp-results.adoc[]

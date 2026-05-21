@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+  <defs>
+    <style>
+      .bg { fill: #fbfaf7; }
+      .panel { fill: #ffffff; stroke: #d7d2c8; stroke-width: 2; rx: 24; }
+      .title { font: 700 30px Arial, sans-serif; fill: #1f2937; }
+      .subtitle { font: 400 16px Arial, sans-serif; fill: #6b7280; }
+      .label { font: 700 18px Arial, sans-serif; fill: #1f2937; }
+      .small { font: 400 14px Arial, sans-serif; fill: #4b5563; }
+      .usecase { fill: #fff7e6; stroke: #d19a2a; stroke-width: 2.5; }
+      .actor { stroke: #2f4858; stroke-width: 3; fill: none; stroke-linecap: round; }
+      .actor-fill { fill: #2f4858; }
+      .line { stroke: #7b8794; stroke-width: 2.5; stroke-dasharray: 8 7; }
+      .core { fill: #eef7ff; stroke: #5b8def; stroke-width: 2; rx: 18; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1400" height="760"/>
+  <rect class="panel" x="40" y="40" width="1320" height="680"/>
+  <text class="title" x="80" y="95">ReflectAI - Casos de uso principales</text>
+  <text class="subtitle" x="80" y="125">Versión simplificada para PDF unificado</text>
+
+  <rect class="core" x="430" y="180" width="520" height="400" rx="24"/>
+  <text class="label" x="560" y="220">ReflectAI</text>
+  <text class="small" x="510" y="250">Sistema de reflexión guiada y seguimiento</text>
+
+  <ellipse class="usecase" cx="700" cy="320" rx="170" ry="52"/>
+  <text class="label" text-anchor="middle" x="700" y="326">CU-01 Gestionar cuenta</text>
+
+  <ellipse class="usecase" cx="700" cy="430" rx="170" ry="52"/>
+  <text class="label" text-anchor="middle" x="700" y="436">CU-02 Iniciar sesión</text>
+
+  <ellipse class="usecase" cx="700" cy="540" rx="170" ry="52"/>
+  <text class="label" text-anchor="middle" x="700" y="546">CU-03 Historial y análisis</text>
+
+  <ellipse class="usecase" cx="1010" cy="430" rx="170" ry="52"/>
+  <text class="label" text-anchor="middle" x="1010" y="436">CU-04 Comparar sesiones</text>
+
+  <path class="line" d="M 440 320 L 535 320"/>
+  <path class="line" d="M 440 430 L 535 430"/>
+  <path class="line" d="M 440 540 L 535 540"/>
+  <path class="line" d="M 870 430 L 840 430"/>
+
+  <g transform="translate(180,265)">
+    <circle class="actor-fill" cx="0" cy="0" r="18"/>
+    <line class="actor" x1="0" y1="18" x2="0" y2="90"/>
+    <line class="actor" x1="-40" y1="45" x2="40" y2="45"/>
+    <line class="actor" x1="0" y1="90" x2="-34" y2="138"/>
+    <line class="actor" x1="0" y1="90" x2="34" y2="138"/>
+    <text class="label" text-anchor="middle" x="0" y="170">Usuario</text>
+    <text class="small" text-anchor="middle" x="0" y="192">Buscador de autoconocimiento</text>
+  </g>
+  <path class="line" d="M 240 355 L 430 320"/>
+  <path class="line" d="M 240 355 L 430 430"/>
+  <path class="line" d="M 240 355 L 430 540"/>
+</svg>

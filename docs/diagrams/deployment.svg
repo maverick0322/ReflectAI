@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820">
+  <defs>
+    <style>
+      .bg { fill: #fbfaf7; }
+      .panel { fill: #ffffff; stroke: #d7d2c8; stroke-width: 2; rx: 24; }
+      .title { font: 700 30px Arial, sans-serif; fill: #1f2937; }
+      .subtitle { font: 400 16px Arial, sans-serif; fill: #6b7280; }
+      .cloud { fill: #eef7ff; stroke: #5b8def; stroke-width: 2.5; rx: 30; }
+      .node { fill: #fff; stroke: #667085; stroke-width: 2; rx: 18; }
+      .comp { fill: #fff7e6; stroke: #d19a2a; stroke-width: 2; rx: 14; }
+      .label { font: 700 18px Arial, sans-serif; fill: #1f2937; }
+      .small { font: 400 14px Arial, sans-serif; fill: #475467; }
+      .line { stroke: #7b8794; stroke-width: 2.5; fill: none; }
+      .dashed { stroke-dasharray: 8 7; }
+    </style>
+  </defs>
+  <rect class="bg" width="1400" height="820"/>
+  <rect class="panel" x="40" y="40" width="1320" height="740"/>
+  <text class="title" x="80" y="95">Vista de despliegue</text>
+  <text class="subtitle" x="80" y="125">Arquitectura serverless con hosting y servicios administrados</text>
+
+  <rect class="node" x="90" y="230" width="220" height="280" rx="24"/>
+  <text class="label" x="200" y="268" text-anchor="middle">Dispositivo del usuario</text>
+  <text class="small" x="200" y="298" text-anchor="middle">Mobile / Desktop</text>
+  <rect class="comp" x="120" y="340" width="160" height="120" rx="18"/>
+  <text class="label" x="200" y="382" text-anchor="middle">Navegador</text>
+  <text class="small" x="200" y="410" text-anchor="middle">ReflectAI Client</text>
+
+  <rect class="cloud" x="420" y="170" width="370" height="420" rx="30"/>
+  <text class="label" x="605" y="210" text-anchor="middle">Vercel</text>
+  <rect class="comp" x="455" y="250" width="300" height="92" rx="18"/>
+  <text class="label" x="605" y="286" text-anchor="middle">SSR / UI</text>
+  <text class="small" x="605" y="312" text-anchor="middle">Next.js runtime</text>
+  <rect class="comp" x="455" y="365" width="300" height="92" rx="18"/>
+  <text class="label" x="605" y="401" text-anchor="middle">API Routes</text>
+  <text class="small" x="605" y="427" text-anchor="middle">Lógica de backend</text>
+  <rect class="comp" x="455" y="480" width="300" height="92" rx="18"/>
+  <text class="label" x="605" y="516" text-anchor="middle">Variables de entorno</text>
+  <text class="small" x="605" y="542" text-anchor="middle">Supabase + Groq</text>
+
+  <rect class="cloud" x="860" y="160" width="220" height="220" rx="30"/>
+  <text class="label" x="970" y="202" text-anchor="middle">Supabase</text>
+  <rect class="comp" x="890" y="235" width="160" height="60" rx="16"/>
+  <text class="small" x="970" y="272" text-anchor="middle">Auth / GoTrue</text>
+  <rect class="comp" x="890" y="305" width="160" height="60" rx="16"/>
+  <text class="small" x="970" y="342" text-anchor="middle">PostgreSQL</text>
+
+  <rect class="cloud" x="860" y="435" width="220" height="170" rx="30"/>
+  <text class="label" x="970" y="477" text-anchor="middle">Groq</text>
+  <rect class="comp" x="890" y="510" width="160" height="60" rx="16"/>
+  <text class="small" x="970" y="547" text-anchor="middle">LLM / IA</text>
+
+  <path class="line" d="M 310 360 L 420 360"/>
+  <path class="line dashed" d="M 790 310 L 860 270"/>
+  <path class="line dashed" d="M 790 420 L 860 540"/>
+  <path class="line" d="M 790 395 L 860 395"/>
+  <text class="small" x="330" y="342">HTTPS</text>
+  <text class="small" x="810" y="288">Auth / DB</text>
+  <text class="small" x="810" y="534">IA</text>
+</svg>

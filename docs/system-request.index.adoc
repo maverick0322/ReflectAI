@@ -1,0 +1,22 @@
+
+= ReflectAI - System Request
+:author: ReflecAI Team
+:revnumber: 1.0
+:revdate: 2026-05-29
+:doctype: article
+:notitle:
+:toc:!
+:sectnums!:
+:sectanchors:
+:chapter-label: 
+:pdf-theme: {docdir}/../theme.yml
+:title-page-background-image: {docdir}/cover-system.svg
+:title-page-background-image: {docdir}/cover-system.svg
+:icons: font
+:imagesdir: {docdir}
+
+image::cover-system.svg[align=center, pdfwidth=100%]
+
+Este documento resume la necesidad, funcionalidades, valor y restricciones del sistema ReflectAI en una sola pagina.
+
+include::system-request.adoc[]
