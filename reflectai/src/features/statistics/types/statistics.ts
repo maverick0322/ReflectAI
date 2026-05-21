@@ -49,5 +49,4 @@ export interface StatisticsDashboardData {
   pattern: StatisticsPattern;
   sessionOptions: StatisticsSessionOption[];
   defaultSelection: StatisticsComparisonSelection;
-  comparisonResult: StatisticsComparisonResult;
 }

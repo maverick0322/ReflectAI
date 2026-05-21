@@ -3,16 +3,15 @@
 import { useState } from 'react';
 
 import type {
-  StatisticsComparisonResult,
   StatisticsComparisonSelection,
   StatisticsSessionOption,
 } from '@/features/statistics/types/statistics';
+import { buildStatisticsComparisonResult } from '@/lib/statistics/summary';
 import GlassCard from '@/shared/ui/GlassCard';
 
 interface SessionComparisonCardProps {
   sessionOptions: StatisticsSessionOption[];
   defaultSelection: StatisticsComparisonSelection;
-  comparisonResult: StatisticsComparisonResult;
 }
 
 const selectClassName = [
@@ -39,10 +38,17 @@ const comparisonHeaderClassName = [
 export function SessionComparisonCard({
   sessionOptions,
   defaultSelection,
-  comparisonResult,
 }: Readonly<SessionComparisonCardProps>) {
   const [selection, setSelection] = useState(defaultSelection);
   const [isComparing, setIsComparing] = useState(false);
+  const canCompare =
+    sessionOptions.length >= 2 &&
+    Boolean(selection.sessionA) &&
+    Boolean(selection.sessionB);
+  const comparisonResult = buildStatisticsComparisonResult(
+    sessionOptions,
+    selection,
+  );
 
   const handleSelectionChange = (
     field: keyof StatisticsComparisonSelection,
@@ -56,6 +62,10 @@ export function SessionComparisonCard({
   };
 
   const handleCompare = () => {
+    if (!canCompare) {
+      return;
+    }
+
     setIsComparing(true);
   };
 
@@ -66,8 +76,7 @@ export function SessionComparisonCard({
           Compare sessions
         </h2>
         <p className="text-sm text-slate-500">
-          The current logic is visual and uses placeholders to simplify future
-          integration.
+          Compare the intensity of two completed reflections.
         </p>
       </div>
 
@@ -78,15 +87,20 @@ export function SessionComparisonCard({
             aria-label="Session A"
             className={selectClassName}
             value={selection.sessionA}
+            disabled={sessionOptions.length === 0}
             onChange={(event) =>
               handleSelectionChange('sessionA', event.target.value)
             }
           >
-            {sessionOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
+            {sessionOptions.length > 0 ? (
+              sessionOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))
+            ) : (
+              <option value="">No completed sessions yet</option>
+            )}
           </select>
         </label>
 
@@ -96,22 +110,31 @@ export function SessionComparisonCard({
             aria-label="Session B"
             className={selectClassName}
             value={selection.sessionB}
+            disabled={sessionOptions.length === 0}
             onChange={(event) =>
               handleSelectionChange('sessionB', event.target.value)
             }
           >
-            {sessionOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
+            {sessionOptions.length > 0 ? (
+              sessionOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))
+            ) : (
+              <option value="">No completed sessions yet</option>
+            )}
           </select>
         </label>
       </div>
 
       <button
         type="button"
-        className={compareButtonClassName}
+        className={[
+          compareButtonClassName,
+          canCompare ? '' : 'cursor-not-allowed opacity-60',
+        ].join(' ')}
+        disabled={!canCompare}
         onClick={handleCompare}
       >
         Show comparison
@@ -150,7 +173,9 @@ export function SessionComparisonCard({
       ) : (
         <div className={emptyComparisonClassName}>
           <p className="text-center text-sm font-medium text-slate-400">
-            Select two sessions and press compare to view the placeholder result.
+            {canCompare
+              ? 'Select two sessions and press compare to view the result.'
+              : 'Complete at least two sessions to unlock the comparison.'}
           </p>
         </div>
       )}

@@ -11,6 +11,8 @@ import {
   getSessionTitle,
 } from '@/lib/reflection/sessionInsights';
 import type {
+  StatisticsComparisonResult,
+  StatisticsComparisonSelection,
   StatisticsDashboardData,
   StatisticsEmotionItem,
   StatisticsEvolutionPoint,
@@ -174,13 +176,73 @@ function buildSessionOptions(
   }));
 }
 
+function getComparisonFallback(): StatisticsComparisonResult {
+  return {
+    sessionAIntensity: 0,
+    sessionBIntensity: 0,
+    sessionALabel: 'No session selected',
+    sessionBLabel: 'No session selected',
+    insight: 'Complete at least two sessions to compare emotional intensity.',
+  };
+}
+
+export function buildStatisticsComparisonResult(
+  sessionOptions: StatisticsSessionOption[],
+  selection: StatisticsComparisonSelection,
+): StatisticsComparisonResult {
+  const sessionA =
+    sessionOptions.find((option) => option.id === selection.sessionA) ?? null;
+  const sessionB =
+    sessionOptions.find((option) => option.id === selection.sessionB) ?? null;
+
+  if (!sessionA || !sessionB) {
+    return getComparisonFallback();
+  }
+
+  const sessionAIntensity = sessionA.intensity ?? 0;
+  const sessionBIntensity = sessionB.intensity ?? 0;
+
+  if (sessionA.id === sessionB.id) {
+    return {
+      sessionAIntensity,
+      sessionBIntensity,
+      sessionALabel: sessionA.label,
+      sessionBLabel: sessionB.label,
+      insight: 'Choose two different sessions to compare your emotional intensity.',
+    };
+  }
+
+  if (sessionAIntensity === sessionBIntensity) {
+    return {
+      sessionAIntensity,
+      sessionBIntensity,
+      sessionALabel: sessionA.label,
+      sessionBLabel: sessionB.label,
+      insight: 'Both sessions show a similar emotional intensity.',
+    };
+  }
+
+  const strongerSession =
+    sessionAIntensity > sessionBIntensity ? sessionA : sessionB;
+  const softerSession =
+    sessionAIntensity > sessionBIntensity ? sessionB : sessionA;
+
+  return {
+    sessionAIntensity,
+    sessionBIntensity,
+    sessionALabel: sessionA.label,
+    sessionBLabel: sessionB.label,
+    insight: `${strongerSession.label} shows higher emotional intensity than ${softerSession.label}.`,
+  };
+}
+
 export function buildStatisticsDashboardData(
   sessions: ReflectionSessionListItem[],
 ): StatisticsDashboardData {
   const completedSessions = getCompletedSessions(sessions);
   const sessionOptions = buildSessionOptions(completedSessions);
   const firstSelection = sessionOptions[0]?.id ?? '';
-  const secondSelection = sessionOptions[1]?.id ?? firstSelection;
+  const secondSelection = sessionOptions[1]?.id ?? '';
 
   return {
     evolution: buildEvolution(completedSessions),
@@ -191,16 +253,6 @@ export function buildStatisticsDashboardData(
     defaultSelection: {
       sessionA: firstSelection,
       sessionB: secondSelection,
-    },
-    comparisonResult: {
-      sessionAIntensity: sessionOptions[0]?.intensity ?? 0,
-      sessionBIntensity: sessionOptions[1]?.intensity ?? 0,
-      sessionALabel: sessionOptions[0]?.label ?? 'No session selected',
-      sessionBLabel: sessionOptions[1]?.label ?? 'No session selected',
-      insight:
-        sessionOptions.length >= 2
-          ? 'Comparison data is ready for backend-driven analysis.'
-          : 'Complete at least two sessions to compare emotional intensity.',
     },
   };
 }

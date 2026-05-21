@@ -18,20 +18,28 @@ export function TopicHighlightsCard({
       <div className="flex flex-col gap-1">
         <h2 className="text-base font-semibold text-slate-900">Frequent topics</h2>
         <p className="text-sm text-slate-500">
-          Frontend-only tags prepared for a real backend count.
+          Topics that show up most often in your completed sessions.
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {topics.map((topic) => (
-          <span
-            key={topic.id}
-            className={topicBadgeClassName}
-          >
-            {topic.label} ({topic.sessionCount})
-          </span>
-        ))}
-      </div>
+      {topics.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {topics.map((topic) => (
+            <span
+              key={topic.id}
+              className={topicBadgeClassName}
+            >
+              {topic.label} ({topic.sessionCount})
+            </span>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-dashed border-white/60 bg-white/20 p-4">
+          <p className="text-sm text-slate-500">
+            Complete more reflections to surface recurring topics.
+          </p>
+        </div>
+      )}
     </GlassCard>
   );
 }
