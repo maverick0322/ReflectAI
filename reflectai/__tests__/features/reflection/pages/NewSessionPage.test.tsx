@@ -3,7 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import NewSessionPage from '@/app/new-session/page';
-import type { ReflectionSessionPayload, SessionResponse } from '@/features/reflection/types/reflection';
+import type {
+  ReflectionSessionPayload,
+  SessionResponse,
+} from '@/features/reflection/types/reflection';
 
 interface ReflectionResponseShape {
   data: {
@@ -105,7 +108,7 @@ vi.mock('@/features/reflection/services/reflectionService', () => ({
 
 async function renderWizard() {
   render(<NewSessionPage />);
-  return screen.findByPlaceholderText(/write here/i);
+  return screen.findByPlaceholderText(/escribe aqu(?:i|\u00ed)/i);
 }
 
 describe('NewSessionPage', () => {
@@ -118,11 +121,13 @@ describe('NewSessionPage', () => {
     const user = userEvent.setup();
     await renderWizard();
 
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
-    expect(await screen.findByText(/please describe the situation briefly/i)).toBeInTheDocument();
     expect(
-      screen.queryByText(/first thought that crossed your mind/i),
+      await screen.findByText(/describe brevemente la situaci(?:o|\u00f3)n/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/primer pensamiento que cruz(?:o|\u00f3) por tu mente/i),
     ).not.toBeInTheDocument();
   });
 
@@ -130,17 +135,24 @@ describe('NewSessionPage', () => {
     const user = userEvent.setup();
     await renderWizard();
 
-    await user.type(screen.getByPlaceholderText(/write here/i), 'I argued with my manager.');
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
-
-    expect(await screen.findByText(/first thought that crossed your mind/i)).toBeInTheDocument();
-
-    await user.type(screen.getByPlaceholderText(/i told myself that/i), 'no');
-    await user.click(screen.getByRole('button', { name: 'Anger' }));
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.type(
+      screen.getByPlaceholderText(/escribe aqu(?:i|\u00ed)/i),
+      'I argued with my manager.',
+    );
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
     expect(
-      await screen.findByText(/naming the thought is often the hardest part/i),
+      await screen.findByText(/primer pensamiento que cruz(?:o|\u00f3) por tu mente/i),
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i), 'no');
+    await user.click(screen.getByRole('button', { name: 'Enojo' }));
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
+
+    expect(
+      await screen.findByText(
+        /ponerle nombre al pensamiento suele ser la parte m(?:a|\u00e1)s dif(?:i|\u00ed)cil/i,
+      ),
     ).toBeInTheDocument();
   });
 
@@ -149,10 +161,10 @@ describe('NewSessionPage', () => {
     const stepOneInput = await renderWizard();
 
     await user.type(stepOneInput, 'Draft content for the first step');
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
-    await screen.findByText(/main emotion/i);
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
+    await screen.findByText(/emoci(?:o|\u00f3)n principal/i);
 
-    await user.click(screen.getByRole('button', { name: /pause \/ save draft/i }));
+    await user.click(screen.getByRole('button', { name: /pausar \/ guardar borrador/i }));
 
     await waitFor(() => {
       expect(routerMock.push).toHaveBeenCalledWith('/dashboard');
@@ -163,41 +175,44 @@ describe('NewSessionPage', () => {
     const user = userEvent.setup();
     await renderWizard();
 
-    await user.type(screen.getByPlaceholderText(/write here/i), 'A difficult work situation');
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.type(
+      screen.getByPlaceholderText(/escribe aqu(?:i|\u00ed)/i),
+      'A difficult work situation',
+    );
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
     await user.type(
-      screen.getByPlaceholderText(/i told myself that/i),
+      screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i),
       'I am not good enough',
     );
-    await user.click(screen.getByRole('button', { name: 'Sadness' }));
+    await user.click(screen.getByRole('button', { name: 'Tristeza' }));
     fireEvent.change(screen.getByRole('slider'), { target: { value: '8' } });
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
-    await screen.findByText(/purpose do you think that emotion/i);
+    await screen.findByText(/prop(?:o|\u00f3)sito crees que esa emoci(?:o|\u00f3)n/i);
     await user.type(
-      screen.getByPlaceholderText(/i think this emotion was trying to/i),
+      screen.getByPlaceholderText(/creo que esta emoci(?:o|\u00f3)n estaba intentando/i),
       'Protect me from failure',
     );
     await user.type(
-      screen.getByPlaceholderText(/my actions, my words, my boundaries/i),
+      screen.getByPlaceholderText(/mis acciones, mis palabras, mis l(?:i|\u00ed)mites/i),
       'My effort',
     );
     await user.type(
-      screen.getByPlaceholderText(/their reactions, their choices, the context/i),
+      screen.getByPlaceholderText(/sus reacciones, sus decisiones, el contexto/i),
       'The client opinion',
     );
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
-    await screen.findByText(/knowing what you know now/i);
+    await screen.findByText(/sabiendo lo que sabes ahora/i);
     await user.type(
-      screen.getByPlaceholderText(/an alternative perspective could be/i),
+      screen.getByPlaceholderText(/una perspectiva alternativa podr(?:i|\u00ed)a ser/i),
       'I did the best I could with the information I had.',
     );
-    await user.click(screen.getByRole('button', { name: /finish reflection/i }));
+    await user.click(screen.getByRole('button', { name: /finalizar reflexi(?:o|\u00f3)n/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/reflection saved/i)).toBeInTheDocument();
+      expect(screen.getByText(/guardada/i)).toBeInTheDocument();
     });
   });
 
@@ -205,13 +220,17 @@ describe('NewSessionPage', () => {
     const user = userEvent.setup();
     await renderWizard();
 
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
-    expect(await screen.findByText(/please describe the situation briefly/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
+    expect(
+      await screen.findByText(/describe brevemente la situaci(?:o|\u00f3)n/i),
+    ).toBeInTheDocument();
 
-    await user.type(screen.getByPlaceholderText(/write here/i), 'Hello world');
+    await user.type(screen.getByPlaceholderText(/escribe aqu(?:i|\u00ed)/i), 'Hello world');
 
     await waitFor(() => {
-      expect(screen.queryByText(/please describe the situation briefly/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/describe brevemente la situaci(?:o|\u00f3)n/i),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -219,32 +238,32 @@ describe('NewSessionPage', () => {
     const user = userEvent.setup();
     await renderWizard();
 
-    await user.type(screen.getByPlaceholderText(/write here/i), 'Valid situation');
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.type(screen.getByPlaceholderText(/escribe aqu(?:i|\u00ed)/i), 'Valid situation');
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
-    await user.type(screen.getByPlaceholderText(/i told myself that/i), 'Valid thought');
-    await user.click(screen.getByRole('button', { name: 'Anger' }));
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.type(screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i), 'Valid thought');
+    await user.click(screen.getByRole('button', { name: 'Enojo' }));
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
     await user.type(
-      screen.getByPlaceholderText(/i think this emotion was trying to/i),
+      screen.getByPlaceholderText(/creo que esta emoci(?:o|\u00f3)n estaba intentando/i),
       'Valid purpose',
     );
     await user.type(
-      screen.getByPlaceholderText(/my actions, my words, my boundaries/i),
+      screen.getByPlaceholderText(/mis acciones, mis palabras, mis l(?:i|\u00ed)mites/i),
       'Valid self control',
     );
     await user.type(
-      screen.getByPlaceholderText(/their reactions, their choices, the context/i),
+      screen.getByPlaceholderText(/sus reacciones, sus decisiones, el contexto/i),
       'Valid others control',
     );
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
-    expect(await screen.findByText(/knowing what you know now/i)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /finish reflection/i }));
+    expect(await screen.findByText(/sabiendo lo que sabes ahora/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /finalizar reflexi(?:o|\u00f3)n/i }));
 
-    expect(await screen.findByText(/describe an alternative perspective/i)).toBeInTheDocument();
-    expect(screen.queryByText(/reflection saved/i)).not.toBeInTheDocument();
+    expect(await screen.findByText(/describe una perspectiva alternativa/i)).toBeInTheDocument();
+    expect(screen.queryByText(/reflexi(?:o|\u00f3)n guardada/i)).not.toBeInTheDocument();
   });
 
   it('resumes an existing session without creating a new one', async () => {
@@ -276,13 +295,15 @@ describe('NewSessionPage', () => {
 
     render(<NewSessionPage />);
 
-    expect(await screen.findByText(/first thought that crossed your mind/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/primer pensamiento que cruz(?:o|\u00f3) por tu mente/i),
+    ).toBeInTheDocument();
     await user.type(
-      screen.getByPlaceholderText(/i told myself that/i),
+      screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i),
       'A sufficiently clear thought',
     );
-    await user.click(screen.getByRole('button', { name: 'Anger' }));
-    await user.click(screen.getByRole('button', { name: /^next$/i }));
+    await user.click(screen.getByRole('button', { name: 'Enojo' }));
+    await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
     await waitFor(() => {
       expect(addReflectionResponseMock).toHaveBeenCalledWith(
@@ -313,7 +334,7 @@ describe('NewSessionPage', () => {
           responses: [
             { id: 'Q1_SIT', text: 'A previously saved situation' },
             { id: 'Q2_THO', text: 'A previously saved thought' },
-            { id: 'Q3_EMO', text: 'Anger', category: 'primary' },
+            { id: 'Q3_EMO', text: 'Enojo', category: 'primary' },
             { id: 'Q4_INT', value: 7 },
           ] as SessionResponse[],
         },
@@ -329,14 +350,18 @@ describe('NewSessionPage', () => {
 
     render(<NewSessionPage />);
 
-    expect(await screen.findByText(/purpose do you think that emotion/i)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /back/i }));
+    expect(
+      await screen.findByText(/prop(?:o|\u00f3)sito crees que esa emoci(?:o|\u00f3)n/i),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /atr(?:a|\u00e1)s/i }));
 
-    expect(await screen.findByText(/first thought that crossed your mind/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/i told myself that/i)).toHaveValue(
+    expect(
+      await screen.findByText(/primer pensamiento que cruz(?:o|\u00f3) por tu mente/i),
+    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i)).toHaveValue(
       'A previously saved thought',
     );
-    expect(screen.getByRole('button', { name: 'Anger' })).toHaveClass('bg-indigo-500');
+    expect(screen.getByRole('button', { name: 'Enojo' })).toHaveClass('bg-indigo-500');
     expect(screen.getByRole('slider')).toHaveValue('7');
   });
 });

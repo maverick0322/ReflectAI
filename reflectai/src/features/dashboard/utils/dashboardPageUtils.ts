@@ -4,10 +4,11 @@ import {
   calculateStreak,
   type SessionSnapshot,
 } from '@/features/dashboard/utils/metrics';
+import { getEmotionDisplayLabel } from '@/lib/reflection/sessionInsights';
 
 export const DEFAULT_DAILY_QUOTE = {
-  text: 'Reflection is the path toward self-mastery.',
-  author: 'Marcus Aurelius',
+  text: 'Reflexionar es el camino hacia el dominio propio.',
+  author: 'Marco Aurelio',
 };
 
 export function isRecoverableDraft(session: SessionSnapshot) {
@@ -28,38 +29,38 @@ export function getDashboardErrorMessage(error: unknown) {
     return error.payload.message;
   }
 
-  return 'Unable to load the dashboard';
+  return 'No se pudo cargar el panel principal';
 }
 
 export function getStreakMessage(streak: number) {
   return streak === 0
-    ? 'Today is the perfect day to start your habit.'
-    : 'Excellent. You are building a strong habit.';
+    ? 'Hoy es un gran día para comenzar tu hábito'
+    : 'Excelente. Estás construyendo un hábito fuerte';
 }
 
 export function getIntensityLabel(value: unknown) {
   if (typeof value !== 'number') {
-    return 'Moderate';
+    return 'Moderada';
   }
 
   if (value >= 8) {
-    return 'High';
+    return 'Alta';
   }
 
   if (value <= 3) {
-    return 'Low';
+    return 'Baja';
   }
 
-  return 'Moderate';
+  return 'Moderada';
 }
 
 export function getPrimaryEmotion(analysis: Record<string, unknown>) {
   const emotions = analysis.primary_emotions;
   if (Array.isArray(emotions) && typeof emotions[0] === 'string') {
-    return emotions[0];
+    return getEmotionDisplayLabel(emotions[0]);
   }
 
-  return 'No data';
+  return 'Sin datos';
 }
 
 export function getAverageIntensity(analysis: Record<string, unknown>) {

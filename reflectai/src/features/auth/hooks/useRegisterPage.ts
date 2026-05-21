@@ -9,6 +9,7 @@ import { registerUser } from '@/features/auth/services/authService';
 import { registerSchema, type RegisterFormValues } from '@/features/auth/schemas/auth';
 
 import { getAuthFormErrorMessage } from '@/features/auth/utils/authPageUtils';
+import { parseDisplayDateToIso } from '@/shared/utils/date';
 
 interface UseRegisterPageResult {
   isSubmitting: boolean;
@@ -23,6 +24,15 @@ export function useRegisterPage(): UseRegisterPageResult {
   const [formError, setFormError] = useState<string | null>(null);
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      confirmEmail: '',
+      password: '',
+      confirmPassword: '',
+      birthDate: '',
+    },
     mode: 'all',
     reValidateMode: 'onChange',
     shouldFocusError: true,
@@ -39,11 +49,11 @@ export function useRegisterPage(): UseRegisterPageResult {
           lastName: data.lastName,
           email: data.email,
           password: data.password,
-          birthDate: data.birthDate,
+          birthDate: parseDisplayDateToIso(data.birthDate),
         });
         router.push('/login');
       } catch (error) {
-        setFormError(getAuthFormErrorMessage(error, 'Unable to create the account'));
+        setFormError(getAuthFormErrorMessage(error, 'No se pudo crear la cuenta'));
       } finally {
         setIsSubmitting(false);
       }

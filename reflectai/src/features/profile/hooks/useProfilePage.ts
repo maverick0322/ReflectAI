@@ -23,6 +23,10 @@ import {
   toggleProfilePreference,
   type ProfileViewData,
 } from '@/features/profile/utils/profilePageUtils';
+import {
+  formatIsoDateToDisplay,
+  parseDisplayDateToIso,
+} from '@/shared/utils/date';
 
 interface UseProfilePageResult {
   profile: ProfileViewData | null;
@@ -32,6 +36,7 @@ interface UseProfilePageResult {
   isUploadingAvatar: boolean;
   formError: string | null;
   editSessionKey: number;
+  control: ReturnType<typeof useForm<ProfileFormValues>>['control'];
   register: ReturnType<typeof useForm<ProfileFormValues>>['register'];
   handleSubmit: ReturnType<typeof useForm<ProfileFormValues>>['handleSubmit'];
   clearErrors: ReturnType<typeof useForm<ProfileFormValues>>['clearErrors'];
@@ -49,7 +54,7 @@ function buildProfileFormValues(profile: ProfileViewData) {
   return {
     firstName: profile.firstName,
     lastName: profile.lastName,
-    birthDate: profile.birthDate,
+    birthDate: formatIsoDateToDisplay(profile.birthDate),
   };
 }
 
@@ -64,6 +69,7 @@ export function useProfilePage(): UseProfilePageResult {
   const [editSessionKey, setEditSessionKey] = useState(0);
 
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -101,7 +107,7 @@ export function useProfilePage(): UseProfilePageResult {
           return;
         }
 
-        setFormError(getProfileErrorMessage(error, 'Unable to load the profile'));
+        setFormError(getProfileErrorMessage(error, 'No se pudo cargar el perfil'));
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -139,7 +145,7 @@ export function useProfilePage(): UseProfilePageResult {
       const response = await updateProfile({
         firstName: data.firstName,
         lastName: data.lastName ?? '',
-        birthDate: data.birthDate,
+        birthDate: parseDisplayDateToIso(data.birthDate),
       });
 
       const updatedProfile = {
@@ -155,7 +161,7 @@ export function useProfilePage(): UseProfilePageResult {
       setIsEditing(false);
     } catch (error) {
       setFormError(
-        getProfileErrorMessage(error, 'Unable to update the profile'),
+        getProfileErrorMessage(error, 'No se pudo actualizar el perfil'),
       );
     } finally {
       setIsSaving(false);
@@ -189,7 +195,7 @@ export function useProfilePage(): UseProfilePageResult {
       );
     } catch (error) {
       setFormError(
-        getProfileErrorMessage(error, 'Unable to upload the profile photo'),
+        getProfileErrorMessage(error, 'No se pudo subir la foto de perfil'),
       );
     } finally {
       setIsUploadingAvatar(false);
@@ -227,6 +233,7 @@ export function useProfilePage(): UseProfilePageResult {
     isUploadingAvatar,
     formError,
     editSessionKey,
+    control,
     register,
     handleSubmit,
     clearErrors,

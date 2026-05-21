@@ -99,29 +99,31 @@ describe('DashboardPage', () => {
     render(<DashboardPage />);
 
     expect(await screen.findByText(/arturo cuevas/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /^today$/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^hoy$/i })).toBeInTheDocument();
   });
 
   it('shows the paused reflection alert when a recoverable draft exists', async () => {
     render(<DashboardPage />);
 
-    expect(await screen.findByText(/you have a paused reflection/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/tienes una reflexi(?:o|\u00f3)n en pausa/i),
+    ).toBeInTheDocument();
   });
 
   it('shows the streak and its dynamic message', async () => {
     render(<DashboardPage />);
 
-    expect(await screen.findByText(/\d-day streak/i)).toBeInTheDocument();
-    expect(screen.getByText(/excellent|perfect day to start/i)).toBeInTheDocument();
+    expect(await screen.findByText(/racha de \d+ d(?:i|\u00ed)as/i)).toBeInTheDocument();
+    expect(screen.getByText(/excelente|gran d(?:i|\u00ed)a para comenzar/i)).toBeInTheDocument();
   });
 
   it('renders the latest session card when data exists', async () => {
     render(<DashboardPage />);
 
     expect(await screen.findByText(/test session/i)).toBeInTheDocument();
-    expect(screen.getByText(/anxiety/i)).toBeInTheDocument();
+    expect(screen.getByText(/ansiedad/i)).toBeInTheDocument();
     expect(
-      screen.queryByText(/you have not recorded any reflections yet/i),
+      screen.queryByText(/a(?:u|\u00fa)n no has registrado ninguna reflexi(?:o|\u00f3)n/i),
     ).not.toBeInTheDocument();
   });
 
@@ -137,15 +139,17 @@ describe('DashboardPage', () => {
     render(<DashboardPage />);
 
     expect(
-      await screen.findByText(/reflection is the path toward self-mastery/i),
+      await screen.findByText(/reflexionar es el camino hacia el dominio propio/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/marcus aurelius/i)).toBeInTheDocument();
+    expect(screen.getByText(/marco aurelio/i)).toBeInTheDocument();
   });
 
   it('shows an error when the dashboard load fails', async () => {
     listSessionsMock.mockRejectedValueOnce(new Error('db down'));
     render(<DashboardPage />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/unable to load the dashboard/i);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      /no se pudo cargar el panel principal/i,
+    );
   });
 });

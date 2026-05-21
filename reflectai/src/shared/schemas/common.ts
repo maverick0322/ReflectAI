@@ -1,34 +1,38 @@
 import { z } from 'zod';
 
+import { isSupportedBirthDate } from '@/shared/utils/date';
+
 export const emailField = z
   .string()
-  .min(1, 'Email is required')
-  .email('Enter a valid email address')
-  .max(254, 'Character limit reached');
+  .min(1, 'El correo es obligatorio')
+  .max(254, 'Límite de caracteres alcanzado')
+  .pipe(z.email({ message: 'Ingresa un correo válido' }));
 
 export const passwordField = z
   .string()
-  .min(1, 'Password is required')
-  .min(8, 'Password must be at least 8 characters long')
-  .max(64, 'Character limit reached')
-  .regex(/[A-Z]/, 'Password must include uppercase, lowercase, and numeric characters')
-  .regex(/[a-z]/, 'Password must include uppercase, lowercase, and numeric characters')
-  .regex(/[0-9]/, 'Password must include uppercase, lowercase, and numeric characters');
+  .min(1, 'La contraseña es obligatoria')
+  .min(8, 'La contraseña debe tener al menos 8 caracteres')
+  .max(64, 'Límite de caracteres alcanzado')
+  .regex(/[A-Z]/, 'La contraseña debe incluir mayúsculas, minúsculas y números')
+  .regex(/[a-z]/, 'La contraseña debe incluir mayúsculas, minúsculas y números')
+  .regex(/\d/, 'La contraseña debe incluir mayúsculas, minúsculas y números');
 
 export const firstNameField = z
   .string()
-  .min(1, 'First name is required')
-  .max(120, 'Character limit reached')
-  .regex(/^[\p{L}\s]+$/u, 'First name can only contain letters');
+  .min(1, 'El nombre es obligatorio')
+  .max(120, 'Límite de caracteres alcanzado')
+  .regex(/^[\p{L}\s]+$/u, 'El nombre solo puede contener letras');
 
 export const lastNameField = z
   .string()
-  .max(120, 'Character limit reached')
+  .max(120, 'Límite de caracteres alcanzado')
   .refine((value) => value === undefined || value === '' || /^[\p{L}\s]+$/u.test(value), {
-    message: 'Last name can only contain letters',
+    message: 'Los apellidos solo pueden contener letras',
   })
   .optional();
 
 export const birthDateField = z
   .string()
-  .min(1, 'Birth date is required');
+  .trim()
+  .min(1, 'La fecha de nacimiento es obligatoria')
+  .refine((value) => isSupportedBirthDate(value), 'Ingresa una fecha válida en formato dd/mm/yyyy');

@@ -73,18 +73,18 @@ export function SessionComparisonCard({
     <GlassCard className="p-5 gap-5 bg-white/25 shadow-xl shadow-violet-200/20">
       <div className="flex flex-col gap-1">
         <h2 className="text-lg font-semibold text-slate-900">
-          Compare sessions
+          Comparar sesiones
         </h2>
         <p className="text-sm text-slate-500">
-          Compare the intensity of two completed reflections.
+          Compara la intensidad de dos reflexiones completadas
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-600">
-          <span>Session A</span>
+          <span>Sesión A</span>
           <select
-            aria-label="Session A"
+            aria-label="Sesión A"
             className={selectClassName}
             value={selection.sessionA}
             disabled={sessionOptions.length === 0}
@@ -99,15 +99,15 @@ export function SessionComparisonCard({
                 </option>
               ))
             ) : (
-              <option value="">No completed sessions yet</option>
+              <option value="">Aún no hay sesiones completadas</option>
             )}
           </select>
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-600">
-          <span>Session B</span>
+          <span>Sesión B</span>
           <select
-            aria-label="Session B"
+            aria-label="Sesión B"
             className={selectClassName}
             value={selection.sessionB}
             disabled={sessionOptions.length === 0}
@@ -122,7 +122,7 @@ export function SessionComparisonCard({
                 </option>
               ))
             ) : (
-              <option value="">No completed sessions yet</option>
+              <option value="">Aún no hay sesiones completadas</option>
             )}
           </select>
         </label>
@@ -137,7 +137,7 @@ export function SessionComparisonCard({
         disabled={!canCompare}
         onClick={handleCompare}
       >
-        Show comparison
+        Mostrar comparación
       </button>
 
       {isComparing ? (
@@ -174,8 +174,8 @@ export function SessionComparisonCard({
         <div className={emptyComparisonClassName}>
           <p className="text-center text-sm font-medium text-slate-400">
             {canCompare
-              ? 'Select two sessions and press compare to view the result.'
-              : 'Complete at least two sessions to unlock the comparison.'}
+              ? 'Selecciona dos sesiones y presiona comparar para ver el resultado'
+              : 'Completa al menos dos sesiones para desbloquear la comparación'}
           </p>
         </div>
       )}

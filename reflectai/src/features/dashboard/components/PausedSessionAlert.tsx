@@ -55,7 +55,7 @@ export function PausedSessionAlert({
     <GlassCard className={alertCardClassName}>
       <button
         type="button"
-        aria-label="Close alert"
+        aria-label="Cerrar alerta"
         onClick={() => setIsVisible(false)}
         className={closeButtonClassName}
       >
@@ -69,10 +69,10 @@ export function PausedSessionAlert({
 
         <div className="flex flex-1 flex-col justify-center">
           <p className="text-sm font-semibold leading-tight text-slate-900 dark:text-white">
-            You have a paused reflection
+            Tienes una reflexión en pausa
           </p>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            Saved {timeAgo} ago
+            Guardada hace {timeAgo}
           </p>
         </div>
 
@@ -82,7 +82,7 @@ export function PausedSessionAlert({
             role="button"
             className={resumeLinkClassName}
           >
-            Continue session
+            Continuar sesión
           </Link>
         </div>
       </div>

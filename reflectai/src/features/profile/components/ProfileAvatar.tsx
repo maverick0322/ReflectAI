@@ -32,10 +32,10 @@ function getInitials(name: string, surname: string) {
 
 function getAvatarUploadErrorMessage(error: unknown) {
   if (error instanceof Error && error.name === 'AbortError') {
-    return 'Upload was interrupted. Please try again.';
+    return 'La carga se interrumpio. Intentalo de nuevo.';
   }
 
-  return 'Unable to save the photo. Please try again.';
+  return 'No se pudo guardar la foto. Intentalo de nuevo.';
 }
 
 export default function ProfileAvatar({
@@ -65,13 +65,13 @@ export default function ProfileAvatar({
     }
 
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setError('Only JPG, PNG, and WEBP files are allowed.');
+      setError('Solo se permiten archivos JPG, PNG y WEBP.');
       input.value = '';
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      setError('The image must be smaller than 2MB.');
+      setError('La imagen debe pesar menos de 2 MB.');
       input.value = '';
       return;
     }
@@ -103,15 +103,15 @@ export default function ProfileAvatar({
 
         <button
           type="button"
-          aria-label="Change profile photo"
+          aria-label="Cambiar foto de perfil"
           onClick={() => fileInputRef.current?.click()}
           className={avatarButtonClassName}
         >
           {preview ? (
-            <Image
-              src={preview}
-              alt="Profile"
-              fill
+              <Image
+                src={preview}
+                alt="Perfil"
+                fill
               unoptimized
               sizes="96px"
               className="object-cover"
@@ -123,7 +123,7 @@ export default function ProfileAvatar({
 
         <button
           type="button"
-          aria-label="Open file picker"
+          aria-label="Abrir selector de archivos"
           onClick={() => fileInputRef.current?.click()}
           className={cameraButtonClassName}
         >

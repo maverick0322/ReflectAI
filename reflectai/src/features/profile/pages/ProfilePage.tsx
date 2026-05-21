@@ -25,6 +25,7 @@ export function ProfilePage() {
     isUploadingAvatar,
     formError,
     editSessionKey,
+    control,
     register,
     handleSubmit,
     clearErrors,
@@ -39,13 +40,13 @@ export function ProfilePage() {
   } = useProfilePage();
 
   if (isLoading) {
-    return <ProfileMessageState message="Loading profile..." tone="default" />;
+    return <ProfileMessageState message="Cargando perfil..." tone="default" />;
   }
 
   if (!profile) {
     return (
       <ProfileMessageState
-        message="Unable to load the profile."
+        message="No se pudo cargar el perfil."
         tone="error"
       />
     );
@@ -68,6 +69,7 @@ export function ProfilePage() {
           isSaving={isSaving}
           editSessionKey={editSessionKey}
           formError={formError}
+          control={control}
           register={register}
           handleSubmit={handleSubmit}
           clearErrors={clearErrors}

@@ -143,7 +143,7 @@ describe('api clients', () => {
   it('calls reflection session endpoints', async () => {
     const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
 
-    await createReflectionSession('Sesion');
+    await createReflectionSession('SesiÓn');
     await listReflectionSessions();
     await getReflectionSession('session-1');
     await addReflectionResponse('session-1', { id: 'Q1_SIT', text: 'Texto' });

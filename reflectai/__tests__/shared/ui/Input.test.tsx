@@ -5,21 +5,21 @@ import Input from '@/shared/ui/Input';
 
 describe('Input', () => {
   it('shows the character counter when maxLength is provided', () => {
-    render(<Input placeholder="Write your name" maxLength={10} />);
+    render(<Input placeholder="Escribe tu nombre" maxLength={10} />);
 
-    const inputElement = screen.getByPlaceholderText('Write your name');
+    const inputElement = screen.getByPlaceholderText('Escribe tu nombre');
     fireEvent.change(inputElement, { target: { value: 'Hello' } });
 
     expect(screen.getByText('5/10')).toBeInTheDocument();
   });
 
   it('shows the limit reached message at the maximum length', () => {
-    render(<Input placeholder="Write your name" maxLength={5} />);
+    render(<Input placeholder="Escribe tu nombre" maxLength={5} />);
 
-    const inputElement = screen.getByPlaceholderText('Write your name');
+    const inputElement = screen.getByPlaceholderText('Escribe tu nombre');
     fireEvent.change(inputElement, { target: { value: 'World' } });
 
-    const limitMessage = screen.getByText('Character limit reached');
+    const limitMessage = screen.getByText('Límite de caracteres alcanzado');
     expect(limitMessage).toBeInTheDocument();
     expect(limitMessage).toHaveClass('text-red-500');
   });

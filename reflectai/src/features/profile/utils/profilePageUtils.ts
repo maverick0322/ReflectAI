@@ -2,6 +2,7 @@ import { ApiError } from '@/core/api/http';
 import type {
   ProfileData as ProfileResponseData,
 } from '@/features/profile/services/profileService';
+import { formatIsoDateToDisplay } from '@/shared/utils/date';
 
 export interface ProfilePreferences {
   notifications: boolean;
@@ -36,19 +37,15 @@ export function mapProfileResponseToViewData(
 }
 
 export function formatFullName(firstName: string, lastName: string) {
-  return [firstName, lastName].filter(Boolean).join(' ') || 'Your profile';
+  return [firstName, lastName].filter(Boolean).join(' ') || 'Tu perfil';
 }
 
 export function formatDisplayBirthDate(isoDate: string) {
   if (!isoDate) {
-    return 'Not specified';
+    return 'No especificada';
   }
 
-  return new Date(`${isoDate}T12:00:00`).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  return formatIsoDateToDisplay(isoDate);
 }
 
 export function getProfileErrorMessage(

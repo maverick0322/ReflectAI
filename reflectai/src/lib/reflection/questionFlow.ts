@@ -15,17 +15,17 @@ export const QUESTION_SEQUENCE: QuestionId[] = [
 ];
 
 const QUESTION_TEXT: Record<QuestionId, string> = {
-  Q1_SIT: 'What specific situation triggered the need to reflect today?',
-  Q2_THO: 'In that moment, what was the first thought that crossed your mind?',
-  Q3_EMO: 'What was the main emotion you experienced?',
-  Q4_INT: 'On a scale from 1 to 10, how intense is that emotion?',
-  Q5_TEL: 'Emotions sometimes have a purpose. What purpose did it serve?',
-  Q6_CON_MINE: 'What things were strictly under your control?',
-  Q6_CON_OTHERS: 'What depended on other people or outside circumstances?',
-  Q7_ALT: 'Is there a more useful or compassionate way to interpret what happened?',
-  SYS_GROUNDING: 'Take a moment to breathe. Are you ready to continue?',
+  Q1_SIT: '¿Qué situación específica despertó hoy la necesidad de reflexionar?',
+  Q2_THO: 'En ese momento, ¿cuál fue el primer pensamiento que cruzó por tu mente?',
+  Q3_EMO: '¿Cuál fue la emoción principal que experimentaste?',
+  Q4_INT: 'En una escala del 1 al 10, ¿qué tan intensa es esa emoción?',
+  Q5_TEL: 'A veces las emociones tienen un propósito. ¿Qué propósito cumplió?',
+  Q6_CON_MINE: '¿Qué cosas estaban estrictamente bajo tu control?',
+  Q6_CON_OTHERS: '¿Qué dependía de otras personas o de circunstancias externas?',
+  Q7_ALT: '¿Existe una forma más útil o compasiva de interpretar lo que pasó?',
+  SYS_GROUNDING: 'Toma un momento para respirar. ¿Estás listo para continuar?',
   SYS_AI_ADJUSTMENT:
-    'Thanks for sharing. Let us refocus on what you can control.',
+    'Gracias por compartirlo. Volvamos a enfocarnos en lo que puedes controlar.',
 };
 
 export function getQuestionText(questionId: QuestionId): string {

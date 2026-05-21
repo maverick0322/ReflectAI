@@ -7,6 +7,7 @@ import type {
   ReflectionSessionPayload,
   SessionResponse,
 } from '@/features/reflection/types/reflection';
+import { normalizePrimaryEmotion } from '@/features/reflection/types/reflection';
 import type { WizardFormValues } from '@/features/reflection/schemas/reflection';
 
 import { ApiError } from '@/core/api/http';
@@ -41,9 +42,9 @@ export const DEFAULT_FORM_VALUES: FormValues = {
 };
 
 export const PROFESSIONAL_REMINDER =
-  'This support does not replace psychological or medical care. ' +
-  'If what you feel is intense, recurring, or affects your daily life, ' +
-  'the best next step is to consult a professional.';
+  'Este apoyo no sustituye la atención psicológica o médica. ' +
+  'Si lo que sientes es intenso, recurrente o afecta tu vida diaria, ' +
+  'el mejor siguiente paso es consultar a un profesional.';
 
 export const STEP_QUESTION_IDS: Record<number, QuestionId[]> = {
   1: ['Q1_SIT'],
@@ -159,10 +160,12 @@ function getAnalysisText(
 }
 
 export function buildFormValues(payload: ReflectionSessionPayload): FormValues {
+  const savedEmotion = getText(payload, 'Q3_EMO');
+
   return {
     situation: getText(payload, 'Q1_SIT'),
     thought: getText(payload, 'Q2_THO'),
-    emotion: getText(payload, 'Q3_EMO'),
+    emotion: normalizePrimaryEmotion(savedEmotion) ?? savedEmotion,
     intensity: getValue(payload, 'Q4_INT') ?? 5,
     purpose: getText(payload, 'Q5_TEL'),
     selfControl: getText(payload, 'Q6_CON_MINE'),
@@ -196,19 +199,19 @@ export function buildCompletionSummary(
     summary: getAnalysisText(
       analysis,
       'summary',
-      'Your reflection has been saved. You identified what happened, how you interpreted it, ' +
-        'and a more useful way to look at it.',
+      'Tu reflexión ha sido guardada. Identificaste lo que ocurrió, cómo lo interpretaste ' +
+        'y una forma más útil de mirarlo.',
     ),
     recommendation: getAnalysisText(
       analysis,
       'recommendation',
-      'Read your alternative perspective again when the emotion starts to rise, ' +
-        'and choose one small action that is still under your control.',
+      'Vuelve a leer tu perspectiva alternativa cuando la emoción empiece a subir ' +
+        'y elige una acción pequeña que aún esté bajo tu control.',
     ),
     encouragement: getAnalysisText(
       analysis,
       'encouraging_message',
-      'Taking a pause to organize what you feel is already a valuable step.',
+      'Hacer una pausa para ordenar lo que sientes ya es un paso valioso.',
     ),
     professionalReminder: getAnalysisText(
       analysis,

@@ -18,7 +18,7 @@ describe('profileSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('First name is required');
+      expect(result.error.issues[0].message).toBe('El nombre es obligatorio');
     }
   });
 
@@ -27,7 +27,7 @@ describe('profileSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('First name can only contain letters');
+      expect(result.error.issues[0].message).toBe('El nombre solo puede contener letras');
     }
   });
 
@@ -40,7 +40,7 @@ describe('profileSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Last name can only contain letters');
+      expect(result.error.issues[0].message).toBe('Los apellidos solo pueden contener letras');
     }
   });
 
@@ -49,7 +49,7 @@ describe('profileSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Birth date is required');
+      expect(result.error.issues[0].message).toBe('La fecha de nacimiento es obligatoria');
     }
   });
 });
@@ -64,7 +64,7 @@ describe('changePasswordSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Passwords do not match');
+      expect(result.error.issues[0].message).toBe('Las contraseñas no coinciden');
     }
   });
 });

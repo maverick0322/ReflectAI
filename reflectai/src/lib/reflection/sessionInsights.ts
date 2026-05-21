@@ -1,4 +1,5 @@
 import type { ReflectionSessionListItem } from '@/features/reflection/services/reflectionService';
+import { getPrimaryEmotionLabel } from '@/features/reflection/types/reflection';
 import type {
   QuestionId,
   ReflectionSessionPayload,
@@ -6,6 +7,35 @@ import type {
 } from '@/features/reflection/types/reflection';
 
 type AnalysisRecord = Record<string, unknown>;
+
+const EMOTION_LABEL_MAP: Record<string, string> = {
+  anxiety: 'Ansiedad',
+  calm: 'Calma',
+  stress: 'Estrés',
+  stressed: 'Estrés',
+  frustration: 'Frustración',
+  frustrated: 'Frustración',
+  guilt: 'Culpa',
+  guilty: 'Culpa',
+};
+
+function normalizeEmotionKey(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+export function getEmotionDisplayLabel(value: string) {
+  const primaryEmotionLabel = getPrimaryEmotionLabel(value);
+
+  if (primaryEmotionLabel !== value) {
+    return primaryEmotionLabel;
+  }
+
+  return EMOTION_LABEL_MAP[normalizeEmotionKey(value)] ?? value;
+}
 
 function isRecord(value: unknown): value is AnalysisRecord {
   return typeof value === 'object' && value !== null;
@@ -73,11 +103,12 @@ export function getAnalysisTextArray(
 
 export function getPrimaryEmotion(session: ReflectionSessionListItem) {
   const analysis = getSessionAnalysis(session);
-  return (
+  const primaryEmotion =
     getAnalysisTextArray(analysis, 'primary_emotions')[0] ??
     getResponseText(session.payload, 'Q3_EMO') ??
-    'Sin emocion'
-  );
+    'Sin emoción';
+
+  return getEmotionDisplayLabel(primaryEmotion);
 }
 
 export function getAverageIntensityScore(session: ReflectionSessionListItem) {
@@ -93,7 +124,7 @@ export function getSessionTitle(session: ReflectionSessionListItem) {
   const fallback =
     getAnalysisText(analysis, 'session_title') ??
     getResponseText(session.payload, 'Q1_SIT') ??
-    'Sesion de reflexion';
+    'Sesión de reflexión';
   const title = session.title?.trim() || fallback;
 
   return title.length > 72 ? `${title.slice(0, 69).trim()}...` : title;
@@ -106,4 +137,3 @@ export function getSessionDateIso(session: ReflectionSessionListItem) {
 export function getCompletedSessions(sessions: ReflectionSessionListItem[]) {
   return sessions.filter((session) => session.status === 'completed');
 }
-

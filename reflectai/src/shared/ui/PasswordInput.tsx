@@ -26,7 +26,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         type="button"
         onClick={() => setShowPassword((currentValue) => !currentValue)}
         className={visibilityButtonClassName}
-        aria-label={showPassword ? 'Hide password' : 'Show password'}
+        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
       >
         {showPassword ? <EyeOffIcon /> : <EyeIcon />}
       </button>

@@ -41,7 +41,7 @@ export function RecoverPasswordPage() {
       const message =
         error instanceof ApiError && error.payload?.message
           ? error.payload.message
-          : 'Unable to send the reset link';
+          : 'No se pudo enviar el enlace de recuperación';
       setFormError(message);
     } finally {
       setIsSubmitting(false);
@@ -53,10 +53,10 @@ export function RecoverPasswordPage() {
       <GlassCard className="mx-auto flex w-full max-w-md flex-col gap-6 p-8">
         <header className="space-y-2 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-reflect-dark">
-            Recover access
+            Recuperar acceso
           </h1>
           <p className="text-sm font-medium text-reflect-dark/70">
-            Enter your email address and we will send you a secure reset link.
+            Ingresa tu correo y te enviaremos un enlace seguro para restablecer tu contraseña
           </p>
         </header>
 
@@ -68,7 +68,7 @@ export function RecoverPasswordPage() {
           <Input
             {...register('email')}
             type="email"
-            placeholder="Email address"
+            placeholder="Correo electrónico"
             maxLength={254}
             error={errors.email?.message}
           />
@@ -79,7 +79,7 @@ export function RecoverPasswordPage() {
           )}
           {isSuccess && (
             <p className="text-sm font-semibold text-green-600" role="status">
-              Check your inbox to continue the reset flow.
+              Revisa tu bandeja de entrada para continuar con el restablecimiento
             </p>
           )}
           <Button
@@ -87,13 +87,13 @@ export function RecoverPasswordPage() {
             disabled={isSubmitting}
             className={isSubmitting ? 'opacity-60' : ''}
           >
-            {isSubmitting ? 'Sending...' : 'Send link'}
+            {isSubmitting ? 'Enviando...' : 'Enviar enlace'}
           </Button>
         </form>
 
         <footer className="mt-4 text-center text-sm text-reflect-dark/70">
-          Remembered your password?{' '}
-          <CustomLink href={APP_ROUTES.login}>Back to sign in</CustomLink>
+          ¿Recordaste tu contraseña?{' '}
+          <CustomLink href={APP_ROUTES.login}>Volver a iniciar sesión</CustomLink>
         </footer>
       </GlassCard>
     </main>

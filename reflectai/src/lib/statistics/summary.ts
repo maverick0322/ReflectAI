@@ -150,9 +150,9 @@ function buildPattern(sessions: ReflectionSessionListItem[]): StatisticsPattern 
 
   if (!dominantPattern) {
     return {
-      title: 'Sin patron dominante',
+      title: 'Sin patrón dominante',
       description:
-        'Completa mas sesiones para detectar patrones de pensamiento con mayor claridad.',
+        'Completa más sesiones para detectar patrones de pensamiento con mayor claridad.',
     };
   }
 
@@ -160,8 +160,8 @@ function buildPattern(sessions: ReflectionSessionListItem[]): StatisticsPattern 
     title: dominantPattern,
     description:
       count === 1
-        ? 'Aparecio en una sesion completada recientemente.'
-        : `Aparecio en ${count} sesiones completadas recientemente.`,
+        ? 'Apareció en una sesión completada recientemente.'
+        : `Apareció en ${count} sesiones completadas recientemente.`,
   };
 }
 
@@ -180,9 +180,9 @@ function getComparisonFallback(): StatisticsComparisonResult {
   return {
     sessionAIntensity: 0,
     sessionBIntensity: 0,
-    sessionALabel: 'No session selected',
-    sessionBLabel: 'No session selected',
-    insight: 'Complete at least two sessions to compare emotional intensity.',
+    sessionALabel: 'Ninguna sesión seleccionada',
+    sessionBLabel: 'Ninguna sesión seleccionada',
+    insight: 'Completa al menos dos sesiones para comparar la intensidad emocional.',
   };
 }
 
@@ -208,7 +208,7 @@ export function buildStatisticsComparisonResult(
       sessionBIntensity,
       sessionALabel: sessionA.label,
       sessionBLabel: sessionB.label,
-      insight: 'Choose two different sessions to compare your emotional intensity.',
+      insight: 'Elige dos sesiones diferentes para comparar tu intensidad emocional.',
     };
   }
 
@@ -218,7 +218,7 @@ export function buildStatisticsComparisonResult(
       sessionBIntensity,
       sessionALabel: sessionA.label,
       sessionBLabel: sessionB.label,
-      insight: 'Both sessions show a similar emotional intensity.',
+      insight: 'Ambas sesiones muestran una intensidad emocional similar.',
     };
   }
 
@@ -232,7 +232,7 @@ export function buildStatisticsComparisonResult(
     sessionBIntensity,
     sessionALabel: sessionA.label,
     sessionBLabel: sessionB.label,
-    insight: `${strongerSession.label} shows higher emotional intensity than ${softerSession.label}.`,
+    insight: `${strongerSession.label} muestra una intensidad emocional mayor que ${softerSession.label}.`,
   };
 }
 

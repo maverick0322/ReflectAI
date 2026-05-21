@@ -33,14 +33,14 @@ export default function HelpPage() {
       <GlassCard className="flex min-h-[90vh] flex-col gap-10 p-6 pb-32">
         <header className="space-y-2">
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            User guide
+            Guía de usuario
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-black">
-            ReflectAI help
+            Ayuda de ReflectAI
           </h1>
           <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-            This quick visual guide helps you move through the app with confidence.
-            Take it step by step and go at your own pace.
+            Esta guía visual rápida te ayuda a recorrer la app con confianza.
+            Avanza paso a paso y a tu propio ritmo.
           </p>
         </header>
 
@@ -50,251 +50,241 @@ export default function HelpPage() {
               <WarningIcon className="h-5 w-5" />
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-bold">Important notice</p>
+              <p className="text-sm font-bold">Aviso importante</p>
               <p className="text-sm leading-relaxed">
-                {'ReflectAI supports self-awareness and reflection. '}
-                <span className="font-semibold">It is not a clinical tool</span>
-                {' and it does not replace professional psychological or psychiatric '}
-                care, diagnosis, or treatment. If you are in crisis, contact
-                local mental health services immediately.
+                {'ReflectAI apoya la autoconciencia y la reflexión. '}
+                <span className="font-semibold">No es una herramienta clínica</span>
+                {' y no sustituye la atención psicológica o psiquiátrica profesional, '}
+                {'ni el diagnóstico o tratamiento. Si estás en crisis, contacta '}
+                {'de inmediato a los servicios de salud mental de tu localidad.'}
               </p>
             </div>
           </div>
         </section>
 
         <section className="space-y-6">
-          <h2 className={sectionHeadingClassName}>
-            1) Set up your account
-          </h2>
+          <h2 className={sectionHeadingClassName}>1) Configura tu cuenta</h2>
 
           <ManualStep
-            title="Create your account"
+            title="Crea tu cuenta"
             description={
               <>
-                {'On the main screen, select '}
-                <span className="font-semibold">Register</span>.
-                You can sign up with your email address and password.
+                {'En la pantalla principal, selecciona '}
+                <span className="font-semibold">Registrarme</span>.
+                {' Puedes registrarte con tu correo y contraseña.'}
               </>
             }
             screenshot={{
               src: '/manual/01-dashboard.png',
-              alt: 'Dashboard screen showing register and sign-in access.',
-              calloutText: 'Tap here',
-              caption: 'Visual reference: register and sign-in entry points.',
+              alt: 'Pantalla principal mostrando acceso a registro e inicio de sesión.',
+              calloutText: 'Toca aquí',
+              caption: 'Referencia visual: puntos de entrada para registro e inicio de sesión.',
             }}
           />
 
           <ManualStep
-            title="Recover access"
+            title="Recupera el acceso"
             description={
               <>
-                {'If you forget your password, select '}
-                <span className="font-semibold">Forgot your password?</span>.
-                We will email you a secure reset link.
+                {'Si olvidas tu contraseña, selecciona '}
+                <span className="font-semibold">¿Olvidaste tu contraseña?</span>.
+                {' Te enviaremos por correo un enlace seguro para restablecerla.'}
               </>
             }
             screenshot={{
               src: '/manual/01-dashboard.png',
-              alt: 'Sign-in screen showing the password recovery option.',
-              calloutText: 'Tap here',
-              caption: 'Visual reference: password recovery option.',
+              alt: 'Pantalla de inicio de sesión mostrando la opción para recuperar contraseña.',
+              calloutText: 'Toca aquí',
+              caption: 'Referencia visual: opción de recuperación de contraseña.',
             }}
           />
 
           <ManualStep
-            title="Keep it private"
+            title="Mantenlo privado"
             description={
               <>
-                Your reflections belong to you. Once you sign in, only you can
-                access your history.
+                Tus reflexiones te pertenecen. Una vez que inicias sesión,
+                solo tú puedes acceder a tu historial.
               </>
             }
             screenshot={{
               src: '/manual/01-dashboard.png',
-              alt: 'Representative dashboard screen.',
+              alt: 'Pantalla representativa del panel principal.',
               calloutText: 'Tip',
-              caption: 'Write freely. No one else can read this.',
+              caption: 'Escribe con libertad. Nadie más puede leer esto.',
             }}
           />
         </section>
 
         <section className="space-y-6">
-          <h2 className={sectionHeadingClassName}>
-            2) Start a reflection session
-          </h2>
+          <h2 className={sectionHeadingClassName}>2) Inicia una sesión de reflexión</h2>
 
           <ManualStep
-            title="Start a new reflection"
+            title="Inicia una nueva reflexión"
             description={
               <>
-                {'From the dashboard, select '}
-                <span className="font-semibold">New reflection</span>.
-                The system will guide you step by step.
+                {'Desde el panel principal, selecciona '}
+                <span className="font-semibold">Nueva reflexión</span>.
+                {' El sistema te guiará paso a paso.'}
               </>
             }
             screenshot={{
               src: '/manual/02-new-reflection.png',
-              alt: 'Dashboard with the New reflection button highlighted.',
-              calloutText: 'Tap here',
-              caption: 'Visual reference: New reflection button.',
+              alt: 'Panel principal con el botón de Nueva reflexión resaltado.',
+              calloutText: 'Toca aquí',
+              caption: 'Referencia visual: botón de Nueva reflexión.',
             }}
           />
 
           <ManualStep
-            title="Follow the flow"
+            title="Sigue el flujo"
             description={
               <>
-                Respond at your own pace. Take a pause if you need one. The most
-                important thing is staying honest with yourself.
+                Responde a tu propio ritmo. Haz una pausa si la necesitas.
+                Lo más importante es mantenerte honesto contigo mismo.
               </>
             }
             screenshot={{
               src: '/manual/03-question-flow.png',
-              alt: 'Guided question flow during a reflection session.',
-              calloutText: 'Write here',
-              caption: 'Visual reference: response field and flow navigation.',
+              alt: 'Flujo guiado de preguntas durante una sesión de reflexión.',
+              calloutText: 'Escribe aquí',
+              caption: 'Referencia visual: campo de respuesta y navegación del flujo.',
             }}
           />
 
           <ManualStep
-            title="Rate intensity"
+            title="Evalúa la intensidad"
             description={
               <>
-                {'Some questions include a '}
-                <span className="font-semibold">1 to 10</span> scale.
-                Move the slider to show how intense the emotion feels right now.
+                {'Algunas preguntas incluyen una escala del '}
+                <span className="font-semibold">1 al 10</span>.
+                {' Mueve el control para indicar qué tan intensa se siente la emoción ahora mismo.'}
               </>
             }
             screenshot={{
               src: '/manual/04-intensity-slider.png',
-              alt: 'Emotion intensity slider control.',
-              calloutText: 'Drag here',
-              caption: 'Visual reference: intensity slider from 1 to 10.',
+              alt: 'Control deslizante para intensidad emocional.',
+              calloutText: 'Desliza aquí',
+              caption: 'Referencia visual: control de intensidad del 1 al 10.',
             }}
           />
 
           <ManualStep
-            title="Save your session"
+            title="Guarda tu sesión"
             description={
               <>
-                {'When you reach the end, select '}
-                <span className="font-semibold">Save session</span>.
-                Your progress will be stored securely.
+                {'Cuando llegues al final, selecciona '}
+                <span className="font-semibold">Guardar sesión</span>.
+                {' Tu progreso se almacenará de forma segura.'}
               </>
             }
             screenshot={{
               src: '/manual/03-question-flow.png',
-              alt: 'Final session step showing the save button.',
-              calloutText: 'Save session',
-              caption: 'Visual reference: save button at the end of the flow.',
+              alt: 'Paso final de la sesión mostrando el botón para guardar.',
+              calloutText: 'Guardar sesión',
+              caption: 'Referencia visual: botón para guardar al final del flujo.',
             }}
           />
         </section>
 
         <section className="space-y-6">
-          <h2 className={sectionHeadingClassName}>
-            3) Review your progress
-          </h2>
+          <h2 className={sectionHeadingClassName}>3) Revisa tu progreso</h2>
 
           <ManualStep
-            title="History"
+            title="Historial"
             description={
               <>
-                {'Open '}
-                <span className="font-semibold">My sessions</span>
-                {' to review '}
-                your reflections by date. Select any session to read it again.
+                {'Abre '}
+                <span className="font-semibold">Mis sesiones</span>
+                {' para revisar tus reflexiones por fecha. Selecciona cualquier sesión para volver a leerla.'}
               </>
             }
             screenshot={{
               src: '/manual/05-my-sessions.png',
-              alt: 'My sessions screen with a reflection list.',
-              calloutText: 'My sessions',
-              caption: 'Visual reference: sessions ordered by date.',
+              alt: 'Pantalla de Mis sesiones con una lista de reflexiones.',
+              calloutText: 'Mis sesiones',
+              caption: 'Referencia visual: sesiones ordenadas por fecha.',
             }}
           />
 
           <ManualStep
-            title="Trend dashboard"
+            title="Panel de tendencias"
             description={
               <>
-                {'In '}
-                <span className="font-semibold">Statistics</span>
-                {' you can review '}
-                charts that summarize emotional frequency and intensity over time.
+                {'En '}
+                <span className="font-semibold">Estadísticas</span>
+                {' puedes revisar gráficas que resumen la frecuencia e intensidad emocional a lo largo del tiempo.'}
               </>
             }
             screenshot={{
               src: '/manual/06-analysis.png',
-              alt: 'Statistics tab with trend charts.',
-              calloutText: 'Statistics',
-              caption: 'Visual reference: frequency and intensity charts.',
+              alt: 'Pestaña de estadísticas con gráficas de tendencias.',
+              calloutText: 'Estadísticas',
+              caption: 'Referencia visual: gráficas de frecuencia e intensidad.',
             }}
           />
 
           <ManualStep
-            title="Compare sessions"
+            title="Compara sesiones"
             description={
               <>
-                If you notice a recurring pattern, open the comparison view,
-                choose two sessions, and inspect them side by side.
+                Si notas un patrón recurrente, abre la vista de comparación,
+                elige dos sesiones y revísalas lado a lado.
               </>
             }
             screenshot={{
               src: '/manual/07-comparison.png',
-              alt: 'Comparison view showing two sessions side by side.',
-              calloutText: 'Compare',
-              caption: 'Visual reference: side-by-side comparison.',
+              alt: 'Vista de comparación mostrando dos sesiones lado a lado.',
+              calloutText: 'Comparar',
+              caption: 'Referencia visual: comparación lado a lado.',
             }}
           />
         </section>
 
         <section className="space-y-4">
-          <h2 className={sectionHeadingClassName}>
-            4) Frequently asked questions
-          </h2>
+          <h2 className={sectionHeadingClassName}>4) Preguntas frecuentes</h2>
 
           <div className="space-y-3">
             <details className={detailsClassName}>
               <summary className={summaryClassName}>
-                Can I delete a session if I regret what I wrote?
+                ¿Puedo eliminar una sesión si me arrepiento de lo que escribí?
                 <span className="text-slate-400 transition-transform group-open:rotate-180">
                   ^
                 </span>
               </summary>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {'Yes. Open the session from your history and use the '}
-                <span className="font-semibold">Delete</span> button at the bottom.
+                {'Sí. Abre la sesión desde tu historial y usa el botón '}
+                <span className="font-semibold">Eliminar</span> al final.
               </p>
             </details>
 
             <details className={detailsClassName}>
               <summary className={summaryClassName}>
-                What happens if my internet connection drops mid-session?
+                ¿Qué pasa si se corta mi conexión a internet a mitad de la sesión?
                 <span className="text-slate-400 transition-transform group-open:rotate-180">
                   ^
                 </span>
               </summary>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                ReflectAI stores your progress temporarily in the browser. If the
-                connection drops, keep the tab open and your answers will sync
-                when the connection returns.
+                ReflectAI guarda tu progreso temporalmente en el navegador.
+                Si la conexión se corta, mantén abierta la pestaña y tus respuestas
+                se sincronizarán cuando regrese la conexión.
               </p>
             </details>
 
             <details className={detailsClassName}>
               <summary className={summaryClassName}>
-                Can I delete all of my data?
+                ¿Puedo eliminar todos mis datos?
                 <span className="text-slate-400 transition-transform group-open:rotate-180">
                   ^
                 </span>
               </summary>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {'Yes. Open '}
-                <span className="font-semibold">Account settings</span>
-                {' and choose '}
-                <span className="font-semibold">Delete account</span>.
-                This removes your profile and reflections permanently.
+                {'Sí. Abre '}
+                <span className="font-semibold">Configuración de cuenta</span>
+                {' y elige '}
+                <span className="font-semibold">Eliminar cuenta</span>.
+                {' Esto elimina tu perfil y tus reflexiones de forma permanente.'}
               </p>
             </details>
           </div>

@@ -23,7 +23,7 @@ export function WizardStatusMessages({
       )}
       {isSaving && (
         <p className="text-sm font-semibold text-slate-500" role="status">
-          Saving...
+          Guardando...
         </p>
       )}
     </>

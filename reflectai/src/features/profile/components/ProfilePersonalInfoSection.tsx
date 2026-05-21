@@ -1,8 +1,10 @@
 import type {
+  Control,
   UseFormClearErrors,
   UseFormHandleSubmit,
   UseFormRegister,
 } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 
 import { APP_ROUTES } from '@/core/routing/routes';
 import type { ProfileFormValues } from '@/features/profile/schemas/profile';
@@ -16,6 +18,7 @@ import PencilIcon from '@/shared/icons/PencilIcon';
 import SaveIcon from '@/shared/icons/SaveIcon';
 import CustomLink from '@/shared/ui/CustomLink';
 import Input from '@/shared/ui/Input';
+import { formatDisplayDateForInput } from '@/shared/utils/date';
 
 import { DataRow, SectionTitle } from './ProfilePagePrimitives';
 
@@ -26,6 +29,7 @@ interface ProfilePersonalInfoSectionProps {
   editSessionKey: number;
   formError: string | null;
   register: UseFormRegister<ProfileFormValues>;
+  control: Control<ProfileFormValues>;
   handleSubmit: UseFormHandleSubmit<ProfileFormValues>;
   errors: Record<string, { message?: string } | undefined>;
   onSubmit: (data: ProfileFormValues) => Promise<void>;
@@ -68,6 +72,7 @@ export function ProfilePersonalInfoSection({
   editSessionKey,
   formError,
   register,
+  control,
   handleSubmit,
   errors,
   onSubmit,
@@ -77,7 +82,7 @@ export function ProfilePersonalInfoSection({
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between px-1">
-        <SectionTitle>Personal information</SectionTitle>
+        <SectionTitle>Información personal</SectionTitle>
         {isEditing ? (
           <div className="flex gap-3">
             <button
@@ -85,7 +90,7 @@ export function ProfilePersonalInfoSection({
               onClick={onCancel}
               className="text-xs font-bold text-slate-400 transition-colors hover:text-slate-600"
             >
-              Cancel
+              Cancelar
             </button>
             <button
               form="profile-form"
@@ -93,7 +98,7 @@ export function ProfilePersonalInfoSection({
               disabled={isSaving}
               className={actionButtonClassName}
             >
-              <SaveIcon className="h-4 w-4" /> {isSaving ? 'Saving...' : 'Save'}
+              <SaveIcon className="h-4 w-4" /> {isSaving ? 'Guardando...' : 'Guardar'}
             </button>
           </div>
         ) : (
@@ -102,7 +107,7 @@ export function ProfilePersonalInfoSection({
             onClick={onStartEditing}
             className={actionButtonClassName}
           >
-            <PencilIcon className="h-4 w-4" /> Edit
+            <PencilIcon className="h-4 w-4" /> Editar
           </button>
         )}
       </div>
@@ -119,32 +124,49 @@ export function ProfilePersonalInfoSection({
         >
           <Input
             {...register('firstName')}
-            placeholder="First name"
+            placeholder="Nombre"
             maxLength={120}
             error={errors.firstName?.message}
           />
           <Input
             {...register('lastName')}
-            placeholder="Last name"
+            placeholder="Apellidos"
             maxLength={120}
             error={errors.lastName?.message}
           />
-          <Input
-            {...register('birthDate')}
-            type="date"
-            className="text-slate-700"
-            error={errors.birthDate?.message}
+          <Controller
+            control={control}
+            name="birthDate"
+            render={({ field }) => (
+              <Input
+                id="profile-birth-date"
+                ref={field.ref}
+                name={field.name}
+                value={field.value ?? ''}
+                onBlur={field.onBlur}
+                onChange={(event) => {
+                  field.onChange(formatDisplayDateForInput(event.target.value));
+                }}
+                placeholder="dd/mm/yyyy"
+                inputMode="numeric"
+                autoComplete="bday"
+                maxLength={10}
+                showCounter={false}
+                className="text-slate-700"
+                error={errors.birthDate?.message}
+              />
+            )}
           />
         </div>
 
         <div className={getReadOnlyFieldsClassName(isEditing)}>
           <DataRow
-            label="Full name"
+            label="Nombre completo"
             value={formatFullName(profile.firstName, profile.lastName)}
           />
           <hr className="border-slate-200/50" />
           <DataRow
-            label="Birth date"
+            label="Fecha de nacimiento"
             value={formatDisplayBirthDate(profile.birthDate)}
           />
         </div>
@@ -153,12 +175,12 @@ export function ProfilePersonalInfoSection({
 
         <div className="flex flex-col px-1">
           <span className="text-[10px] font-bold uppercase text-slate-400">
-            Email address
+            Correo electrónico
           </span>
           <div className="mt-1 flex items-center justify-between">
             <span className="font-medium text-slate-500">{profile.email}</span>
             <span className={verifiedBadgeClassName}>
-              Verified
+              Verificado
             </span>
           </div>
         </div>
@@ -169,7 +191,7 @@ export function ProfilePersonalInfoSection({
           href={APP_ROUTES.changePassword}
           className={changePasswordLinkClassName}
         >
-          <LockIcon className="h-4 w-4" /> Change password
+          <LockIcon className="h-4 w-4" /> Cambiar contraseña
         </CustomLink>
 
         {formError && (

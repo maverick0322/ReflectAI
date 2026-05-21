@@ -226,7 +226,7 @@ export function useReflectionWizard(): UseReflectionWizardResult {
           return;
         }
 
-        setFormError(getWizardErrorMessage(error, 'Unable to start the session'));
+        setFormError(getWizardErrorMessage(error, 'No se pudo iniciar la sesión'));
       } finally {
         if (isMounted) {
           setIsCreatingSession(false);
@@ -361,7 +361,7 @@ export function useReflectionWizard(): UseReflectionWizardResult {
 
       setStep((current) => Math.min(current + 1, 5));
     } catch (error) {
-      setFormError(getWizardErrorMessage(error, 'Unable to save the response'));
+      setFormError(getWizardErrorMessage(error, 'No se pudo guardar la respuesta'));
     } finally {
       setIsSaving(false);
     }
@@ -416,10 +416,10 @@ export function useReflectionWizard(): UseReflectionWizardResult {
       }
 
       await saveResponses(responses, metadataPatch);
-      setDraftMessage('Draft saved successfully');
+      setDraftMessage('Borrador guardado correctamente');
       goToDashboard();
     } catch (error) {
-      setFormError(getWizardErrorMessage(error, 'Unable to save the draft'));
+      setFormError(getWizardErrorMessage(error, 'No se pudo guardar el borrador'));
     } finally {
       setIsSaving(false);
     }
@@ -453,7 +453,7 @@ export function useReflectionWizard(): UseReflectionWizardResult {
       }
       setStep(4);
     } catch (error) {
-      setFormError(getWizardErrorMessage(error, 'Unable to save the grounding step'));
+      setFormError(getWizardErrorMessage(error, 'No se pudo guardar el paso de regulación'));
     } finally {
       setIsSaving(false);
     }
@@ -468,7 +468,7 @@ export function useReflectionWizard(): UseReflectionWizardResult {
       const activeSessionId = await saveResponses(buildResponsesForStep(values, 5));
 
       if (!activeSessionId) {
-        setFormError('Unable to complete the session');
+        setFormError('No se pudo completar la sesión');
         return;
       }
 
@@ -487,7 +487,7 @@ export function useReflectionWizard(): UseReflectionWizardResult {
       );
       setIsSuccess(true);
     } catch (error) {
-      setFormError(getWizardErrorMessage(error, 'Unable to complete the session'));
+      setFormError(getWizardErrorMessage(error, 'No se pudo completar la sesión'));
     } finally {
       setIsSaving(false);
     }

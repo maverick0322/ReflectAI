@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { wizardFormSchema } from '@/features/reflection/schemas/reflection';
 import { PrimaryEmotion } from '@/features/reflection/types/reflection';
+import { wizardFormSchema } from '@/features/reflection/schemas/reflection';
 
 describe('Wizard form validations', () => {
   it('passes with valid data', () => {
@@ -34,7 +34,9 @@ describe('Wizard form validations', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const issue = result.error.issues.find((item) => item.path.includes('thought'));
-      expect(issue?.message).toContain('Naming the thought is often the hardest part');
+      expect(issue?.message).toContain(
+        'Ponerle nombre al pensamiento suele ser la parte más difícil',
+      );
     }
   });
 
@@ -53,7 +55,7 @@ describe('Wizard form validations', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const issue = result.error.issues.find((item) => item.path.includes('intensity'));
-      expect(issue?.message).toBe('Maximum intensity is 10');
+      expect(issue?.message).toBe('La intensidad máxima es 10');
     }
   });
 

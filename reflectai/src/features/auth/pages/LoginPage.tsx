@@ -43,7 +43,7 @@ export default function LoginPage() {
       const message =
         error instanceof ApiError && error.payload?.message
           ? error.payload.message
-          : 'Unable to sign in';
+          : 'No se pudo iniciar sesión';
       setFormError(message);
     } finally {
       setIsSubmitting(false);
@@ -58,7 +58,7 @@ export default function LoginPage() {
             ReflectAI
           </h1>
           <p className="text-sm font-medium text-reflect-dark/70">
-            Your safe space for reflection
+            Tu espacio seguro para reflexionar
           </p>
         </header>
 
@@ -70,13 +70,13 @@ export default function LoginPage() {
           <Input
             {...register('email')}
             type="email"
-            placeholder="Email address"
+            placeholder="Correo electrónico"
             maxLength={254}
             error={errors.email?.message}
           />
           <PasswordInput
             {...register('password')}
-            placeholder="Password"
+            placeholder="Contraseña"
             maxLength={64}
             error={errors.password?.message}
           />
@@ -86,7 +86,7 @@ export default function LoginPage() {
               href={APP_ROUTES.recover}
               className="text-sm font-semibold"
             >
-              Forgot your password?
+              ¿Olvidaste tu contraseña?
             </CustomLink>
           </div>
 
@@ -101,13 +101,13 @@ export default function LoginPage() {
             disabled={isSubmitting}
             className={isSubmitting ? 'opacity-60' : ''}
           >
-            {isSubmitting ? 'Signing in...' : 'Sign in'}
+            {isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </Button>
         </form>
 
         <div className="relative flex items-center py-2 text-sm font-medium text-reflect-dark/50">
           <div className="flex-grow border-t border-reflect-dark/10" />
-          <span className="mx-4">or continue with</span>
+          <span className="mx-4">o continúa con</span>
           <div className="flex-grow border-t border-reflect-dark/10" />
         </div>
 
@@ -117,12 +117,12 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-reflect-dark/50">
-          Google and Facebook sign-in will be available soon.
+          El inicio de sesión con Google y Facebook estarán disponibles pronto
         </p>
 
         <footer className="text-center text-sm text-reflect-dark/70">
-          Need an account?{' '}
-          <CustomLink href={APP_ROUTES.register}>Create one here</CustomLink>
+          ¿Necesitas una cuenta?{' '}
+          <CustomLink href={APP_ROUTES.register}>Creala aquí</CustomLink>
         </footer>
       </GlassCard>
     </main>

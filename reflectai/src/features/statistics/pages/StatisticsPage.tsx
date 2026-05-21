@@ -22,16 +22,16 @@ export function StatisticsPage() {
         <header className="flex flex-col gap-2">
           <div>
             <span className="text-sm font-medium text-slate-500 uppercase tracking-widest">
-              Personal dashboard
+              Panel personal
             </span>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              My statistics
+              Mis estadísticas
             </h1>
           </div>
           <p className="text-sm text-slate-500">
             {completedSessionsCount > 0
-              ? `Explore your trends across ${completedSessionsCount} completed reflections.`
-              : 'Complete a few reflections to unlock your emotional trends.'}
+              ? `Explora tus tendencias en ${completedSessionsCount} reflexiones completadas`
+              : 'Completa algunas reflexiones para desbloquear tus tendencias emocionales'}
           </p>
         </header>
 
@@ -40,7 +40,7 @@ export function StatisticsPage() {
             role="status"
             className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/60 px-4 py-6"
           >
-            <p className="text-sm text-slate-600">Loading your statistics...</p>
+            <p className="text-sm text-slate-600">Cargando tus estadísticas...</p>
           </div>
         ) : formError ? (
           <div

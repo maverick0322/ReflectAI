@@ -25,58 +25,60 @@ describe('HelpPage', () => {
     render(<HelpPage />);
 
     expect(
-      screen.getByRole('heading', { name: /reflectai help/i }),
+      screen.getByRole('heading', { name: /ayuda de reflectai/i }),
     ).toBeInTheDocument();
 
-    const notice = screen.getByText(/important notice/i).closest('section');
+    const notice = screen.getByText(/aviso importante/i).closest('section');
     expect(notice).not.toBeNull();
-    expect(notice).toHaveTextContent(/not a clinical tool/i);
-    expect(notice).toHaveTextContent(/professional psychological/i);
+    expect(notice).toHaveTextContent(/no es una herramienta cl(?:i|\u00ed)nica/i);
+    expect(notice).toHaveTextContent(/atenci(?:o|\u00f3)n psicol(?:o|\u00f3)gica/i);
 
-    expect(screen.getByText('1) Set up your account')).toBeInTheDocument();
-    expect(screen.getByText('2) Start a reflection session')).toBeInTheDocument();
-    expect(screen.getByText('3) Review your progress')).toBeInTheDocument();
-    expect(screen.getByText('4) Frequently asked questions')).toBeInTheDocument();
+    expect(screen.getByText('1) Configura tu cuenta')).toBeInTheDocument();
+    expect(screen.getByText('2) Inicia una sesión de reflexión')).toBeInTheDocument();
+    expect(screen.getByText('3) Revisa tu progreso')).toBeInTheDocument();
+    expect(screen.getByText('4) Preguntas frecuentes')).toBeInTheDocument();
   });
 
   it('keeps the manual steps connected to their visual references', () => {
     render(<HelpPage />);
 
-    expect(screen.getByRole('heading', { name: /create your account/i }))
-      .toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /rate intensity/i }))
-      .toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /compare sessions/i }))
-      .toBeInTheDocument();
-
-    expect(screen.getAllByTestId('manual-screenshot').length).toBeGreaterThan(6);
     expect(
-      screen.getByLabelText('Emotion intensity slider control.'),
+      screen.getByRole('heading', { name: /crea tu cuenta/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Visual reference: side-by-side comparison.'),
+      screen.getByRole('heading', { name: /eval(?:u|\u00fa)a la intensidad/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /compara sesiones/i }),
+    ).toBeInTheDocument();
+
+    expect(screen.getAllByTestId('manual-screenshot')).toHaveLength(10);
+    expect(
+      screen.getByLabelText(/control deslizante para intensidad emocional/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/referencia visual: comparaci(?:o|\u00f3)n lado a lado\./i),
     ).toBeInTheDocument();
   });
 
   it('renders actionable FAQ answers for data deletion and sync recovery', () => {
     render(<HelpPage />);
 
-    const faqSection = screen
-      .getByText('4) Frequently asked questions')
-      .closest('section');
+    const faqSection = screen.getByText('4) Preguntas frecuentes').closest('section');
     expect(faqSection).not.toBeNull();
 
     const faq = within(faqSection as HTMLElement);
     expect(
-      faq.getByText('Can I delete a session if I regret what I wrote?'),
+      faq.getByText(/puedo eliminar una sesi(?:o|\u00f3)n si me arrepiento de lo que escrib(?:i|\u00ed)\?/i),
     ).toBeInTheDocument();
-    expect(faq.getByText(/button at the bottom/i)).toHaveTextContent(
-      /Delete button at the bottom\./,
+    expect(faq.getByText(/usa el bot(?:o|\u00f3)n/i)).toHaveTextContent(
+      /usa el bot(?:o|\u00f3)n eliminar al final\./i,
     );
     expect(
-      faq.getByText(/connection drops, keep the tab open/i),
+      faq.getByText(/mant(?:e|\u00e9)n abierta la pesta(?:n|\u00f1)a/i),
     ).toBeInTheDocument();
-    expect(faq.getByText(/removes your profile and reflections/i))
-      .toBeInTheDocument();
+    expect(
+      faq.getByText(/elimina tu perfil y tus reflexiones/i),
+    ).toBeInTheDocument();
   });
 });

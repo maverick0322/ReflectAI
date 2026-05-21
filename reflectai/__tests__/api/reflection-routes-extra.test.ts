@@ -114,8 +114,8 @@ beforeEach(() => {
   vi.mocked(buildFallbackAnalysis).mockReturnValue(fallbackAnalysis);
 });
 
-describe('rutas API de sesiones de reflexion: errores y ramas', () => {
-  it('cubre validacion, fallo de insert y catch al crear sesion', async () => {
+describe('rutas API de sesiones de reflexión: errores y ramas', () => {
+  it('cubre validación, fallo de insert y catch al crear sesión', async () => {
     mockAuthenticatedUser();
 
     const invalidResponse = await createReflectionSession(
@@ -132,7 +132,7 @@ describe('rutas API de sesiones de reflexion: errores y ramas', () => {
     mockAuthenticatedUser({ supabase: { from: vi.fn(() => insertBuilder) } });
 
     const dbResponse = await createReflectionSession(
-      jsonRequest('/api/reflection-sessions', { title: 'Sesion' }),
+      jsonRequest('/api/reflection-sessions', { title: 'SesiÓn' }),
     );
     expect(dbResponse.status).toBe(500);
     expect((await readJson(dbResponse)).error?.message).toBe('No se pudo crear la sesion');
@@ -170,12 +170,12 @@ describe('rutas API de sesiones de reflexion: errores y ramas', () => {
     );
   });
 
-  it('obtiene detalle de sesion y cubre no autorizado/catch', async () => {
+  it('obtiene detalle de sesión y cubre no autorizado/catch', async () => {
     const detailBuilder = createBuilder({
       singleResult: {
         data: {
           id: 'session-1',
-          title: 'Sesion',
+          title: 'SesiÓn',
           status: 'draft',
           started_at: startedAt,
           payload: payloadWithResponse,
@@ -212,7 +212,7 @@ describe('rutas API de sesiones de reflexion: errores y ramas', () => {
     mockAuthenticatedUser({ user: null, error: { message: 'missing' } });
     const unauthorizedResponse = await addReflectionResponse(
       jsonRequest('/api/reflection-sessions/session-1/responses', {
-        response: { id: 'Q1_SIT', text: 'Situacion' },
+        response: { id: 'Q1_SIT', text: 'SituaciÓn' },
       }),
       routeParams,
     );
@@ -233,7 +233,7 @@ describe('rutas API de sesiones de reflexion: errores y ramas', () => {
     mockAuthenticatedUser({ supabase: { from: vi.fn(() => missingBuilder) } });
     const missingResponse = await addReflectionResponse(
       jsonRequest('/api/reflection-sessions/session-1/responses', {
-        response: { id: 'Q1_SIT', text: 'Situacion' },
+        response: { id: 'Q1_SIT', text: 'SituaciÓn' },
       }),
       routeParams,
     );
@@ -299,7 +299,7 @@ describe('rutas API de sesiones de reflexion: errores y ramas', () => {
     expect(catchResponse.status).toBe(500);
   });
 
-  it('cubre validacion, no autorizado, sesion faltante y sesion ya completada al completar', async () => {
+  it('cubre validación, no autorizado, sesión faltante y sesión ya completada al completar', async () => {
     mockAuthenticatedUser();
     const invalidResponse = await completeReflectionSession(
       jsonRequest('/api/reflection-sessions/session-1/complete', {

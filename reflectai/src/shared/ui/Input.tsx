@@ -5,6 +5,7 @@ import React, { forwardRef, useId, useState } from 'react';
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   rightElement?: React.ReactNode;
+  showCounter?: boolean;
 }
 
 function getInputBorderClass(error?: string) {
@@ -20,7 +21,7 @@ function getCharacterCounter(charCount: number, maxLength?: number) {
 
   if (charCount >= maxLength) {
     return {
-      label: 'Character limit reached',
+      label: 'Límite de caracteres alcanzado',
       className: 'text-red-500 font-bold',
     };
   }
@@ -57,12 +58,25 @@ function buildInputClassName({
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className = '', error, onChange, maxLength, rightElement, ...props }, ref) => {
+  (
+    {
+      className = '',
+      error,
+      onChange,
+      maxLength,
+      rightElement,
+      showCounter = true,
+      ...props
+    },
+    ref,
+  ) => {
     const fallbackId = useId();
     const id = props.id ?? fallbackId;
     const errorId = `${id}-error`;
     const [charCount, setCharCount] = useState(0);
-    const counter = getCharacterCounter(charCount, maxLength);
+    const counter = showCounter
+      ? getCharacterCounter(charCount, maxLength)
+      : null;
     const inputClassName = buildInputClassName({
       className,
       error,

@@ -39,25 +39,25 @@ interface SectionModel extends SectionConfigItem {
 }
 
 const DEFAULT_PURPOSE_QUESTION =
-  'What purpose do you think that emotion was trying to serve?';
+  '¿Qué propósito crees que esa emoción estaba intentando cumplir?';
 const DEFAULT_OWN_CONTROL_QUESTION =
-  'In this situation, what was strictly under your control?';
+  'En esta situación, ¿qué estaba estrictamente bajo tu control?';
 const DEFAULT_OTHERS_CONTROL_QUESTION =
-  'What depended on other people or outside circumstances?';
+  '¿Qué dependía de otras personas o de circunstancias externas?';
 
 const SECTION_CONFIG: SectionConfigItem[] = [
   {
     key: 'purpose',
-    placeholder: 'I think this emotion was trying to...',
-    description: 'For example: protect me, warn me, seek fairness, or keep control.',
+    placeholder: 'Creo que esta emoción estaba intentando...',
+    description: 'Por ejemplo: protegerme, advertirme, buscar justicia o mantener el control.',
   },
   {
     key: 'selfControl',
-    placeholder: 'My actions, my words, my boundaries...',
+    placeholder: 'Mis acciones, mis palabras, mis límites...',
   },
   {
     key: 'othersControl',
-    placeholder: 'Their reactions, their choices, the context...',
+    placeholder: 'Sus reacciones, sus decisiones, el contexto...',
   },
 ];
 
@@ -163,7 +163,7 @@ export const Step3PurposeControl = ({
         </div>
       ))}
 
-      <WizardStepActions onPrev={onPrev} onNext={onNext} nextLabel="Next" />
+      <WizardStepActions onPrev={onPrev} onNext={onNext} nextLabel="Siguiente" />
     </div>
   );
 };

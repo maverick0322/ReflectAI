@@ -56,7 +56,7 @@ export function RecentSessionCard({
         <span>{date}</span>
         <span aria-hidden="true">&bull;</span>
         <span>
-          Intensity: <span className="font-bold">{intensity}</span>
+          Intensidad: <span className="font-bold">{intensity}</span>
         </span>
       </div>
     </GlassCard>

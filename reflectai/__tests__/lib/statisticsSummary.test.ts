@@ -10,7 +10,7 @@ import {
 const sessions: ReflectionSessionListItem[] = [
   {
     id: 'session-high',
-    title: 'Sesion intensa',
+    title: 'Sesión intensa',
     status: 'completed',
     started_at: '2026-05-10T10:00:00.000Z',
     completed_at: '2026-05-10T10:20:00.000Z',
@@ -31,7 +31,7 @@ const sessions: ReflectionSessionListItem[] = [
   },
   {
     id: 'session-low',
-    title: 'Sesion tranquila',
+    title: 'Sesión tranquila',
     status: 'completed',
     started_at: '2026-05-09T10:00:00.000Z',
     completed_at: '2026-05-09T10:20:00.000Z',
@@ -85,7 +85,7 @@ describe('statistics summary', () => {
     expect(data.topics[0]).toMatchObject({ label: 'Trabajo', sessionCount: 2 });
     expect(data.pattern).toMatchObject({
       title: 'Lectura de pensamiento',
-      description: 'Aparecio en una sesion completada recientemente.',
+      description: 'Apareció en una sesión completada recientemente.',
     });
     expect(data.sessionOptions.map((option) => option.id)).toEqual([
       'session-high',
@@ -117,7 +117,7 @@ describe('statistics summary', () => {
     expect(data.emotions).toEqual([]);
     expect(data.topics).toEqual([]);
     expect(data.sessionOptions).toEqual([]);
-    expect(data.pattern.title).toBe('Sin patron dominante');
+    expect(data.pattern.title).toBe('Sin patrón dominante');
     expect(data.defaultSelection).toEqual({ sessionA: '', sessionB: '' });
   });
 
@@ -156,7 +156,7 @@ describe('statistics summary', () => {
     expect(data.topics[0]).toMatchObject({ label: 'Trabajo intenso', sessionCount: 1 });
     expect(data.pattern).toMatchObject({
       title: 'Catastrofizacion',
-      description: 'Aparecio en 2 sesiones completadas recientemente.',
+      description: 'Apareció en 2 sesiones completadas recientemente.',
     });
   });
 
@@ -171,9 +171,9 @@ describe('statistics summary', () => {
     ).toMatchObject({
       sessionAIntensity: 80,
       sessionBIntensity: 40,
-      sessionALabel: expect.stringContaining('Sesion intensa'),
-      sessionBLabel: expect.stringContaining('Sesion tranquila'),
-      insight: expect.stringContaining('shows higher emotional intensity'),
+      sessionALabel: expect.stringContaining('Sesión intensa'),
+      sessionBLabel: expect.stringContaining('Sesión tranquila'),
+      insight: expect.stringContaining('muestra una intensidad emocional mayor que'),
     });
   });
 
@@ -186,9 +186,9 @@ describe('statistics summary', () => {
     ).toEqual({
       sessionAIntensity: 0,
       sessionBIntensity: 0,
-      sessionALabel: 'No session selected',
-      sessionBLabel: 'No session selected',
-      insight: 'Complete at least two sessions to compare emotional intensity.',
+      sessionALabel: 'Ninguna sesión seleccionada',
+      sessionBLabel: 'Ninguna sesión seleccionada',
+      insight: 'Completa al menos dos sesiones para comparar la intensidad emocional.',
     });
   });
 });

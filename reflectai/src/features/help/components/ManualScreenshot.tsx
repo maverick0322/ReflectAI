@@ -37,7 +37,7 @@ const calloutClassName = [
 export default function ManualScreenshot({
   src,
   alt,
-  calloutText = 'Tap here',
+  calloutText = 'Toca aquí',
   caption,
 }: ManualScreenshotProps) {
   const [hasError, setHasError] = useState(false);
@@ -64,10 +64,10 @@ export default function ManualScreenshot({
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-slate-700">
-                  Screenshot pending
+                  Captura pendiente
                 </p>
                 <p className="text-xs text-slate-500">
-                  This image will be added once the interface is finalized.
+                  Esta imagen se agregará cuando la interfaz quede finalizada
                 </p>
               </div>
             </div>

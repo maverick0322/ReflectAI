@@ -19,7 +19,7 @@ function getStatisticsErrorMessage(error: unknown) {
     return error.payload.message;
   }
 
-  return 'Unable to load your statistics.';
+  return 'No se pudieron cargar tus estadísticas.';
 }
 
 export function useStatisticsPage(): UseStatisticsPageResult {

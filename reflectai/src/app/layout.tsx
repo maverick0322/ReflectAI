@@ -4,7 +4,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'ReflectAI',
-  description: 'Your safe space for personal reflection',
+  description: 'Tu espacio seguro para la reflexión personal',
 };
 
 const bodyClassName = [
@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body
         suppressHydrationWarning
         className={bodyClassName}
@@ -26,8 +26,8 @@ export default function RootLayout({
         <div className="flex min-h-screen flex-col">
           <div className="flex-1">{children}</div>
           <footer className="px-6 py-4 text-center text-xs text-[#1E1B4B]/60">
-            ReflectAI is not a clinical tool, does not diagnose, and does not replace
-            professional psychological care.
+            ReflectAI no es una herramienta clínica, no diagnostica y no sustituye
+            la atención psicológica profesional.
           </footer>
         </div>
       </body>

@@ -16,8 +16,8 @@ interface StepProps {
 }
 
 const DEFAULT_QUESTION =
-  'Knowing what you know now, how could you interpret this situation ' +
-  'in a more useful or compassionate way?';
+  'Sabiendo lo que sabes ahora ¿Cómo podrias interpretar esta situación ' +
+  'de una manera más útil o compasiva?';
 
 export const Step4Reframing = ({
   onPrev,
@@ -54,15 +54,15 @@ export const Step4Reframing = ({
           {questionText}
         </h2>
         <p className="mt-1 text-sm font-medium text-slate-500">
-          For example: instead of assuming everything went wrong, I can recognize
-          that I learned something useful.
+          Por ejemplo: en lugar de asumir que todo salió mal, puedo reconocer
+          que aprendí algo útil.
         </p>
 
         <WizardTextAreaField
           control={control}
           name="alternative"
           value={alternativeValue}
-          placeholder="An alternative perspective could be..."
+          placeholder="Una perspectiva alternativa podria ser..."
           shouldShowError={shouldShowError}
           errorMessage={errors.alternative?.message}
           minHeightClassName="min-h-[180px]"
@@ -73,7 +73,7 @@ export const Step4Reframing = ({
       <WizardStepActions
         onPrev={onPrev}
         onNext={handleFinalize}
-        nextLabel="Finish reflection"
+        nextLabel="Finalizar reflexión"
       />
     </div>
   );

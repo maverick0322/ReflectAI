@@ -28,7 +28,7 @@ describe('registerSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('First name is required');
+      expect(result.error.issues[0].message).toBe('El nombre es obligatorio');
     }
   });
 
@@ -37,7 +37,7 @@ describe('registerSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('First name can only contain letters');
+      expect(result.error.issues[0].message).toBe('El nombre solo puede contener letras');
     }
   });
 
@@ -50,7 +50,7 @@ describe('registerSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Last name can only contain letters');
+      expect(result.error.issues[0].message).toBe('Los apellidos solo pueden contener letras');
     }
   });
 
@@ -59,7 +59,7 @@ describe('registerSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Character limit reached');
+      expect(result.error.issues[0].message).toBe('Límite de caracteres alcanzado');
     }
   });
 
@@ -68,7 +68,7 @@ describe('registerSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Enter a valid email address');
+      expect(result.error.issues[0].message).toBe('Ingresa un correo válido');
     }
   });
 
@@ -80,7 +80,7 @@ describe('registerSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Email addresses do not match');
+      expect(result.error.issues[0].message).toBe('Los correos no coinciden');
     }
   });
 
@@ -93,7 +93,9 @@ describe('registerSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Password must be at least 8 characters long');
+      expect(result.error.issues[0].message).toBe(
+        'La contraseña debe tener al menos 8 caracteres',
+      );
     }
   });
 
@@ -107,7 +109,7 @@ describe('registerSchema', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues[0].message).toBe(
-        'Password must include uppercase, lowercase, and numeric characters',
+        'La contraseña debe incluir mayúsculas, minúsculas y números',
       );
     }
   });
@@ -120,7 +122,7 @@ describe('registerSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Passwords do not match');
+      expect(result.error.issues[0].message).toBe('Las contraseñas no coinciden');
     }
   });
 
@@ -129,7 +131,34 @@ describe('registerSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Birth date is required');
+      expect(result.error.issues[0].message).toBe('La fecha de nacimiento es obligatoria');
+    }
+  });
+
+  it('fails when birthDate contains only whitespace', () => {
+    const result = registerSchema.safeParse({ ...validUser, birthDate: '   ' });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('La fecha de nacimiento es obligatoria');
+    }
+  });
+
+  it('fails when birthDate has an unsupported format', () => {
+    const result = registerSchema.safeParse({ ...validUser, birthDate: '10-05-1998' });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Ingresa una fecha válida en formato dd/mm/yyyy');
+    }
+  });
+
+  it('fails when birthDate has impossible date parts', () => {
+    const result = registerSchema.safeParse({ ...validUser, birthDate: '31/02/2000' });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Ingresa una fecha válida en formato dd/mm/yyyy');
     }
   });
 });
@@ -152,7 +181,7 @@ describe('loginSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Enter a valid email address');
+      expect(result.error.issues[0].message).toBe('Ingresa un correo válido');
     }
   });
 
@@ -164,7 +193,7 @@ describe('loginSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Password is required');
+      expect(result.error.issues[0].message).toBe('La contraseña es obligatoria');
     }
   });
 });
@@ -179,7 +208,7 @@ describe('recoverPasswordSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Enter a valid email address');
+      expect(result.error.issues[0].message).toBe('Ingresa un correo válido');
     }
   });
 });
@@ -194,7 +223,7 @@ describe('confirmRecoverySchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Recovery code is required');
+      expect(result.error.issues[0].message).toBe('El código de recuperación es obligatorio');
     }
   });
 });
@@ -219,7 +248,7 @@ describe('changePasswordSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Passwords do not match');
+      expect(result.error.issues[0].message).toBe('Las contraseñas no coinciden');
     }
   });
 });

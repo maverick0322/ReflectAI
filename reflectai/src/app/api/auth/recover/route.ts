@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     });
   } catch {
     return NextResponse.json(
-      { error: { message: 'Error inesperado al recuperar contraseÃ±a' } },
+      { error: { message: 'Error inesperado al recuperar contraseña' } },
       { status: 500 },
     );
   }

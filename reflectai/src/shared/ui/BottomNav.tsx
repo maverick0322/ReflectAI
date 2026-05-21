@@ -18,20 +18,20 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: APP_ROUTES.dashboard, ariaLabel: 'Home', icon: HomeIcon },
-  { href: APP_ROUTES.history, ariaLabel: 'History', icon: CalendarIcon },
+  { href: APP_ROUTES.dashboard, ariaLabel: 'Inicio', icon: HomeIcon },
+  { href: APP_ROUTES.history, ariaLabel: 'Historial', icon: CalendarIcon },
   {
     href: APP_ROUTES.newSession,
-    ariaLabel: 'New session',
+    ariaLabel: 'Nueva sesión',
     icon: PlusIcon,
     isPrimary: true,
   },
   {
     href: APP_ROUTES.statistics,
-    ariaLabel: 'Statistics',
+    ariaLabel: 'Estadísticas',
     icon: ChartIcon,
   },
-  { href: APP_ROUTES.profile, ariaLabel: 'Profile', icon: ProfileIcon },
+  { href: APP_ROUTES.profile, ariaLabel: 'Perfil', icon: ProfileIcon },
 ];
 
 const navClassName = [
