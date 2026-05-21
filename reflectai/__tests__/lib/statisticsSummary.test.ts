@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { ReflectionSessionListItem } from '@/features/reflection/services/reflectionService';
 import {
+  buildStatisticsComparisonResult,
   buildStatisticsDashboardData,
   toIntensityPercentage,
 } from '@/lib/statistics/summary';
@@ -90,6 +91,10 @@ describe('statistics summary', () => {
       'session-high',
       'session-low',
     ]);
+    expect(data.defaultSelection).toEqual({
+      sessionA: 'session-high',
+      sessionB: 'session-low',
+    });
   });
 
   it('builds empty statistics when there are no completed sessions', () => {
@@ -152,6 +157,38 @@ describe('statistics summary', () => {
     expect(data.pattern).toMatchObject({
       title: 'Catastrofizacion',
       description: 'Aparecio en 2 sesiones completadas recientemente.',
+    });
+  });
+
+  it('builds comparison results from the selected sessions', () => {
+    const { sessionOptions } = buildStatisticsDashboardData(sessions);
+
+    expect(
+      buildStatisticsComparisonResult(sessionOptions, {
+        sessionA: 'session-high',
+        sessionB: 'session-low',
+      }),
+    ).toMatchObject({
+      sessionAIntensity: 80,
+      sessionBIntensity: 40,
+      sessionALabel: expect.stringContaining('Sesion intensa'),
+      sessionBLabel: expect.stringContaining('Sesion tranquila'),
+      insight: expect.stringContaining('shows higher emotional intensity'),
+    });
+  });
+
+  it('returns a fallback comparison when there are not enough sessions', () => {
+    expect(
+      buildStatisticsComparisonResult([], {
+        sessionA: '',
+        sessionB: '',
+      }),
+    ).toEqual({
+      sessionAIntensity: 0,
+      sessionBIntensity: 0,
+      sessionALabel: 'No session selected',
+      sessionBLabel: 'No session selected',
+      insight: 'Complete at least two sessions to compare emotional intensity.',
     });
   });
 });

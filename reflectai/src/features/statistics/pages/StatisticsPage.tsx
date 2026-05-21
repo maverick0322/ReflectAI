@@ -1,12 +1,21 @@
+'use client';
+
 import { EmotionalEvolutionCard } from '@/features/statistics/components/EmotionalEvolutionCard';
 import { EmotionDistributionCard } from '@/features/statistics/components/EmotionDistributionCard';
 import { SessionComparisonCard } from '@/features/statistics/components/SessionComparisonCard';
 import { ThoughtPatternCard } from '@/features/statistics/components/ThoughtPatternCard';
 import { TopicHighlightsCard } from '@/features/statistics/components/TopicHighlightsCard';
-import { statisticsDashboardMock } from '@/features/statistics/data/statisticsMocks';
+import { useStatisticsPage } from '@/features/statistics/hooks/useStatisticsPage';
 import GlassCard from '@/shared/ui/GlassCard';
 
 export function StatisticsPage() {
+  const {
+    dashboardData,
+    completedSessionsCount,
+    isLoading,
+    formError,
+  } = useStatisticsPage();
+
   return (
     <main className="flex-1 w-full max-w-lg mx-auto px-4 py-6">
       <GlassCard className="p-6 pb-32 min-h-[90vh] flex flex-col gap-6">
@@ -20,37 +29,43 @@ export function StatisticsPage() {
             </h1>
           </div>
           <p className="text-sm text-slate-500">
-            Explore your recent emotional trends in a compact view that is ready
-            to connect to the backend.
+            {completedSessionsCount > 0
+              ? `Explore your trends across ${completedSessionsCount} completed reflections.`
+              : 'Complete a few reflections to unlock your emotional trends.'}
           </p>
-          <div
-            className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/60 px-4 py-3"
-            role="note"
-          >
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-violet-500">
-              Frontend placeholder
-            </p>
-            <p className="mt-1 text-sm text-slate-600">
-              This screen uses placeholder data. The structure and contracts are
-              already prepared for backend integration.
-            </p>
-          </div>
         </header>
 
-        <EmotionalEvolutionCard evolution={statisticsDashboardMock.evolution} />
+        {isLoading ? (
+          <div
+            role="status"
+            className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/60 px-4 py-6"
+          >
+            <p className="text-sm text-slate-600">Loading your statistics...</p>
+          </div>
+        ) : formError ? (
+          <div
+            role="alert"
+            className="rounded-2xl border border-red-200 bg-red-50 px-4 py-6"
+          >
+            <p className="text-sm font-medium text-red-600">{formError}</p>
+          </div>
+        ) : (
+          <>
+            <EmotionalEvolutionCard evolution={dashboardData.evolution} />
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <EmotionDistributionCard emotions={statisticsDashboardMock.emotions} />
-          <TopicHighlightsCard topics={statisticsDashboardMock.topics} />
-        </section>
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <EmotionDistributionCard emotions={dashboardData.emotions} />
+              <TopicHighlightsCard topics={dashboardData.topics} />
+            </section>
 
-        <ThoughtPatternCard pattern={statisticsDashboardMock.pattern} />
+            <ThoughtPatternCard pattern={dashboardData.pattern} />
 
-        <SessionComparisonCard
-          sessionOptions={statisticsDashboardMock.sessionOptions}
-          defaultSelection={statisticsDashboardMock.defaultSelection}
-          comparisonResult={statisticsDashboardMock.comparisonResult}
-        />
+            <SessionComparisonCard
+              sessionOptions={dashboardData.sessionOptions}
+              defaultSelection={dashboardData.defaultSelection}
+            />
+          </>
+        )}
       </GlassCard>
     </main>
   );
