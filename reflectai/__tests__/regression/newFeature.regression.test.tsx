@@ -152,7 +152,7 @@ describe('New feature regression - version 2026-05-19', () => {
     await user.click(screen.getByRole('button', { name: /siguiente/i }));
 
     await user.type(
-      screen.getByPlaceholderText(/me dije a mi mismo que/i),
+      screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i),
       'Siento que no estan tomando en serio mi esfuerzo.',
     );
     await user.click(screen.getByRole('button', { name: 'Enojo' }));

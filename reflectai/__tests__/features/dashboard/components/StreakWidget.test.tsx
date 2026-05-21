@@ -14,7 +14,7 @@ describe('StreakWidget', () => {
   it('renders the streak with 1 day', () => {
     render(<StreakWidget days={1} streakMessage="Habit started" />);
 
-    expect(screen.getByText(/racha de 1 días/i)).toBeInTheDocument();
+    expect(screen.getByText(/racha de 1 día/i)).toBeInTheDocument();
   });
 
   it('renders correctly with 0 days', () => {

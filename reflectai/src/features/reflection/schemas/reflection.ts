@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-import { PrimaryEmotion } from '@/features/reflection/types/reflection';
+import {
+  normalizePrimaryEmotion,
+  PrimaryEmotion,
+} from '@/features/reflection/types/reflection';
 
 export const createReflectionSessionSchema = z.object({
   title: z
@@ -56,7 +59,7 @@ export const addReflectionResponseSchema = z.object({
         Boolean(data.intervention),
       {
         message:
-          'Una respuesta debe incluir texto, valor, estado, metodo o intervención',
+          'Una respuesta debe incluir texto, valor, estado, método o intervención',
       },
     ),
   metadataPatch: metadataPatchSchema,
@@ -94,9 +97,12 @@ export const wizardFormSchema = z.object({
     .max(3000, 'Límite de 3000 caracteres'),
   emotion: z
     .string()
+    .trim()
     .min(1, 'Selecciona una emoción principal')
     .refine(
-      (value) => Object.values(PrimaryEmotion).includes(value as PrimaryEmotion),
+      (value) =>
+        Object.values(PrimaryEmotion).includes(value as PrimaryEmotion) ||
+        normalizePrimaryEmotion(value) !== null,
       'Selecciona una emoción principal',
     ),
   intensity: z
@@ -116,7 +122,7 @@ export const wizardFormSchema = z.object({
   othersControl: z
     .string()
     .trim()
-    .min(3, 'Identifica lo que dependia de otras personas.')
+    .min(3, 'Identifica lo que dependía de otras personas.')
     .max(3000, 'Límite de 3000 caracteres'),
   alternative: z
     .string()

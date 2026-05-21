@@ -50,7 +50,7 @@ describe('addReflectionResponseSchema', () => {
 
     expect(result.success).toBe(false);
     expect(result.error?.issues[0].message).toBe(
-      'Una respuesta debe incluir texto, valor, estado, metodo o intervención',
+      'Una respuesta debe incluir texto, valor, estado, método o intervención',
     );
   });
 

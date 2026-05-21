@@ -4,6 +4,7 @@ import {
   calculateStreak,
   type SessionSnapshot,
 } from '@/features/dashboard/utils/metrics';
+import { getEmotionDisplayLabel } from '@/lib/reflection/sessionInsights';
 
 export const DEFAULT_DAILY_QUOTE = {
   text: 'Reflexionar es el camino hacia el dominio propio.',
@@ -34,7 +35,7 @@ export function getDashboardErrorMessage(error: unknown) {
 export function getStreakMessage(streak: number) {
   return streak === 0
     ? 'Hoy es un gran día para comenzar tu hábito'
-    : 'Excelente. Estas construyendo un hábito fuerte';
+    : 'Excelente. Estás construyendo un hábito fuerte';
 }
 
 export function getIntensityLabel(value: unknown) {
@@ -56,7 +57,7 @@ export function getIntensityLabel(value: unknown) {
 export function getPrimaryEmotion(analysis: Record<string, unknown>) {
   const emotions = analysis.primary_emotions;
   if (Array.isArray(emotions) && typeof emotions[0] === 'string') {
-    return emotions[0];
+    return getEmotionDisplayLabel(emotions[0]);
   }
 
   return 'Sin datos';

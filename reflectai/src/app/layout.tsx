@@ -4,7 +4,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'ReflectAI',
-  description: 'Tu espacio seguro para la reflexion personal',
+  description: 'Tu espacio seguro para la reflexión personal',
 };
 
 const bodyClassName = [
@@ -26,8 +26,8 @@ export default function RootLayout({
         <div className="flex min-h-screen flex-col">
           <div className="flex-1">{children}</div>
           <footer className="px-6 py-4 text-center text-xs text-[#1E1B4B]/60">
-            ReflectAI no es una herramienta clinica, no diagnostica y no sustituye
-            la atención psicologica profesional
+            ReflectAI no es una herramienta clínica, no diagnostica y no sustituye
+            la atención psicológica profesional.
           </footer>
         </div>
       </body>

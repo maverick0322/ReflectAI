@@ -15,15 +15,15 @@ export const QUESTION_SEQUENCE: QuestionId[] = [
 ];
 
 const QUESTION_TEXT: Record<QuestionId, string> = {
-  Q1_SIT: 'Que situacion especifica desperto hoy la necesidad de reflexionar?',
-  Q2_THO: 'En ese momento, cual fue el primer pensamiento que cruzo por tu mente?',
-  Q3_EMO: 'Cual fue la emocion principal que experimentaste?',
-  Q4_INT: 'En una escala del 1 al 10, que tan intensa es esa emocion?',
-  Q5_TEL: 'A veces las emociones tienen un proposito. Que proposito cumplio?',
-  Q6_CON_MINE: 'Que cosas estaban estrictamente bajo tu control?',
-  Q6_CON_OTHERS: 'Que dependia de otras personas o de circunstancias externas?',
-  Q7_ALT: 'Existe una forma mas util o compasiva de interpretar lo que paso?',
-  SYS_GROUNDING: 'Toma un momento para respirar. Estas listo para continuar?',
+  Q1_SIT: '¿Qué situación específica despertó hoy la necesidad de reflexionar?',
+  Q2_THO: 'En ese momento, ¿cuál fue el primer pensamiento que cruzó por tu mente?',
+  Q3_EMO: '¿Cuál fue la emoción principal que experimentaste?',
+  Q4_INT: 'En una escala del 1 al 10, ¿qué tan intensa es esa emoción?',
+  Q5_TEL: 'A veces las emociones tienen un propósito. ¿Qué propósito cumplió?',
+  Q6_CON_MINE: '¿Qué cosas estaban estrictamente bajo tu control?',
+  Q6_CON_OTHERS: '¿Qué dependía de otras personas o de circunstancias externas?',
+  Q7_ALT: '¿Existe una forma más útil o compasiva de interpretar lo que pasó?',
+  SYS_GROUNDING: 'Toma un momento para respirar. ¿Estás listo para continuar?',
   SYS_AI_ADJUSTMENT:
     'Gracias por compartirlo. Volvamos a enfocarnos en lo que puedes controlar.',
 };

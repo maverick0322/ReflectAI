@@ -36,7 +36,6 @@ function RegisterNameFields({
   register: UseFormReturn<RegisterFormValues>['register'];
   errors: RegisterFieldErrors;
 }>) {
-
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <Input
@@ -62,7 +61,6 @@ function RegisterEmailFields({
   register: UseFormReturn<RegisterFormValues>['register'];
   errors: RegisterFieldErrors;
 }>) {
-
   return (
     <>
       <Input
@@ -90,7 +88,6 @@ function RegisterPasswordFields({
   register: UseFormReturn<RegisterFormValues>['register'];
   errors: RegisterFieldErrors;
 }>) {
-
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <PasswordInput
@@ -191,8 +188,8 @@ export function RegisterFormSection({
       </div>
 
       <p className="text-[11px] text-reflect-dark/60 text-center">
-        ReflectAI no es una herramienta clinica, no diagnostica y no sustituye
-        la atención psicologica profesional
+        ReflectAI no es una herramienta clínica, no diagnostica y no sustituye
+        la atención psicológica profesional.
       </p>
     </form>
   );
@@ -203,7 +200,7 @@ export function RegisterSocialSection() {
     <>
       <div className="relative flex items-center py-2 text-sm font-medium text-reflect-dark/50">
         <div className="flex-grow border-t border-reflect-dark/10" />
-        <span className="mx-4">o registrate con</span>
+        <span className="mx-4">o regístrate con</span>
         <div className="flex-grow border-t border-reflect-dark/10" />
       </div>
 
@@ -213,7 +210,7 @@ export function RegisterSocialSection() {
       </div>
 
       <p className="text-xs text-reflect-dark/50 text-center">
-        El registro con Google y Facebook estarán disponibles pronto
+        El registro con Google y Facebook estará disponible pronto
       </p>
 
       <footer className="text-center text-sm text-reflect-dark/70">

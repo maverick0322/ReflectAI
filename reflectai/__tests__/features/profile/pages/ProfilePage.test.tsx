@@ -154,7 +154,7 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    expect(screen.getByRole('link', { name: /cambiar contraseÑa/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /cambiar contraseña/i })).toHaveAttribute(
       'href',
       '/change-password',
     );
@@ -169,7 +169,7 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    await user.click(screen.getByRole('button', { name: /cerrar sesiÓn/i }));
+    await user.click(screen.getByRole('button', { name: /cerrar sesión/i }));
 
     expect(logoutUserMock).toHaveBeenCalled();
     expect(pushMock).toHaveBeenCalledWith('/login');
@@ -181,7 +181,7 @@ describe('ProfilePage', () => {
     render(<ProfilePage />);
     await screen.findByRole('heading', { name: /arturo cuevas/i });
 
-    await user.click(screen.getByRole('button', { name: /cerrar sesiÓn/i }));
+    await user.click(screen.getByRole('button', { name: /cerrar sesión/i }));
 
     expect(pushMock).toHaveBeenCalledWith('/login');
   });

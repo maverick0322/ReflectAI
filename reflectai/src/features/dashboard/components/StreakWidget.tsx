@@ -12,6 +12,8 @@ const streakIconClassName = [
 ].join(' ');
 
 export function StreakWidget({ days, streakMessage }: StreakWidgetProps) {
+  const streakLabel = days === 1 ? 'Racha de 1 día' : `Racha de ${days} días`;
+
   return (
     <GlassCard className="p-4">
       <div className="flex w-full flex-row items-center gap-4">
@@ -21,7 +23,7 @@ export function StreakWidget({ days, streakMessage }: StreakWidgetProps) {
 
         <div className="flex flex-1 flex-col justify-center">
           <span className="text-base font-bold text-slate-800 dark:text-white">
-            Racha de {days} días
+            {streakLabel}
           </span>
           <span className="text-sm leading-tight text-slate-600 dark:text-slate-300">
             {streakMessage}

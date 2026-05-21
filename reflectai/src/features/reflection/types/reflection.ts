@@ -14,14 +14,60 @@ export type ReflectionSession = {
 };
 
 export enum PrimaryEmotion {
-  JOY = 'Alegria',
-  TRUST = 'Confianza',
-  FEAR = 'Miedo',
-  SURPRISE = 'Sorpresa',
-  SADNESS = 'Tristeza',
-  AVERSION = 'Aversión',
-  ANGER = 'Enojo',
-  ANTICIPATION = 'Anticipación',
+  JOY = 'Joy',
+  TRUST = 'Trust',
+  FEAR = 'Fear',
+  SURPRISE = 'Surprise',
+  SADNESS = 'Sadness',
+  AVERSION = 'Aversion',
+  ANGER = 'Anger',
+  ANTICIPATION = 'Anticipation',
+}
+
+export const PRIMARY_EMOTION_LABELS: Record<PrimaryEmotion, string> = {
+  [PrimaryEmotion.JOY]: 'Alegría',
+  [PrimaryEmotion.TRUST]: 'Confianza',
+  [PrimaryEmotion.FEAR]: 'Miedo',
+  [PrimaryEmotion.SURPRISE]: 'Sorpresa',
+  [PrimaryEmotion.SADNESS]: 'Tristeza',
+  [PrimaryEmotion.AVERSION]: 'Aversión',
+  [PrimaryEmotion.ANGER]: 'Enojo',
+  [PrimaryEmotion.ANTICIPATION]: 'Anticipación',
+};
+
+const PRIMARY_EMOTION_ALIASES: Record<string, PrimaryEmotion> = {
+  joy: PrimaryEmotion.JOY,
+  alegria: PrimaryEmotion.JOY,
+  trust: PrimaryEmotion.TRUST,
+  confianza: PrimaryEmotion.TRUST,
+  fear: PrimaryEmotion.FEAR,
+  miedo: PrimaryEmotion.FEAR,
+  surprise: PrimaryEmotion.SURPRISE,
+  sorpresa: PrimaryEmotion.SURPRISE,
+  sadness: PrimaryEmotion.SADNESS,
+  tristeza: PrimaryEmotion.SADNESS,
+  aversion: PrimaryEmotion.AVERSION,
+  anger: PrimaryEmotion.ANGER,
+  enojo: PrimaryEmotion.ANGER,
+  anticipation: PrimaryEmotion.ANTICIPATION,
+  anticipacion: PrimaryEmotion.ANTICIPATION,
+};
+
+function normalizeEmotionKey(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+export function normalizePrimaryEmotion(value: string) {
+  return PRIMARY_EMOTION_ALIASES[normalizeEmotionKey(value)] ?? null;
+}
+
+export function getPrimaryEmotionLabel(value: string) {
+  const normalized = normalizePrimaryEmotion(value);
+  return normalized ? PRIMARY_EMOTION_LABELS[normalized] : value;
 }
 
 export type QuestionId =

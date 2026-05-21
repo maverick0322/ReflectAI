@@ -68,7 +68,7 @@ describe('registerSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Ingresa un correo valido');
+      expect(result.error.issues[0].message).toBe('Ingresa un correo válido');
     }
   });
 
@@ -134,6 +134,33 @@ describe('registerSchema', () => {
       expect(result.error.issues[0].message).toBe('La fecha de nacimiento es obligatoria');
     }
   });
+
+  it('fails when birthDate contains only whitespace', () => {
+    const result = registerSchema.safeParse({ ...validUser, birthDate: '   ' });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('La fecha de nacimiento es obligatoria');
+    }
+  });
+
+  it('fails when birthDate has an unsupported format', () => {
+    const result = registerSchema.safeParse({ ...validUser, birthDate: '10-05-1998' });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Ingresa una fecha válida en formato dd/mm/yyyy');
+    }
+  });
+
+  it('fails when birthDate has impossible date parts', () => {
+    const result = registerSchema.safeParse({ ...validUser, birthDate: '31/02/2000' });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Ingresa una fecha válida en formato dd/mm/yyyy');
+    }
+  });
 });
 
 describe('loginSchema', () => {
@@ -154,7 +181,7 @@ describe('loginSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Ingresa un correo valido');
+      expect(result.error.issues[0].message).toBe('Ingresa un correo válido');
     }
   });
 
@@ -181,7 +208,7 @@ describe('recoverPasswordSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Ingresa un correo valido');
+      expect(result.error.issues[0].message).toBe('Ingresa un correo válido');
     }
   });
 });

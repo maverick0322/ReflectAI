@@ -4,7 +4,10 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 
 import { useValidationContext } from '@/features/reflection/contexts/ValidationContext';
 import type { WizardFormValues } from '@/features/reflection/schemas/reflection';
-import { PrimaryEmotion } from '@/features/reflection/types/reflection';
+import {
+  PRIMARY_EMOTION_LABELS,
+  PrimaryEmotion,
+} from '@/features/reflection/types/reflection';
 import { WizardStepActions } from '@/features/reflection/components/WizardStepActions';
 import { WizardTextAreaField } from '@/features/reflection/components/WizardTextAreaField';
 
@@ -60,7 +63,7 @@ function EmotionSelector({
             onClick={() => onSelectEmotion(emotion)}
             className={getEmotionButtonClassName(currentEmotion === emotion)}
           >
-            {emotion}
+            {PRIMARY_EMOTION_LABELS[emotion]}
           </button>
         ))}
       </div>
@@ -153,7 +156,7 @@ export const Step2Evaluation = ({
           control={control}
           name="thought"
           value={thoughtText}
-          placeholder="Me dije a mi mismo que..."
+          placeholder="Me dije a mí mismo que..."
           shouldShowError={Boolean(errors.thought) && shouldShowErrors}
           errorMessage={errors.thought?.message}
         />

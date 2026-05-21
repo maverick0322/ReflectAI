@@ -17,7 +17,7 @@ vi.mock('@/lib/ai/groqClient', () => ({
       key_themes: ['familia'],
       cognitive_distortion_detected: null,
       session_title: 'SesiÓn resumida',
-      summary: 'Resumen de la sesiÓn',
+      summary: 'Resumen de la sesión',
       recommendation: 'Recomendacion concreta',
       encouraging_message: 'Mensaje alentador',
       professional_support_reminder:
@@ -68,7 +68,7 @@ describe('reflection analysis', () => {
         { id: 'Q1_SIT', text: 'Una situaciÓn importante que necesito resumir.' },
         { id: 'Q3_EMO', text: 'ansiedad' },
         { id: 'Q4_INT', value: 8 },
-        { id: 'Q7_ALT', text: 'Puedo responder con mÁs calma.' },
+        { id: 'Q7_ALT', text: 'Puedo responder con más calma.' },
       ],
     };
 
@@ -76,7 +76,7 @@ describe('reflection analysis', () => {
 
     expect(fallback.primary_emotions).toEqual(['ansiedad']);
     expect(fallback.average_intensity).toBe(8);
-    expect(fallback.session_title).toBe('Puedo responder con mÁs calma.');
+    expect(fallback.session_title).toBe('Puedo responder con más calma.');
   });
 
   it('runs analysis using Groq client', async () => {

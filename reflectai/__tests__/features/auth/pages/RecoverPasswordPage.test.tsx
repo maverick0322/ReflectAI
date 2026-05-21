@@ -27,7 +27,7 @@ describe('RecoverPasswordPage', () => {
 
     expect(screen.getByRole('heading', { name: /recuperar acceso/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /enviar enlace/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /volver a iniciar sesiÓn/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /volver a iniciar sesión/i })).toHaveAttribute(
       'href',
       '/login',
     );

@@ -156,7 +156,7 @@ describe('rutas API de autenticacion', () => {
     });
   });
 
-  it('confirma recuperacion solo cuando Supabase devuelve sesiÓn', async () => {
+  it('confirma recuperación solo cuando Supabase devuelve sesión', async () => {
     const exchangeCodeForSession = vi.fn(async () => ({
       data: { session: { access_token: 'token' } },
       error: null,
@@ -245,7 +245,7 @@ describe('rutas API de autenticacion', () => {
     expect(badCurrentBody.error?.message).toBe('La contraseña actual es incorrecta');
   });
 
-  it('elimina cuenta limpiando sesiÓnes, perfil y usuario auth', async () => {
+  it('elimina cuenta limpiando sesiones, perfil y usuario auth', async () => {
     const signInWithPassword = vi.fn(async () => ({ error: null }));
     const signOut = vi.fn();
     mockAuthenticatedUser({

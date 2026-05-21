@@ -121,7 +121,7 @@ describe('DashboardPage', () => {
     render(<DashboardPage />);
 
     expect(await screen.findByText(/test session/i)).toBeInTheDocument();
-    expect(screen.getByText(/anxiety/i)).toBeInTheDocument();
+    expect(screen.getByText(/ansiedad/i)).toBeInTheDocument();
     expect(
       screen.queryByText(/a(?:u|\u00fa)n no has registrado ninguna reflexi(?:o|\u00f3)n/i),
     ).not.toBeInTheDocument();

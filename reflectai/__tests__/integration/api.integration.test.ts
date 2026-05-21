@@ -93,7 +93,7 @@ const aiAnalysis = {
   session_title: 'Pausa ante una conversacion difÍcil',
   summary: 'Resumen generado por IA',
   recommendation: 'Elige una accion pequena bajo tu control.',
-  encouraging_message: 'Hiciste espacio para responder con mÁs claridad.',
+  encouraging_message: 'Hiciste espacio para responder con más claridad.',
   professional_support_reminder:
     'Si el malestar persiste, consulta a un profesional.',
 };
@@ -880,7 +880,7 @@ describe('Critical API integration - version 2026-05-12', () => {
 
   it('TC-04-02 generates next questions with per-question fallback', async () => {
     vi.mocked(generateNextQuestion)
-      .mockResolvedValueOnce('QuÉ emociÓn aparece con mÁs fuerza?')
+      .mockResolvedValueOnce('¿Qué emoción aparece con más fuerza?')
       .mockRejectedValueOnce(new Error('groq'));
     const readBuilder = createChain({
       singleResult: {
@@ -926,13 +926,13 @@ describe('Critical API integration - version 2026-05-12', () => {
     expect(body.data).toMatchObject({
       done: false,
       questionId: 'Q3_EMO',
-      questionText: 'QuÉ emociÓn aparece con mÁs fuerza?',
+      questionText: '¿Qué emoción aparece con más fuerza?',
       aiGenerated: true,
     });
     expect(body.data?.questions).toEqual([
       {
         questionId: 'Q3_EMO',
-        questionText: 'QuÉ emociÓn aparece con mÁs fuerza?',
+        questionText: '¿Qué emoción aparece con más fuerza?',
         aiGenerated: true,
       },
       {

@@ -8,13 +8,13 @@ describe('HistorySearchBar', () => {
   it('renders an uncontrolled search input with the provided default value', () => {
     render(
       <HistorySearchBar
-        placeholder="Buscar sesiÓnes"
+        placeholder="Buscar sesiones"
         defaultValue="work"
       />,
     );
 
     const input = screen.getByRole('searchbox', { name: /buscar en el historial/i });
-    expect(input).toHaveAttribute('placeholder', 'Buscar sesiÓnes');
+    expect(input).toHaveAttribute('placeholder', 'Buscar sesiones');
     expect(input).toHaveValue('work');
   });
 
@@ -24,7 +24,7 @@ describe('HistorySearchBar', () => {
 
     render(
       <HistorySearchBar
-        placeholder="Buscar sesiÓnes"
+        placeholder="Buscar sesiones"
         value=""
         onChange={onChange}
       />,

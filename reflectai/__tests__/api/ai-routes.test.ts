@@ -253,7 +253,7 @@ describe('ruta API de siguiente pregunta', () => {
     expect(generateNextQuestion).not.toHaveBeenCalled();
   });
 
-  it('rechaza payload invalido, usuario anonimo y sesiÓn inexistente', async () => {
+  it('rechaza payload inválido, usuario anónimo y sesión inexistente', async () => {
     const invalidResponse = await nextQuestionPost(
       jsonRequest('/api/ai/next-question', {
         sessionId: 'no-es-uuid',
@@ -287,8 +287,8 @@ describe('ruta API de siguiente pregunta', () => {
   });
 });
 
-describe('ruta API de analisis de sesiÓn', () => {
-  it('analiza sesiÓn y persiste resultado de IA', async () => {
+describe('ruta API de análisis de sesión', () => {
+  it('analiza sesión y persiste resultado de IA', async () => {
     const aiAnalysis = {
       ...fallbackAnalysis,
       primary_emotions: ['ansiedad'],
@@ -359,7 +359,7 @@ describe('ruta API de analisis de sesiÓn', () => {
     expect(updateBuilder.update).toHaveBeenCalledWith({ ai_analysis: fallbackAnalysis });
   });
 
-  it('rechaza payload invalido, usuario anonimo, sesiÓn inexistente y fallo al guardar', async () => {
+  it('rechaza payload inválido, usuario anónimo, sesión inexistente y fallo al guardar', async () => {
     const invalidResponse = await analyzeSessionPost(
       jsonRequest('/api/ai/analyze-session', {
         sessionId: 'bad',

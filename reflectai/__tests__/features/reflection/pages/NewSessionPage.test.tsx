@@ -145,7 +145,7 @@ describe('NewSessionPage', () => {
       await screen.findByText(/primer pensamiento que cruz(?:o|\u00f3) por tu mente/i),
     ).toBeInTheDocument();
 
-    await user.type(screen.getByPlaceholderText(/me dije a mi mismo que/i), 'no');
+    await user.type(screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i), 'no');
     await user.click(screen.getByRole('button', { name: 'Enojo' }));
     await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
@@ -182,7 +182,7 @@ describe('NewSessionPage', () => {
     await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
     await user.type(
-      screen.getByPlaceholderText(/me dije a mi mismo que/i),
+      screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i),
       'I am not good enough',
     );
     await user.click(screen.getByRole('button', { name: 'Tristeza' }));
@@ -241,7 +241,7 @@ describe('NewSessionPage', () => {
     await user.type(screen.getByPlaceholderText(/escribe aqu(?:i|\u00ed)/i), 'Valid situation');
     await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
-    await user.type(screen.getByPlaceholderText(/me dije a mi mismo que/i), 'Valid thought');
+    await user.type(screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i), 'Valid thought');
     await user.click(screen.getByRole('button', { name: 'Enojo' }));
     await user.click(screen.getByRole('button', { name: /^siguiente$/i }));
 
@@ -299,7 +299,7 @@ describe('NewSessionPage', () => {
       await screen.findByText(/primer pensamiento que cruz(?:o|\u00f3) por tu mente/i),
     ).toBeInTheDocument();
     await user.type(
-      screen.getByPlaceholderText(/me dije a mi mismo que/i),
+      screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i),
       'A sufficiently clear thought',
     );
     await user.click(screen.getByRole('button', { name: 'Enojo' }));
@@ -358,7 +358,7 @@ describe('NewSessionPage', () => {
     expect(
       await screen.findByText(/primer pensamiento que cruz(?:o|\u00f3) por tu mente/i),
     ).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/me dije a mi mismo que/i)).toHaveValue(
+    expect(screen.getByPlaceholderText(/me dije a m(?:i|\u00ed) mismo que/i)).toHaveValue(
       'A previously saved thought',
     );
     expect(screen.getByRole('button', { name: 'Enojo' })).toHaveClass('bg-indigo-500');
