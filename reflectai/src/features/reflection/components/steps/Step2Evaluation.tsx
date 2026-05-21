@@ -48,7 +48,7 @@ function EmotionSelector({
   shouldShowError,
   errorMessage,
   onSelectEmotion,
-}: EmotionSelectorProps) {
+}: Readonly<EmotionSelectorProps>) {
   return (
     <section className="flex flex-col gap-4">
       <h3 className="text-lg font-bold text-slate-800">{title}</h3>
@@ -76,10 +76,10 @@ function EmotionSelector({
 function IntensitySlider({
   currentIntensity,
   intensityQuestion,
-}: {
+}: Readonly<{
   currentIntensity: number;
   intensityQuestion: string;
-}) {
+}>) {
   const { control } = useFormContext<WizardFormValues>();
 
   return (
@@ -123,7 +123,7 @@ export const Step2Evaluation = ({
   thoughtQuestion = DEFAULT_THOUGHT_QUESTION,
   emotionQuestion = DEFAULT_EMOTION_QUESTION,
   intensityQuestion = DEFAULT_INTENSITY_QUESTION,
-}: StepProps) => {
+}: Readonly<StepProps>) => {
   const {
     control,
     setValue,

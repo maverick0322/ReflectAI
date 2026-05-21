@@ -50,9 +50,19 @@ describe('shared UI components', () => {
   });
 
   it('renders SocialButton with the provider and disabled state', () => {
-    render(<SocialButton provider="Google" icon={<span data-testid="icon" />} disabled />);
+    render(
+      <SocialButton
+        provider="Google"
+        icon={<span data-testid="icon" />}
+        disabled
+        className="mt-4"
+      />,
+    );
 
-    expect(screen.getByRole('button', { name: /google/i })).toBeDisabled();
+    const button = screen.getByRole('button', { name: /google/i });
+    expect(button).toBeDisabled();
+    expect(button).toHaveClass('cursor-not-allowed');
+    expect(button).toHaveClass('mt-4');
     expect(screen.getByTestId('icon')).toBeInTheDocument();
   });
 

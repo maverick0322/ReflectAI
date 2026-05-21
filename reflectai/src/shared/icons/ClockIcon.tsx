@@ -1,4 +1,7 @@
-export function ClockIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
+export function ClockIcon({
+  className,
+  ...props
+}: Readonly<React.SVGProps<SVGSVGElement>>) {
   return (
     <svg 
       xmlns="http://www.w3.org/2000/svg" 

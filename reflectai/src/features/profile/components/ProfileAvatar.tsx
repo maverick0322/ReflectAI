@@ -30,6 +30,14 @@ function getInitials(name: string, surname: string) {
   return (name.charAt(0) + (surname ? surname.charAt(0) : '')).toUpperCase();
 }
 
+function getAvatarUploadErrorMessage(error: unknown) {
+  if (error instanceof Error && error.name === 'AbortError') {
+    return 'Upload was interrupted. Please try again.';
+  }
+
+  return 'Unable to save the photo. Please try again.';
+}
+
 export default function ProfileAvatar({
   firstName,
   lastName,
@@ -75,9 +83,8 @@ export default function ProfileAvatar({
       await onPhotoSelected(file);
       setPreview(objectUrl);
     } catch (uploadError: unknown) {
-      void uploadError;
       URL.revokeObjectURL(objectUrl);
-      setError('Unable to save the photo. Please try again.');
+      setError(getAvatarUploadErrorMessage(uploadError));
     } finally {
       input.value = '';
     }

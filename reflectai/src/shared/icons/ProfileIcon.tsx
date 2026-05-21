@@ -4,7 +4,10 @@ const profilePathData =
   '14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 ' +
   '0-5.216-.584-7.499-1.632Z';
 
-export function ProfileIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
+export function ProfileIcon({
+  className,
+  ...props
+}: Readonly<React.SVGProps<SVGSVGElement>>) {
   return (
     <svg 
       xmlns="http://www.w3.org/2000/svg" 

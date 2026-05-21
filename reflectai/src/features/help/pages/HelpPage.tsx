@@ -52,9 +52,9 @@ export default function HelpPage() {
             <div className="space-y-1">
               <p className="text-sm font-bold">Important notice</p>
               <p className="text-sm leading-relaxed">
-                ReflectAI supports self-awareness and reflection.{' '}
-                <span className="font-semibold">It is not a clinical tool</span>{' '}
-                and it does not replace professional psychological or psychiatric
+                {'ReflectAI supports self-awareness and reflection. '}
+                <span className="font-semibold">It is not a clinical tool</span>
+                {' and it does not replace professional psychological or psychiatric '}
                 care, diagnosis, or treatment. If you are in crisis, contact
                 local mental health services immediately.
               </p>
@@ -71,7 +71,7 @@ export default function HelpPage() {
             title="Create your account"
             description={
               <>
-                On the main screen, select{' '}
+                {'On the main screen, select '}
                 <span className="font-semibold">Register</span>.
                 You can sign up with your email address and password.
               </>
@@ -88,7 +88,7 @@ export default function HelpPage() {
             title="Recover access"
             description={
               <>
-                If you forget your password, select{' '}
+                {'If you forget your password, select '}
                 <span className="font-semibold">Forgot your password?</span>.
                 We will email you a secure reset link.
               </>
@@ -127,7 +127,7 @@ export default function HelpPage() {
             title="Start a new reflection"
             description={
               <>
-                From the dashboard, select{' '}
+                {'From the dashboard, select '}
                 <span className="font-semibold">New reflection</span>.
                 The system will guide you step by step.
               </>
@@ -160,7 +160,7 @@ export default function HelpPage() {
             title="Rate intensity"
             description={
               <>
-                Some questions include a{' '}
+                {'Some questions include a '}
                 <span className="font-semibold">1 to 10</span> scale.
                 Move the slider to show how intense the emotion feels right now.
               </>
@@ -177,7 +177,7 @@ export default function HelpPage() {
             title="Save your session"
             description={
               <>
-                When you reach the end, select{' '}
+                {'When you reach the end, select '}
                 <span className="font-semibold">Save session</span>.
                 Your progress will be stored securely.
               </>
@@ -200,7 +200,9 @@ export default function HelpPage() {
             title="History"
             description={
               <>
-                Open <span className="font-semibold">My sessions</span> to review
+                {'Open '}
+                <span className="font-semibold">My sessions</span>
+                {' to review '}
                 your reflections by date. Select any session to read it again.
               </>
             }
@@ -216,7 +218,9 @@ export default function HelpPage() {
             title="Trend dashboard"
             description={
               <>
-                In <span className="font-semibold">Statistics</span> you can review
+                {'In '}
+                <span className="font-semibold">Statistics</span>
+                {' you can review '}
                 charts that summarize emotional frequency and intensity over time.
               </>
             }
@@ -259,7 +263,7 @@ export default function HelpPage() {
                 </span>
               </summary>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                Yes. Open the session from your history and use the{' '}
+                {'Yes. Open the session from your history and use the '}
                 <span className="font-semibold">Delete</span> button at the bottom.
               </p>
             </details>
@@ -286,8 +290,10 @@ export default function HelpPage() {
                 </span>
               </summary>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                Yes. Open <span className="font-semibold">Account settings</span>{' '}
-                and choose <span className="font-semibold">Delete account</span>.
+                {'Yes. Open '}
+                <span className="font-semibold">Account settings</span>
+                {' and choose '}
+                <span className="font-semibold">Delete account</span>.
                 This removes your profile and reflections permanently.
               </p>
             </details>
