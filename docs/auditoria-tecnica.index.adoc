@@ -1,0 +1,21 @@
+= ReflectAI - Auditoria tecnica
+:author: ReflecAI Team
+:revnumber: 1.0
+:revdate: 2026-05-21
+:doctype: book
+:notitle:
+:toc: macro
+:toclevels: 3
+:sectnums:
+:sectanchors:
+:chapter-label:
+:pdf-theme: {docdir}/../theme.yml
+:icons: font
+:imagesdir: {docdir}
+
+image::cover.svg[align=center, pdfwidth=100%]
+<<<
+
+toc::[]
+
+include::auditoria-tecnica.adoc[]
